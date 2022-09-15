@@ -1,0 +1,89 @@
+{
+  "env": {
+      "browser": true,
+      "es2021": true
+  },
+  "extends": [
+      "plugin:react/recommended",
+      "airbnb",
+      "plugin:@typescript-eslint/recommended",
+      "plugin:prettier/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+      "ecmaFeatures": {
+          "jsx": true
+      },
+      "ecmaVersion": "latest",
+      "sourceType": "module"
+  },
+  "plugins": [
+      "react",
+      "@typescript-eslint",
+      "react-hooks",
+      "prettier",
+      "eslint-plugin-import-helpers"
+  ],
+  "rules": {
+      "no-alert": "off",
+      "prettier/prettier": "error",
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+      "@typescript-eslint/explicit-module-boundary-types": "off",
+      "import/prefer-default-export": "off",
+      "react/react-in-jsx-scope": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "import/no-duplicates": "off",
+      "camelcase": "off",
+      "react/no-unstable-nested-components": "off",
+      "react/require-default-props": "off",
+      "react/jsx-props-no-spreading": "off",
+      "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            "argsIgnorePattern": "_"
+          }
+      ],
+      "import-helpers/order-imports": [
+          "warn",
+          {
+              "newlinesBetween": "always",
+              "groups": [
+                  "module",
+                  "/^#shared/",
+                  "/^#modules/",
+                  [
+                      "parent",
+                      "sibling",
+                      "index"
+                  ]
+              ],
+              "alphabetize": {
+                  "order": "asc",
+                  "ignoreCase": true
+              }
+          }
+      ],
+      "react/jsx-filename-extension": [
+          1,
+          {
+              "extensions": [
+                  ".tsx"
+              ]
+          }
+      ],
+      "import/extensions": [
+          "error",
+          "ignorePackages",
+          {
+              "tsx": "never",
+              "ts": "never"
+          }
+      ]
+  },
+  "settings": {
+      "import/resolver": {
+          "typescript": {}
+      }
+  }
+}
