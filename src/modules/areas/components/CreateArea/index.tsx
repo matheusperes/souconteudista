@@ -1,7 +1,12 @@
+import { yupResolver } from '@hookform/resolvers/yup';
 import CloseIcon from '@mui/icons-material/Close';
-import { Dialog, DialogTitle, Box, Grid, TextField, Button, IconButton } from '@mui/material';
-import { useCallback, useState } from 'react';
+import { Dialog, DialogTitle, Box, Grid, Button, IconButton } from '@mui/material';
+import { useCallback } from 'react';
+import { useForm } from 'react-hook-form';
+import * as yup from 'yup';
 
+import { MyTextField } from '#shared/components/Form/TextField';
+import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
 
 export type IArea = {
@@ -10,6 +15,16 @@ export type IArea = {
   description: string;
 };
 
+type IForm = {
+  name: string;
+  description: string;
+};
+
+const validateForm = yup.object().shape({
+  name: yup.string().required('Área precisa ter um nome'),
+  description: yup.string().required('Área precisa ter uma descrição'),
+});
+
 type ICreateAreaModal = {
   updateListArea: (area: IArea) => void;
   open: boolean;
@@ -17,17 +32,34 @@ type ICreateAreaModal = {
 };
 
 export function CreateAreaModal({ updateListArea, open, onClose }: ICreateAreaModal) {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const { message } = useToast();
 
-  const handleCreate = useCallback(async () => {
-    const response = await api.post('/areas', { name, description });
+  const {
+    handleSubmit,
+    formState: { errors },
+    control,
+    reset,
+  } = useForm<IForm>({
+    resolver: yupResolver(validateForm),
+  });
 
-    updateListArea(response.data);
-    setName('');
-    setDescription('');
-    onClose();
-  }, [name, description, updateListArea, onClose]);
+  const handleCreate = useCallback(
+    async (form: IForm) => {
+      try {
+        const response = await api.post('/areas', {
+          name: form.name,
+          description: form.description,
+        });
+        updateListArea(response.data);
+        message({ mensagem: 'Área Cadastrada', tipo: 'success' });
+        reset();
+        onClose();
+      } catch (error: any) {
+        message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+      }
+    },
+    [updateListArea, message, reset, onClose],
+  );
 
   return (
     <Dialog onClose={onClose} open={open}>
@@ -49,47 +81,40 @@ export function CreateAreaModal({ updateListArea, open, onClose }: ICreateAreaMo
         </IconButton>
       </Box>
       <Box sx={{ padding: '1rem' }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Nome da Area"
-                variant="outlined"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
+        <form onSubmit={handleSubmit(handleCreate)} noValidate>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <MyTextField
+                name="name"
+                control={control}
+                errors={errors.name}
+                label="Nome da Área"
               />
-            </Box>
-          </Grid>
-          <Grid item xs={12}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Descrição da Area"
-                variant="outlined"
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField
+                name="description"
+                control={control}
+                errors={errors.description}
+                label="Descrição"
               />
-            </Box>
-          </Grid>
-
-          <Grid item xs={12}>
-            <Box display="flex" alignItems="center" marginBottom="1rem">
+            </Grid>
+            <Grid item xs={12} sx={{ marginBottom: '1rem' }}>
               <Button
-                fullWidth
-                variant="contained"
-                onClick={handleCreate}
                 sx={{
                   background: '#0b0f79',
                   color: '#E5E5E5',
                   '&:hover': { background: '#020560' },
                 }}
+                fullWidth
+                variant="contained"
+                type="submit"
               >
                 Inserir
               </Button>
-            </Box>
+            </Grid>
           </Grid>
-        </Grid>
+        </form>
       </Box>
     </Dialog>
   );

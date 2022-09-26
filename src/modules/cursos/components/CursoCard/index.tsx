@@ -4,17 +4,16 @@ import { useNavigate } from 'react-router-dom';
 
 import Delete from '#shared/images/Delete.svg';
 import Edit from '#shared/images/Edit.svg';
-import { api } from '#shared/services/axios';
 
 import { CardContent, CardStyled, BoxBruna } from './styles';
 
 type ICursoCard = {
   curso: { id: string; name: string; cor: string; active: string };
-  reloadList: () => void;
+  DeleteCurso: (curso_id: string) => void;
   updateCursoModal: (curso_id: string) => void;
 };
 
-export function CursoCard({ curso, reloadList, updateCursoModal }: ICursoCard) {
+export function CursoCard({ curso, DeleteCurso, updateCursoModal }: ICursoCard) {
   const navigate = useNavigate();
 
   return (
@@ -45,15 +44,8 @@ export function CursoCard({ curso, reloadList, updateCursoModal }: ICursoCard) {
             <IconButton
               onClick={async (e) => {
                 e.stopPropagation();
-                try {
-                  await api.delete(`/cursos/${curso.id}`);
 
-                  reloadList();
-
-                  // setCursos(cursos.filter((curso2) => curso.id !== curso2.id));
-                } catch {
-                  alert('Você está demitido!');
-                }
+                DeleteCurso(curso.id);
               }}
             >
               <img src={Delete} alt="Delete" />

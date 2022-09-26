@@ -1,18 +1,35 @@
 import { ArrowForward } from '@mui/icons-material';
-import { Box, Breadcrumbs, Typography } from '@mui/material';
+import { Box, Breadcrumbs, Grid, IconButton, Typography } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
+import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
+import { useToast } from '#shared/hooks/toast';
+import DisciplinaIcon from '#shared/images/IconDisciplina.svg';
 import { api } from '#shared/services/axios';
 
 import { InfoPpcs } from '#modules/ppcs/pages/ListPpcInfo';
+import { toRoman } from '#modules/ppcs/pages/ListPpcInfo/roman';
+
+type Versoes = {
+  id: string;
+  disciplina_id: string;
+  disciplina_versao_nome: string;
+  codigo: string;
+  credito_quantidade: number;
+  ementa: string;
+  observacao: string;
+  em_oferta: boolean;
+  produzido: boolean;
+};
 
 type DisciplinaAPI = {
   id: string;
   modulo: number;
   semestre: number;
   created_at: string;
+  versoes: Versoes;
 };
 
 type Curso = {
@@ -43,6 +60,8 @@ type ICompetencia = {
 export function FilteredCompetencia() {
   const params = useParams();
   const { setTitle } = useTitle();
+  const { message } = useToast();
+  const { startLoading, stopLoading } = useLoading();
 
   const [competencia, setCompetencia] = useState<ICompetencia>();
   const [ppc, setPpc] = useState<InfoPpcs>();
@@ -52,20 +71,32 @@ export function FilteredCompetencia() {
   }, [setTitle]);
 
   const getCompetencia = useCallback(async () => {
-    const response = await api.get(`/competencia/${params?.id}`);
-
-    setCompetencia(response.data);
-  }, [params?.id]);
+    startLoading();
+    try {
+      const response = await api.get(`/competencia/${params?.id}`);
+      setCompetencia(response.data);
+    } catch (error: any) {
+      message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+    } finally {
+      stopLoading();
+    }
+  }, [message, params?.id, startLoading, stopLoading]);
 
   useEffect(() => {
     getCompetencia();
   }, [getCompetencia]);
 
   const getPpc = useCallback(async () => {
-    const response = await api.get(`/ppc/${params?.ppc_id}`);
-
-    setPpc(response.data);
-  }, [params?.ppc_id]);
+    startLoading();
+    try {
+      const response = await api.get(`/ppc/${params?.ppc_id}`);
+      setPpc(response.data);
+    } catch (error: any) {
+      message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+    } finally {
+      stopLoading();
+    }
+  }, [message, params?.ppc_id, startLoading, stopLoading]);
 
   useEffect(() => {
     getPpc();
@@ -78,18 +109,51 @@ export function FilteredCompetencia() {
           <Breadcrumbs separator={<ArrowForward fontSize="small" />}>
             <Link to="/">Home</Link>
             <Link to="/cursos">Cursos</Link>
-            <Link to={`/cursos/${ppc?.curso.id}/ppcs`}>{ppc?.curso?.name}</Link>
-            <Link to={`/cursos/${ppc?.curso.id}/ppcs/${ppc?.id}`}>{`PPC ${ppc?.anoVoto}`}</Link>
-            <Typography>Competências</Typography>
+            {ppc && <Link to={`/cursos/${ppc?.curso.id}/ppcs`}>{ppc?.curso?.name}</Link>}
+            {ppc && (
+              <Link to={`/cursos/${ppc?.curso.id}/ppcs/${ppc?.id}`}>{`PPC ${ppc?.anoVoto}`}</Link>
+            )}
+            {ppc && <Typography>Competências</Typography>}
           </Breadcrumbs>
         </Box>
-        <Box sx={{ marginTop: '0.5rem', textAlign: 'justify' }}>
-          <Box sx={{ background: 'rgba(239, 239, 239, 0.45)', padding: '1.5rem ' }}>
-            <Typography>{`${competencia?.competenciaNumero} - ${competencia?.competencia}`}</Typography>
+        {competencia && (
+          <>
+            <Box sx={{ marginTop: '0.5rem', textAlign: 'justify' }}>
+              <Box sx={{ background: 'rgba(239, 239, 239, 0.45)', padding: '1.5rem ' }}>
+                <Typography>{`${toRoman(Number(competencia?.competenciaNumero))} - ${
+                  competencia?.competencia
+                }`}</Typography>
 
-            <Typography sx={{}} />
-          </Box>
-        </Box>
+                <Typography sx={{}} />
+              </Box>
+            </Box>
+            <Box sx={{ padding: '1rem' }}>
+              <Grid container spacing={2}>
+                {competencia.ppc.ppcDisciplinaVersoes?.map((versao) => (
+                  <Grid item xs={3}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <IconButton
+                        sx={{
+                          cursor: 'default',
+                        }}
+                      >
+                        <img src={DisciplinaIcon} alt="Icon" />
+                      </IconButton>
+                      <Typography>{versao.versoes.disciplina_versao_nome}</Typography>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+          </>
+        )}
       </Box>
     </Box>
   );

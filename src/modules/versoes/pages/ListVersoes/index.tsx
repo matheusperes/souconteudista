@@ -1,4 +1,4 @@
-import { Add, ArrowForward } from '@mui/icons-material';
+import { ArrowForward } from '@mui/icons-material';
 import {
   Box,
   Breadcrumbs,
@@ -13,12 +13,15 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { Col, StyledTable } from '#shared/components/StyledTable';
+import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
+import { useToast } from '#shared/hooks/toast';
 import Delete from '#shared/images/Delete.svg';
 import Edit from '#shared/images/Edit.svg';
 import { api } from '#shared/services/axios';
 
 import { CreateVersaoModal } from '#modules/versoes/components/CreateVersaoModal';
+import { DeleteVersão } from '#modules/versoes/components/DeleteVersao';
 import { UpdateVersaoModal } from '#modules/versoes/components/UpdateVersaoModal';
 
 import { Versoes } from '../FilteredVersao';
@@ -26,9 +29,12 @@ import { Versoes } from '../FilteredVersao';
 export function ListVersoes() {
   const { setTitle } = useTitle();
   const navigate = useNavigate();
+  const { message } = useToast();
+  const { startLoading, stopLoading } = useLoading();
 
   const [openCreate, setOpenCreate] = useState(false);
   const [openUpdateVersao, setOpenUpdateVersao] = useState<string | null>(null);
+  const [openDelete, setOpenDelete] = useState<any>(null);
   const [search, setSearch] = useState('');
   const [versoes, setVersoes] = useState<Versoes[]>([]);
 
@@ -37,10 +43,16 @@ export function ListVersoes() {
   }, [setTitle]);
 
   const getVersoes = useCallback(async () => {
-    const response = await api.get('/versoes');
-
-    setVersoes(response.data);
-  }, []);
+    startLoading();
+    try {
+      const response = await api.get('/versoes');
+      setVersoes(response.data);
+    } catch (error: any) {
+      message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+    } finally {
+      stopLoading();
+    }
+  }, [message, startLoading, stopLoading]);
 
   useEffect(() => {
     getVersoes();
@@ -67,14 +79,10 @@ export function ListVersoes() {
             <ButtonGroup variant="outlined" aria-label="outlined primary button group">
               <IconButton
                 color="primary"
-                onClick={async () => {
-                  try {
-                    await api.delete(`/versoes/${item.id}`);
+                onClick={async (e) => {
+                  e.stopPropagation();
 
-                    setVersoes(versoes.filter((versao2) => item.id !== versao2.id));
-                  } catch {
-                    alert('Você está sendo teimoso... Se persistir, será demitido!');
-                  }
+                  setOpenDelete(item.id);
                 }}
               >
                 <img src={Delete} alt="Delete" />
@@ -94,7 +102,7 @@ export function ListVersoes() {
         },
       },
     ];
-  }, [versoes]);
+  }, []);
 
   return (
     <>
@@ -108,6 +116,14 @@ export function ListVersoes() {
           open={!!openUpdateVersao}
           onClose={() => setOpenUpdateVersao(null)}
           versao_id={openUpdateVersao}
+          reloadList={() => getVersoes()}
+        />
+      )}
+      {!!openDelete && (
+        <DeleteVersão
+          open={!!openDelete}
+          onClose={() => setOpenDelete(null)}
+          versao_id={openDelete}
           reloadList={() => getVersoes()}
         />
       )}
@@ -164,9 +180,8 @@ export function ListVersoes() {
           <Box sx={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'space-between' }}>
             <Box>
               <Button
-                variant="text"
-                endIcon={<Add />}
-                sx={{ color: '#000' }}
+                variant="contained"
+                sx={{ background: '#020560', '&:hover': { background: '#020560' } }}
                 onClick={() => {
                   setOpenCreate(true);
                 }}

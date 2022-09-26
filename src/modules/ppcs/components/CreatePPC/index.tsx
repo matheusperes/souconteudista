@@ -1,43 +1,17 @@
+import { yupResolver } from '@hookform/resolvers/yup';
 import CloseIcon from '@mui/icons-material/Close';
-import {
-  Dialog,
-  Box,
-  DialogTitle,
-  IconButton,
-  Grid,
-  Button,
-  Container,
-  TextField,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-} from '@mui/material';
-import { useState, useCallback } from 'react';
+import { Dialog, Box, DialogTitle, IconButton, Grid, Button, Container } from '@mui/material';
+import { useCallback } from 'react';
+import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
+import * as yup from 'yup';
 
+import { FormCheckbox } from '#shared/components/Form/CheckBox';
+import { MyTextField } from '#shared/components/Form/TextField';
+import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
 
 import { Ppc } from '#modules/ppcs/pages/ListPpcsCurso';
-
-type Competencia = {
-  competencia: string;
-  id: string;
-};
-
-type Perfil = {
-  perfil: string;
-  id: string;
-};
-
-type CompetenciaApi = {
-  competencia: string;
-  competenciaNumero: number;
-};
-
-type PerfilApi = {
-  perfil: string;
-  perfilNumero: number;
-};
 
 type ICreateFilteredPpcModal = {
   updateListPpcs: (ppc: Ppc) => void;
@@ -45,76 +19,63 @@ type ICreateFilteredPpcModal = {
   onClose: () => void;
 };
 
+type IForm = {
+  anoVoto: number;
+  dataInicio: string;
+  dataFim: string;
+  horaCredito: number;
+  quantSemestres: number;
+  active: boolean;
+  ppc_ativo: boolean;
+};
+
+const validateForm = yup.object().shape({
+  anoVoto: yup.number().required('Ano Obrigatório'),
+  dataInicio: yup.string().required('Data Obrigatória'),
+  dataFim: yup.string().required('Data Obrigatória'),
+  quantSemestres: yup.number().required('Quantidade de Semestres Obrigatório'),
+  horaCredito: yup.number().required('Quantidade de Créditos Obrigatório'),
+});
+
 export function CreateFilteredPpcModal({ updateListPpcs, open, onClose }: ICreateFilteredPpcModal) {
+  const { message } = useToast();
   const params = useParams();
-  const [anoVoto, setAnoVoto] = useState(0);
-  const [dataInicio, setDataInicio] = useState('');
-  const [dataFim, setDataFim] = useState('');
-  const [horaCredito, setHoraCredito] = useState(0);
-  const [quantSemestres, setQuantSemestres] = useState(0);
-  const [active, setActive] = useState(true);
-  const [atual, setAtual] = useState(true);
-  const [competencias, setCompetencias] = useState<Competencia[]>([]);
-  const [perfil, setPerfil] = useState<Perfil[]>([]);
+
+  const {
+    handleSubmit,
+    formState: { errors },
+    control,
+    reset,
+  } = useForm<IForm>({
+    resolver: yupResolver(validateForm),
+  });
 
   const handleCreate = useCallback(
-    async (event: React.FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      if (params?.curso_id !== null) {
-        const competenciaFixed = competencias.map<CompetenciaApi>((competencia, index) => {
-          return {
-            competencia: competencia.competencia,
-            competenciaNumero: index + 1,
-          };
-        });
-
-        const perfilFixed = perfil.map<PerfilApi>((perfil2, index) => {
-          return {
-            perfil: perfil2.perfil,
-            perfilNumero: index + 1,
-          };
-        });
-
-        const response = await api.post('/ppcs', {
-          curso_id: params.curso_id,
-          anoVoto,
-          dataInicio,
-          dataFim,
-          horaCredito,
-          quantSemestres,
-          active,
-          ppc_ativo: atual,
-          competencias: competenciaFixed,
-          perfis: perfilFixed,
-        });
-
-        updateListPpcs(response.data);
-        setAnoVoto(0);
-        setCompetencias([]);
-        setDataInicio('');
-        setDataFim('');
-        setHoraCredito(0);
-        setQuantSemestres(0);
-        setActive(true);
-        setAtual(true);
-        setPerfil([]);
-        onClose();
+    async (form: IForm) => {
+      try {
+        if (params?.curso_id !== null) {
+          const response = await api.post('/ppcs', {
+            curso_id: params.curso_id,
+            anoVoto: form.anoVoto,
+            dataInicio: form.dataInicio,
+            dataFim: form.dataFim,
+            horaCredito: form.horaCredito,
+            quantSemestres: form.quantSemestres,
+            active: form.active,
+            ppc_ativo: form.ppc_ativo,
+            competencias: [],
+            perfis: [],
+          });
+          updateListPpcs(response.data);
+          message({ mensagem: 'PPC Cadastrado', tipo: 'success' });
+          reset();
+          onClose();
+        }
+      } catch (error: any) {
+        message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [
-      params.curso_id,
-      competencias,
-      perfil,
-      anoVoto,
-      dataInicio,
-      dataFim,
-      horaCredito,
-      quantSemestres,
-      active,
-      atual,
-      updateListPpcs,
-      onClose,
-    ],
+    [params.curso_id, updateListPpcs, message, reset, onClose],
   );
 
   return (
@@ -137,78 +98,56 @@ export function CreateFilteredPpcModal({ updateListPpcs, open, onClose }: ICreat
         </IconButton>
       </Box>
       <Container sx={{ marginTop: '1rem' }}>
-        <form onSubmit={handleCreate}>
+        <form onSubmit={handleSubmit(handleCreate)} noValidate>
           <Grid container spacing={2}>
             <Grid item xs={6}>
-              <TextField
-                fullWidth
-                label="Ano do Voto"
-                variant="outlined"
-                value={anoVoto}
-                onChange={(event) => setAnoVoto(Number(event.target.value))}
+              <MyTextField
+                name="anoVoto"
+                control={control}
+                errors={errors.anoVoto}
+                label="Ano Voto"
+                inputProps={{ inputMode: 'numeric' }}
               />
             </Grid>
-
             <Grid item xs={6}>
-              <TextField
-                fullWidth
+              <MyTextField
+                name="dataInicio"
+                control={control}
+                errors={errors.dataInicio}
                 label="Data de Inicio"
-                variant="outlined"
-                value={dataInicio}
-                onChange={(event) => setDataInicio(event.target.value)}
               />
             </Grid>
-
             <Grid item xs={6}>
-              <TextField
-                fullWidth
+              <MyTextField
+                name="dataFim"
+                control={control}
+                errors={errors.dataFim}
                 label="Data de Fim"
-                variant="outlined"
-                value={dataFim}
-                onChange={(event) => setDataFim(event.target.value)}
               />
             </Grid>
-
             <Grid item xs={6}>
-              <TextField
-                fullWidth
-                label="Horas/Creditos"
-                variant="outlined"
-                value={horaCredito}
-                onChange={(event) => setHoraCredito(Number(event.target.value))}
+              <MyTextField
+                name="horaCredito"
+                control={control}
+                errors={errors.horaCredito}
+                label="Horas/Créditos"
+                inputProps={{ inputMode: 'numeric' }}
               />
             </Grid>
-
             <Grid item xs={12}>
-              <TextField
-                fullWidth
+              <MyTextField
+                name="quantSemestres"
+                control={control}
+                errors={errors.quantSemestres}
                 label="Quantidade de Semestres"
-                variant="outlined"
-                value={quantSemestres}
-                onChange={(event) => setQuantSemestres(Number(event.target.value))}
+                inputProps={{ inputMode: 'numeric' }}
               />
             </Grid>
-
             <Grid item xs={6}>
-              <FormGroup>
-                <FormControlLabel
-                  control={<Checkbox />}
-                  label="PPC Ativo"
-                  checked={active}
-                  onChange={() => setActive(!active)}
-                />
-              </FormGroup>
+              <FormCheckbox name="active" control={control} label="PPC Ativo" />
             </Grid>
-
             <Grid item xs={6}>
-              <FormGroup>
-                <FormControlLabel
-                  control={<Checkbox />}
-                  label="PPC Atual"
-                  checked={atual}
-                  onChange={() => setAtual(!atual)}
-                />
-              </FormGroup>
+              <FormCheckbox name="ppc_ativo" control={control} label="PPC Atual" />
             </Grid>
 
             <Grid item xs={12} sx={{ marginBottom: '1rem' }}>

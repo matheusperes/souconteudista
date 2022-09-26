@@ -1,5 +1,4 @@
 import { ArrowForward } from '@mui/icons-material';
-import AddIcon from '@mui/icons-material/Add';
 import {
   Box,
   Breadcrumbs,
@@ -14,13 +13,16 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { Col, StyledTable } from '#shared/components/StyledTable';
+import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
+import { useToast } from '#shared/hooks/toast';
 import Delete from '#shared/images/Delete.svg';
 import Edit from '#shared/images/Edit.svg';
 import { api } from '#shared/services/axios';
 
 import { IDisciplinas } from '#modules/areas/pages/FilteredDisciplinas';
 import { CreateDisciplinaModal } from '#modules/disciplinas/components/CreateDisciplina';
+import { DeleteDisciplina } from '#modules/disciplinas/components/DeleteDisciplina';
 import { UpdateDisciplinaModal } from '#modules/disciplinas/components/UpdateDisciplina';
 
 export type AreaOption = {
@@ -31,9 +33,12 @@ export type AreaOption = {
 export function ListDisciplinas() {
   const { setTitle } = useTitle();
   const navigate = useNavigate();
+  const { message } = useToast();
+  const { startLoading, stopLoading } = useLoading();
 
   const [openCreate, setOpenCreate] = useState(false);
   const [openUpdate, setOpenUpdate] = useState<string | null>(null);
+  const [openDelete, setOpenDelete] = useState<any>(null);
   const [disciplinas, setDisciplinas] = useState<IDisciplinas[]>([]);
   const [search, setSearch] = useState('');
 
@@ -42,10 +47,16 @@ export function ListDisciplinas() {
   }, [setTitle]);
 
   const getDisciplinas = useCallback(async () => {
-    const response = await api.get('/disciplinas');
-
-    setDisciplinas(response.data);
-  }, []);
+    startLoading();
+    try {
+      const response = await api.get('/disciplinas');
+      setDisciplinas(response.data);
+    } catch (error: any) {
+      message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+    } finally {
+      stopLoading();
+    }
+  }, [message, startLoading, stopLoading]);
 
   useEffect(() => {
     getDisciplinas();
@@ -71,15 +82,8 @@ export function ListDisciplinas() {
                 color="primary"
                 onClick={async (e) => {
                   e.stopPropagation();
-                  try {
-                    await api.delete(`/disciplinas/${item.id}`);
 
-                    setDisciplinas(
-                      disciplinas.filter((disciplinas2) => item.id !== disciplinas2.id),
-                    );
-                  } catch {
-                    alert('Você não pode excluir uma disciplina com versões cadastradas');
-                  }
+                  setOpenDelete(item.id);
                 }}
               >
                 <img src={Delete} alt="Delete" />
@@ -99,7 +103,7 @@ export function ListDisciplinas() {
         },
       },
     ];
-  }, [disciplinas]);
+  }, []);
 
   return (
     <>
@@ -114,6 +118,15 @@ export function ListDisciplinas() {
           open={!!openUpdate}
           onClose={() => setOpenUpdate(null)}
           disciplina_id={openUpdate}
+          reloadList={() => getDisciplinas()}
+        />
+      )}
+
+      {!!openDelete && (
+        <DeleteDisciplina
+          open={!!openDelete}
+          onClose={() => setOpenDelete(null)}
+          disciplina_id={openDelete}
           reloadList={() => getDisciplinas()}
         />
       )}
@@ -170,9 +183,8 @@ export function ListDisciplinas() {
           <Box sx={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'space-between' }}>
             <Box>
               <Button
-                variant="text"
-                endIcon={<AddIcon />}
-                sx={{ color: '#000' }}
+                variant="contained"
+                sx={{ background: '#020560', '&:hover': { background: '#020560' } }}
                 onClick={() => {
                   setOpenCreate(true);
                 }}

@@ -4,7 +4,7 @@ import { Control, Controller, FieldError } from 'react-hook-form';
 type MyTextFieldProps = TextFieldProps & {
   control: Control<any>;
   name: string;
-  errors: FieldError | undefined;
+  errors?: FieldError | undefined;
 };
 
 export function MyTextField({ control, name, defaultValue, errors, label }: MyTextFieldProps) {
@@ -20,6 +20,7 @@ export function MyTextField({ control, name, defaultValue, errors, label }: MyTe
           helperText={errors?.message}
           fullWidth
           label={label}
+          multiline
         />
       )}
     />

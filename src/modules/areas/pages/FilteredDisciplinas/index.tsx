@@ -1,5 +1,4 @@
 import { ArrowForward } from '@mui/icons-material';
-import AddIcon from '@mui/icons-material/Add';
 import {
   Box,
   Breadcrumbs,
@@ -11,15 +10,18 @@ import {
   Typography,
 } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { Col, StyledTable } from '#shared/components/StyledTable';
+import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
+import { useToast } from '#shared/hooks/toast';
 import Delete from '#shared/images/Delete.svg';
 import Edit from '#shared/images/Edit.svg';
 import { api } from '#shared/services/axios';
 
 import { CreateFilteredDisciplinaModal } from '#modules/disciplinas/components/CreateDisciplinaFiltered';
+import { DeleteDisciplina } from '#modules/disciplinas/components/DeleteDisciplina';
 import { UpdateDisciplinaModal } from '#modules/disciplinas/components/UpdateDisciplina';
 
 export type Area = {
@@ -38,39 +40,55 @@ export type IDisciplinas = {
 
 export function FilteredDisciplinas() {
   const { setTitle } = useTitle();
+  const navigate = useNavigate();
   const params = useParams();
+  const { message } = useToast();
+  const { startLoading, stopLoading } = useLoading();
 
   const [disciplinas, setDisciplinas] = useState<IDisciplinas[]>([]);
   const [area, setArea] = useState<Area>();
   const [search, setSearch] = useState('');
   const [openCreate, setOpenCreate] = useState(false);
   const [openUpdateDisciplina, setOpenUpdateDisciplina] = useState<string | null>(null);
+  const [openDelete, setOpenDelete] = useState<any>(null);
+
+  useEffect(() => {
+    setTitle(`Área`);
+  }, [setTitle]);
 
   const getDisciplinas = useCallback(async () => {
-    const response = await api.get('/disciplinas', {
-      params: { area_id: params?.id },
-    });
-
-    setDisciplinas(response.data);
-  }, [params?.id]);
+    startLoading();
+    try {
+      const response = await api.get('/disciplinas', {
+        params: { area_id: params?.id },
+      });
+      setDisciplinas(response.data);
+    } catch (error: any) {
+      message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+    } finally {
+      stopLoading();
+    }
+  }, [message, params?.id, startLoading, stopLoading]);
 
   useEffect(() => {
     getDisciplinas();
   }, [getDisciplinas]);
 
   const getArea = useCallback(async () => {
-    const response = await api.get(`/area/${params?.id}`);
-
-    setArea(response.data);
-  }, [params?.id]);
+    startLoading();
+    try {
+      const response = await api.get(`/area/${params?.id}`);
+      setArea(response.data);
+    } catch (error: any) {
+      message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+    } finally {
+      stopLoading();
+    }
+  }, [message, params?.id, startLoading, stopLoading]);
 
   useEffect(() => {
     getArea();
   }, [getArea]);
-
-  useEffect(() => {
-    setTitle(`Área`);
-  }, [setTitle]);
 
   const colunas = useMemo<Col<IDisciplinas>[]>(() => {
     return [
@@ -86,15 +104,8 @@ export function FilteredDisciplinas() {
                 color="primary"
                 onClick={async (e) => {
                   e.stopPropagation();
-                  try {
-                    await api.delete(`/disciplinas/${item.id}`);
 
-                    setDisciplinas(
-                      disciplinas.filter((disciplinas2) => item.id !== disciplinas2.id),
-                    );
-                  } catch {
-                    alert('Você não pode excluir uma disciplina com versões cadastradas');
-                  }
+                  setOpenDelete(item.id);
                 }}
               >
                 <img src={Delete} alt="Delete" />
@@ -114,7 +125,7 @@ export function FilteredDisciplinas() {
         },
       },
     ];
-  }, [disciplinas]);
+  }, []);
 
   const filtereDisciplinas = useMemo(() => {
     return disciplinas.filter((disciplina) => {
@@ -134,6 +145,15 @@ export function FilteredDisciplinas() {
           open={!!openUpdateDisciplina}
           onClose={() => setOpenUpdateDisciplina(null)}
           disciplina_id={openUpdateDisciplina}
+          reloadList={() => getDisciplinas()}
+        />
+      )}
+
+      {!!openDelete && (
+        <DeleteDisciplina
+          open={!!openDelete}
+          onClose={() => setOpenDelete(null)}
+          disciplina_id={openDelete}
           reloadList={() => getDisciplinas()}
         />
       )}
@@ -158,9 +178,8 @@ export function FilteredDisciplinas() {
           <Box sx={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'space-between' }}>
             <Box>
               <Button
-                variant="text"
-                endIcon={<AddIcon />}
-                sx={{ color: '#000' }}
+                variant="contained"
+                sx={{ background: '#020560', '&:hover': { background: '#020560' } }}
                 onClick={() => {
                   setOpenCreate(true);
                 }}
@@ -181,7 +200,11 @@ export function FilteredDisciplinas() {
             </Box>
           </Box>
           <Box sx={{ marginTop: '1rem' }}>
-            <StyledTable colunas={colunas} conteudo={filtereDisciplinas} />
+            <StyledTable
+              colunas={colunas}
+              conteudo={filtereDisciplinas}
+              navegationLine={(item) => navigate(`/disciplinas/${item.id}`)}
+            />
           </Box>
         </Box>
       </Box>

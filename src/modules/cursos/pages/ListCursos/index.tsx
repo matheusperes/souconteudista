@@ -3,11 +3,14 @@ import { Box, Grid, Typography, Button, TextField, Breadcrumbs } from '@mui/mate
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
+import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
+import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
 
 import { CreateCursoModal } from '#modules/cursos/components/CreateCurso';
 import { CursoCard } from '#modules/cursos/components/CursoCard';
+import { DeleteCurso } from '#modules/cursos/components/DeleteCurso';
 import { UpdateCursoModal } from '#modules/cursos/components/UpdateCurso';
 
 export type ICurso = {
@@ -16,22 +19,35 @@ export type ICurso = {
   active: string;
 };
 
+const listCores = ['#020560', '#2E86AB', '#A23B72', '#F18F01', '#C73E1D'];
+
 export function ListCursos() {
+  const { startLoading, stopLoading } = useLoading();
   const { setTitle } = useTitle();
+  const { message } = useToast();
+
   const [openCreate, setOpenCreate] = useState(false);
   const [cursos, setCursos] = useState<ICurso[]>([]);
   const [search, setSearch] = useState('');
   const [openUpdate, setOpenUpdate] = useState<string | null>(null);
+  const [openDelete, setOpenDelete] = useState<string | null>(null);
 
   useEffect(() => {
     setTitle('Cursos');
   }, [setTitle]);
 
   const getCursos = useCallback(async () => {
-    const response = await api.get('/cursos');
+    startLoading();
+    try {
+      const response = await api.get('/cursos');
 
-    setCursos(response.data);
-  }, []);
+      setCursos(response.data);
+    } catch (error: any) {
+      message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+    } finally {
+      stopLoading();
+    }
+  }, [message, startLoading, stopLoading]);
 
   useEffect(() => {
     getCursos();
@@ -56,6 +72,14 @@ export function ListCursos() {
           open={!!openUpdate}
           onClose={() => setOpenUpdate(null)}
           curso_id={openUpdate}
+          reloadList={() => getCursos()}
+        />
+      )}
+      {!!openDelete && (
+        <DeleteCurso
+          open={!!openDelete}
+          onClose={() => setOpenDelete(null)}
+          curso_id={openDelete}
           reloadList={() => getCursos()}
         />
       )}
@@ -98,20 +122,20 @@ export function ListCursos() {
             </Button>
           </Box>
           <Grid container spacing={4}>
-            {filteredCursos.map((curso) => (
+            {filteredCursos.map((curso, index) => (
               <Grid item xs={12} sm={6} md={4} xl={3} key={curso.id}>
                 <CursoCard
                   curso={{
                     name: curso.name,
-                    cor: '#020560',
+                    cor: listCores[index % listCores.length],
                     id: curso.id,
                     active: curso.active ? 'Curso Ativo' : 'Curso Inativo',
                   }}
-                  reloadList={() => {
-                    setCursos(cursos.filter((curso2) => curso.id !== curso2.id));
-                  }}
                   updateCursoModal={(curso_id) => {
                     setOpenUpdate(curso_id);
+                  }}
+                  DeleteCurso={(curso_id) => {
+                    setOpenDelete(curso_id);
                   }}
                 />
               </Grid>

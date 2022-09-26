@@ -1,22 +1,42 @@
+import { yupResolver } from '@hookform/resolvers/yup';
 import CloseIcon from '@mui/icons-material/Close';
-import {
-  Dialog,
-  Box,
-  DialogTitle,
-  IconButton,
-  Grid,
-  TextField,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-} from '@mui/material';
-import { useState, useCallback } from 'react';
+import { Dialog, Box, DialogTitle, IconButton, Grid, Button } from '@mui/material';
+import { useCallback } from 'react';
+import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
+import * as yup from 'yup';
 
+import { FormCheckbox } from '#shared/components/Form/CheckBox';
+import { MyTextField } from '#shared/components/Form/TextField';
+import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
 
+import { Area } from '#modules/areas/pages/FilteredDisciplinas';
 import { Versoes } from '#modules/disciplinas/pages/FilteredVersoes';
+
+type Disciplinas = {
+  id: string;
+  name: string;
+  area_id: string;
+  sigla: string;
+  area: Area;
+};
+
+type IForm = {
+  codigo: string;
+  credito: number;
+  oferta: boolean;
+  produzido: boolean;
+  ementa: string;
+  observacao: string;
+  disciplina: Disciplinas;
+};
+
+const validateForm = yup.object().shape({
+  codigo: yup.string().required('código Obrigatória'),
+  credito: yup.number().required('Crédito Obrigatório'),
+  ementa: yup.string().required('Ementa Obrigatória'),
+});
 
 type CreateFilteredVersaoModal = {
   updateListVersoes: (versao: Versoes) => void;
@@ -30,45 +50,39 @@ export function CreateFilteredVersaoModal({
   onClose,
 }: CreateFilteredVersaoModal) {
   const params = useParams();
-  const [codigo, setCodigo] = useState('');
-  const [credito, setCredito] = useState(0);
-  const [ementa, setEmenta] = useState('');
-  const [observacao, setObservacao] = useState('');
-  const [oferta, setOferta] = useState(true);
-  const [produzido, setProduzido] = useState(true);
+  const { message } = useToast();
 
-  const handleCreate = useCallback(async () => {
-    if (params?.id !== null) {
-      const response = await api.post('/versoes', {
-        disciplina_id: params.id,
-        codigo,
-        credito_quantidade: credito,
-        ementa,
-        observacao,
-        em_oferta: oferta,
-        produzido,
-      });
+  const {
+    handleSubmit,
+    formState: { errors },
+    control,
+    reset,
+  } = useForm<IForm>({
+    resolver: yupResolver(validateForm),
+  });
 
-      updateListVersoes(response.data);
-      setCodigo('');
-      setCredito(0);
-      setEmenta('');
-      setObservacao('');
-      setOferta(true);
-      setProduzido(true);
-      onClose();
-    }
-  }, [
-    codigo,
-    credito,
-    ementa,
-    observacao,
-    oferta,
-    onClose,
-    params.id,
-    produzido,
-    updateListVersoes,
-  ]);
+  const handleCreate = useCallback(
+    async (form: IForm) => {
+      try {
+        const response = await api.post('/versoes', {
+          disciplina_id: params.id,
+          codigo: form.codigo,
+          credito_quantidade: form.credito,
+          ementa: form.ementa,
+          observacao: form.observacao,
+          em_oferta: form.oferta,
+          produzido: form.produzido,
+        });
+        updateListVersoes(response.data);
+        message({ mensagem: 'Versão Cadastrada', tipo: 'success' });
+        reset();
+        onClose();
+      } catch (error: any) {
+        message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+      }
+    },
+    [message, onClose, params.id, reset, updateListVersoes],
+  );
 
   return (
     <Dialog onClose={onClose} open={open}>
@@ -90,82 +104,48 @@ export function CreateFilteredVersaoModal({
         </IconButton>
       </Box>
       <Box sx={{ padding: '1rem' }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6} md={6}>
-            <TextField
-              fullWidth
-              label="Codigo"
-              variant="outlined"
-              value={codigo}
-              onChange={(event) => setCodigo(event.target.value)}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={6}>
-            <TextField
-              fullWidth
-              label="Credito"
-              variant="outlined"
-              value={credito}
-              onChange={(event) => setCredito(Number(event.target.value))}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={6}>
-            <FormGroup>
-              <FormControlLabel
-                control={<Checkbox />}
-                label="Em Oferta"
-                checked={oferta}
-                onChange={() => setOferta(!oferta)}
+        <form onSubmit={handleSubmit(handleCreate)} noValidate>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <MyTextField name="codigo" control={control} errors={errors.codigo} label="Código" />
+            </Grid>
+            <Grid item xs={6}>
+              <MyTextField
+                name="credito"
+                control={control}
+                errors={errors.credito}
+                label="Créditos"
+                inputProps={{ inputMode: 'numeric' }}
               />
-            </FormGroup>
+            </Grid>
+            <Grid item xs={6}>
+              <FormCheckbox name="oferta" control={control} label="Em Oferta" />
+            </Grid>
+            <Grid item xs={6}>
+              <FormCheckbox name="produzido" control={control} label="Produzido" />
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField name="ementa" control={control} errors={errors.ementa} label="Ementa" />
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField name="observacao" control={control} label="Observação" />
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{
+                  background: '#020560',
+                  color: '#E5E5E5',
+                  '&:hover': { background: '#020560' },
+                }}
+              >
+                Inserir
+              </Button>
+            </Grid>
           </Grid>
-          <Grid item xs={12} sm={6} md={6}>
-            <FormGroup>
-              <FormControlLabel
-                control={<Checkbox />}
-                label="Produzido"
-                checked={produzido}
-                onChange={() => setProduzido(!produzido)}
-              />
-            </FormGroup>
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              id="outlined-textarea"
-              label="Ementa"
-              placeholder="Ementa"
-              value={ementa}
-              onChange={(event) => setEmenta(event.target.value)}
-              multiline
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              placeholder="Observção"
-              label="Observção"
-              variant="outlined"
-              value={observacao}
-              onChange={(event) => setObservacao(event.target.value)}
-              multiline
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <Button
-              fullWidth
-              variant="contained"
-              onClick={handleCreate}
-              sx={{
-                background: '#0b0f79',
-                color: '#E5E5E5',
-                '&:hover': { background: '#020560' },
-              }}
-            >
-              Inserir
-            </Button>
-          </Grid>
-        </Grid>
+        </form>
       </Box>
     </Dialog>
   );

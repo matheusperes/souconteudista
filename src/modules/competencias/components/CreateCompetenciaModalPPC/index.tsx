@@ -1,7 +1,12 @@
+import { yupResolver } from '@hookform/resolvers/yup';
 import CloseIcon from '@mui/icons-material/Close';
-import { Dialog, Box, DialogTitle, IconButton, Grid, TextField, Button } from '@mui/material';
-import { useCallback, useState } from 'react';
+import { Dialog, Box, DialogTitle, IconButton, Grid, Button } from '@mui/material';
+import { useCallback } from 'react';
+import { useForm } from 'react-hook-form';
+import * as yup from 'yup';
 
+import { MyTextField } from '#shared/components/Form/TextField';
+import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
 
 type ICreateCompetenciaModalPPC = {
@@ -11,29 +16,55 @@ type ICreateCompetenciaModalPPC = {
   ppc_id: string;
 };
 
+type IForm = {
+  ppc_id: string;
+  competencia: string;
+  competenciaNumero: number;
+};
+
+const validateForm = yup.object().shape({
+  competencia: yup.string().required('Competência precisa ter um nome'),
+  competenciaNumero: yup.number().required('Competência precisa ter um número'),
+});
+
 export function CreateCompetenciaModalPPC({
   reloadList,
   open,
   onClose,
   ppc_id,
 }: ICreateCompetenciaModalPPC) {
-  const [competencia, SetCompetencia] = useState('');
-  const [competenciaNumero, setCompetenciaNumero] = useState(0);
+  const { message } = useToast();
 
-  const handleCreate = useCallback(async () => {
-    await api.post('/competencias', {
-      competencia,
-      competenciaNumero,
-      ppc_id,
-    });
+  const {
+    handleSubmit,
+    formState: { errors },
+    control,
+    reset,
+  } = useForm<IForm>({
+    resolver: yupResolver(validateForm),
+  });
 
-    if (reloadList) {
-      reloadList();
-    }
-    SetCompetencia('');
-    setCompetenciaNumero(0);
-    onClose();
-  }, [competencia, competenciaNumero, ppc_id, reloadList, onClose]);
+  const handleCreate = useCallback(
+    async (form: IForm) => {
+      try {
+        await api.post('/competencias', {
+          competencia: form.competencia,
+          competenciaNumero: form.competenciaNumero,
+          ppc_id,
+        });
+
+        if (reloadList) {
+          reloadList();
+        }
+        message({ mensagem: 'Competência Cadastrada', tipo: 'success' });
+        reset();
+        onClose();
+      } catch (error: any) {
+        message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+      }
+    },
+    [ppc_id, reloadList, message, reset, onClose],
+  );
 
   return (
     <Dialog onClose={onClose} open={open}>
@@ -57,48 +88,41 @@ export function CreateCompetenciaModalPPC({
         </IconButton>
       </Box>
       <Box sx={{ padding: '1rem' }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Nome da competencia"
-                variant="outlined"
-                multiline
-                value={competencia}
-                onChange={(event) => SetCompetencia(event.target.value)}
+        <form onSubmit={handleSubmit(handleCreate)} noValidate>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <MyTextField
+                name="competencia"
+                control={control}
+                errors={errors.competencia}
+                label="Competencia"
               />
-            </Box>
-          </Grid>
-          <Grid item xs={12}>
-            <Box>
-              <TextField
-                fullWidth
-                label="Numero da Competencia"
-                variant="outlined"
-                multiline
-                value={competenciaNumero}
-                onChange={(event) => setCompetenciaNumero(Number(event.target.value))}
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField
+                name="competenciaNumero"
+                control={control}
+                errors={errors.competenciaNumero}
+                label="Número da competencia"
+                inputProps={{ inputMode: 'numeric' }}
               />
-            </Box>
-          </Grid>
-          <Grid item xs={12}>
-            <Box>
+            </Grid>
+            <Grid item xs={12} sx={{ marginBottom: '1rem' }}>
               <Button
-                fullWidth
-                variant="contained"
-                onClick={handleCreate}
                 sx={{
                   background: '#0b0f79',
                   color: '#E5E5E5',
                   '&:hover': { background: '#020560' },
                 }}
+                fullWidth
+                variant="contained"
+                type="submit"
               >
                 Inserir
               </Button>
-            </Box>
+            </Grid>
           </Grid>
-        </Grid>
+        </form>
       </Box>
     </Dialog>
   );

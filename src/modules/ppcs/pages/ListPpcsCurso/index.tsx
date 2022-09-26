@@ -18,12 +18,15 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
+import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
+import { useToast } from '#shared/hooks/toast';
 import Delete from '#shared/images/Delete.svg';
 import Edit from '#shared/images/Edit.svg';
 import { api } from '#shared/services/axios';
 
 import { CreateFilteredPpcModal } from '#modules/ppcs/components/CreatePPC';
+import { DeletePPC } from '#modules/ppcs/components/DeletePPC';
 import { UpdatePpcModal } from '#modules/ppcs/components/UpdatePPC';
 
 export type Curso = {
@@ -59,13 +62,14 @@ const StyledTableContainer = styled(TableContainer)`
       color: #000;
       font-weight: 400;
       padding: 1rem 2rem;
-      text-align: left;
+      text-align: center;
       line-height: 1.5rem;
     }
 
     td {
       padding: 1rem 2rem;
       border: 0;
+      text-align: center;
       background: #fff;
       color: #000;
       cursor: pointer;
@@ -84,44 +88,62 @@ const StyledTableContainer = styled(TableContainer)`
 export function PPC() {
   const { setTitle } = useTitle();
   const navigate = useNavigate();
+  const params = useParams();
+  const { message } = useToast();
+  const { startLoading, stopLoading } = useLoading();
+
   const [openCreate, setOpenCreate] = useState(false);
   const [openUpdatePPC, setOpenUpdatePPC] = useState<string | null>(null);
+  const [openDelete, setOpenDelete] = useState<any>(null);
+
   const [search, setSearch] = useState('');
   const [ppcs, setPpcs] = useState<Ppc[]>([]);
   const [curso, setCurso] = useState<Curso>();
-  const params = useParams();
 
-  const filteredPPCS = useMemo(() => {
-    return ppcs.filter((ppc) => {
-      return ppc.curso.name.toLowerCase().includes(search.toLowerCase());
-    });
-  }, [ppcs, search]);
+  useEffect(() => {
+    setTitle(curso?.name || '');
+  }, [curso?.name, setTitle]);
 
   const getPpcs = useCallback(async () => {
-    const response = await api.get('/ppcs', {
-      params: { curso_id: params?.curso_id },
-    });
-
-    setPpcs(response.data);
-  }, [params?.curso_id]);
+    startLoading();
+    try {
+      const response = await api.get('/ppcs', {
+        params: { curso_id: params?.curso_id },
+      });
+      setPpcs(response.data);
+    } catch (error: any) {
+      message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+    } finally {
+      stopLoading();
+    }
+  }, [message, params?.curso_id, startLoading, stopLoading]);
 
   useEffect(() => {
     getPpcs();
   }, [getPpcs]);
 
   const getCurso = useCallback(async () => {
-    const response = await api.get(`/curso/${params?.curso_id}`);
+    startLoading();
+    try {
+      const response = await api.get(`/curso/${params?.curso_id}`);
 
-    setCurso(response.data);
-  }, [params?.curso_id]);
+      setCurso(response.data);
+    } catch (error: any) {
+      message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+    } finally {
+      stopLoading();
+    }
+  }, [message, params?.curso_id, startLoading, stopLoading]);
 
   useEffect(() => {
     getCurso();
   }, [getCurso]);
 
-  useEffect(() => {
-    setTitle(curso?.name || '');
-  }, [curso?.name, setTitle]);
+  const filteredPPCS = useMemo(() => {
+    return ppcs.filter((ppc) => {
+      return ppc.curso.name.toLowerCase().includes(search.toLowerCase());
+    });
+  }, [ppcs, search]);
 
   return (
     <>
@@ -135,6 +157,14 @@ export function PPC() {
           open={!!openUpdatePPC}
           onClose={() => setOpenUpdatePPC(null)}
           ppc_id={openUpdatePPC}
+          reloadList={() => getPpcs()}
+        />
+      )}
+      {!!openDelete && (
+        <DeletePPC
+          open={!!openDelete}
+          onClose={() => setOpenDelete(null)}
+          ppc_id={openDelete}
           reloadList={() => getPpcs()}
         />
       )}
@@ -248,8 +278,19 @@ export function PPC() {
                     <TableRow
                       key={ppc.id}
                       sx={{
-                        borderRadius: '10px',
-                        boxShadow: '0px 5px rgba(67, 200, 104, 0.25)',
+                        ...(ppc.ppc_ativo && {
+                          borderRadius: '10px',
+                          boxShadow: '0px 5px rgba(237, 229, 41, 0.25)',
+                        }),
+                        ...(ppc.ppc_ativo === false && {
+                          borderRadius: '10px',
+                          boxShadow: '0px 5px rgba(216, 68, 68, 0.25)',
+                        }),
+                        ...(ppc.active &&
+                          ppc.ppc_ativo && {
+                            borderRadius: '10px',
+                            boxShadow: '0px 5px rgba(67, 200, 104, 0.25)',
+                          }),
                       }}
                       onClick={() => navigate(`/cursos/${ppc.curso.id}/ppcs/${ppc.id}`)}
                     >
@@ -263,14 +304,10 @@ export function PPC() {
                         <ButtonGroup variant="outlined" aria-label="outlined primary button group">
                           <IconButton
                             color="primary"
-                            onClick={async () => {
-                              try {
-                                await api.delete(`/ppcs/${ppc.id}`);
+                            onClick={async (e) => {
+                              e.stopPropagation();
 
-                                setPpcs(ppcs.filter((ppcs2) => ppc.id !== ppcs2.id));
-                              } catch {
-                                alert('Você está sendo teimoso... Se persistir, será demitido!');
-                              }
+                              setOpenDelete(ppc.id);
                             }}
                           >
                             <img src={Delete} alt="Delete" />

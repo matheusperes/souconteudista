@@ -1,4 +1,4 @@
-import { Add, ArrowForward } from '@mui/icons-material';
+import { ArrowForward } from '@mui/icons-material';
 import {
   Box,
   Breadcrumbs,
@@ -13,12 +13,15 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 
 import { Col, StyledTable } from '#shared/components/StyledTable';
+import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
+import { useToast } from '#shared/hooks/toast';
 import Delete from '#shared/images/Delete.svg';
 import Edit from '#shared/images/Edit.svg';
 import { api } from '#shared/services/axios';
 
 import { CreateFilteredVersaoModal } from '#modules/versoes/components/CraeteFilteredVersaoModal';
+import { DeleteVersão } from '#modules/versoes/components/DeleteVersao';
 import { UpdateVersaoModal } from '#modules/versoes/components/UpdateVersaoModal';
 
 type Area = {
@@ -52,9 +55,13 @@ export function FilteredVersoes() {
   const { setTitle } = useTitle();
   const params = useParams();
   const navigate = useNavigate();
+  const { message } = useToast();
+  const { startLoading, stopLoading } = useLoading();
 
   const [openUpdateVersao, setOpenUpdateVersao] = useState<string | null>(null);
   const [openCreate, setOpenCreate] = useState(false);
+  const [openDelete, setOpenDelete] = useState<any>(null);
+
   const [versoes, setVersoes] = useState<Versoes[]>([]);
   const [search, setSearch] = useState('');
   const [disciplina, setDisciplina] = useState<Disciplinas>();
@@ -64,22 +71,34 @@ export function FilteredVersoes() {
   }, [setTitle]);
 
   const getVersoes = useCallback(async () => {
-    const response = await api.get('/versoes', {
-      params: { disciplina_id: params?.id },
-    });
-
-    setVersoes(response.data);
-  }, [params?.id]);
+    startLoading();
+    try {
+      const response = await api.get('/versoes', {
+        params: { disciplina_id: params?.id },
+      });
+      setVersoes(response.data);
+    } catch (error: any) {
+      message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+    } finally {
+      stopLoading();
+    }
+  }, [message, params?.id, startLoading, stopLoading]);
 
   useEffect(() => {
     getVersoes();
   }, [getVersoes]);
 
   const getDisciplina = useCallback(async () => {
-    const response = await api.get(`/disciplina/${params?.id}`);
-
-    setDisciplina(response.data);
-  }, [params?.id]);
+    startLoading();
+    try {
+      const response = await api.get(`/disciplina/${params?.id}`);
+      setDisciplina(response.data);
+    } catch (error: any) {
+      message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+    } finally {
+      stopLoading();
+    }
+  }, [message, params?.id, startLoading, stopLoading]);
 
   useEffect(() => {
     getDisciplina();
@@ -106,14 +125,10 @@ export function FilteredVersoes() {
             <ButtonGroup variant="outlined" aria-label="outlined primary button group">
               <IconButton
                 color="primary"
-                onClick={async () => {
-                  try {
-                    await api.delete(`/versoes/${item.id}`);
+                onClick={async (e) => {
+                  e.stopPropagation();
 
-                    setVersoes(versoes.filter((versao2) => item.id !== versao2.id));
-                  } catch {
-                    alert('Você está sendo teimoso... Se persistir, será demitido!');
-                  }
+                  setOpenDelete(item.id);
                 }}
               >
                 <img src={Delete} alt="Delete" />
@@ -133,7 +148,7 @@ export function FilteredVersoes() {
         },
       },
     ];
-  }, [versoes]);
+  }, []);
 
   return (
     <>
@@ -147,6 +162,14 @@ export function FilteredVersoes() {
           open={!!openUpdateVersao}
           onClose={() => setOpenUpdateVersao(null)}
           versao_id={openUpdateVersao}
+          reloadList={() => getVersoes()}
+        />
+      )}
+      {!!openDelete && (
+        <DeleteVersão
+          open={!!openDelete}
+          onClose={() => setOpenDelete(null)}
+          versao_id={openDelete}
           reloadList={() => getVersoes()}
         />
       )}
@@ -177,9 +200,8 @@ export function FilteredVersoes() {
           <Box sx={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'space-between' }}>
             <Box>
               <Button
-                variant="text"
-                endIcon={<Add />}
-                sx={{ color: '#000' }}
+                variant="contained"
+                sx={{ background: '#020560', '&:hover': { background: '#020560' } }}
                 onClick={() => {
                   setOpenCreate(true);
                 }}

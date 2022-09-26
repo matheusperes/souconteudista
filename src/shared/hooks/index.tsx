@@ -1,5 +1,6 @@
 import { ReactElement } from 'react';
 
+import { LoadingProvider } from './loading';
 import { TitleProvider } from './title';
 import { ToastProvider } from './toast';
 
@@ -10,7 +11,9 @@ type AppProviderProps = {
 export function AppProvider({ children }: AppProviderProps) {
   return (
     <ToastProvider>
-      <TitleProvider>{children}</TitleProvider>
+      <LoadingProvider>
+        <TitleProvider>{children}</TitleProvider>
+      </LoadingProvider>
     </ToastProvider>
   );
 }

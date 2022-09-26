@@ -1,5 +1,4 @@
 import { ArrowForward } from '@mui/icons-material';
-import AddIcon from '@mui/icons-material/Add';
 import {
   Box,
   Typography,
@@ -14,12 +13,15 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { Col, StyledTable } from '#shared/components/StyledTable';
+import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
+import { useToast } from '#shared/hooks/toast';
 import Delete from '#shared/images/Delete.svg';
 import Edit from '#shared/images/Edit.svg';
 import { api } from '#shared/services/axios';
 
 import { CreateAreaModal } from '#modules/areas/components/CreateArea';
+import { DeleteAreaModal } from '#modules/areas/components/DeleteArea';
 import { UpdateAreaModal } from '#modules/areas/components/UpdateArea';
 
 type IAreas = {
@@ -31,25 +33,34 @@ type IAreas = {
 export function ListAreas() {
   const { setTitle } = useTitle();
   const navigate = useNavigate();
+  const { message } = useToast();
+  const { startLoading, stopLoading } = useLoading();
 
   const [search, setSearch] = useState('');
   const [openCreate, setOpenCreate] = useState(false);
   const [openUpdate, setOpenUpdate] = useState<any>(null);
+  const [openDelete, setOpenDelete] = useState<any>(null);
   const [areas, setAreas] = useState<IAreas[]>([]);
-
-  const getAreas = useCallback(async () => {
-    const response = await api.get('/areas');
-
-    setAreas(response.data);
-  }, []);
-
-  useEffect(() => {
-    getAreas();
-  }, [getAreas]);
 
   useEffect(() => {
     setTitle('Áreas');
   }, [setTitle]);
+
+  const getAreas = useCallback(async () => {
+    startLoading();
+    try {
+      const response = await api.get('/areas');
+      setAreas(response.data);
+    } catch (error: any) {
+      message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+    } finally {
+      stopLoading();
+    }
+  }, [message, startLoading, stopLoading]);
+
+  useEffect(() => {
+    getAreas();
+  }, [getAreas]);
 
   const filteredAreas = useMemo(() => {
     return areas.filter((area1) => {
@@ -70,13 +81,8 @@ export function ListAreas() {
                 color="primary"
                 onClick={async (e) => {
                   e.stopPropagation();
-                  try {
-                    await api.delete(`/areas/${item.id}`);
 
-                    setAreas(areas.filter((area) => item.id !== area.id));
-                  } catch {
-                    alert('Você não pode excluir uma área com disciplinas cadastradas');
-                  }
+                  setOpenDelete(item.id);
                 }}
               >
                 <img src={Delete} alt="Delete" />
@@ -96,7 +102,7 @@ export function ListAreas() {
         },
       },
     ];
-  }, [areas]);
+  }, []);
 
   return (
     <>
@@ -105,12 +111,22 @@ export function ListAreas() {
         onClose={() => setOpenCreate(false)}
         updateListArea={(area2) => setAreas([...areas, area2])}
       />
-      <UpdateAreaModal
-        open={!!openUpdate}
-        onClose={() => setOpenUpdate(null)}
-        area_id={openUpdate}
-        reloadList={() => getAreas()}
-      />
+      {openUpdate && (
+        <UpdateAreaModal
+          open={!!openUpdate}
+          onClose={() => setOpenUpdate(null)}
+          area_id={openUpdate}
+          reloadList={() => getAreas()}
+        />
+      )}
+      {openDelete && (
+        <DeleteAreaModal
+          open={!!openDelete}
+          onClose={() => setOpenDelete(null)}
+          area_id={openDelete}
+          reloadList={() => getAreas()}
+        />
+      )}
       <Box className="Pagina">
         <Box sx={{ mt: '1rem', padding: '1.5rem', width: '100%' }}>
           <Box>
@@ -167,9 +183,8 @@ export function ListAreas() {
           <Box sx={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'space-between' }}>
             <Box>
               <Button
-                variant="text"
-                endIcon={<AddIcon />}
-                sx={{ color: '#000' }}
+                variant="contained"
+                sx={{ background: '#020560', '&:hover': { background: '#020560' } }}
                 onClick={() => {
                   setOpenCreate(true);
                 }}

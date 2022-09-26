@@ -1,28 +1,35 @@
+import { yupResolver } from '@hookform/resolvers/yup';
 import CloseIcon from '@mui/icons-material/Close';
-import {
-  Dialog,
-  Box,
-  DialogTitle,
-  IconButton,
-  Grid,
-  TextField,
-  Autocomplete,
-  Button,
-} from '@mui/material';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Dialog, Box, DialogTitle, IconButton, Grid, Button } from '@mui/material';
+import { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import * as yup from 'yup';
 
+import { FormSelect } from '#shared/components/Form/FormSelect';
+import { MyTextField } from '#shared/components/Form/TextField';
+import { useLoading } from '#shared/hooks/loading';
+import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
 
-type Area = {
-  id: string;
+import { IArea } from '#modules/areas/components/CreateArea';
+
+type Disciplinas = {
   name: string;
-  description: string;
+  sigla: string;
+  area_id: string;
+  area: IArea;
 };
 
-type AreaOption = {
-  id: string;
-  label: string;
+type IForm = {
+  name: number;
+  sigla: string;
+  area: IArea;
 };
+
+const validateForm = yup.object().shape({
+  name: yup.string().required('Nome Obrigatório'),
+  sigla: yup.string().required('Sigla Obrigatória'),
+});
 
 type IUpdateDisciplinaModal = {
   open: boolean;
@@ -37,56 +44,74 @@ export function UpdateDisciplinaModal({
   disciplina_id,
   reloadList,
 }: IUpdateDisciplinaModal) {
-  const [areas, setAreas] = useState<Area[]>([]);
-  const [name, setName] = useState('');
-  const [sigla, setSigla] = useState('');
-  const [areaId, setAreaId] = useState<AreaOption | null>(null);
+  const { startLoading, stopLoading } = useLoading();
+  const { message } = useToast();
+
+  const {
+    handleSubmit,
+    formState: { errors },
+    control,
+    reset,
+  } = useForm<IForm>({
+    resolver: yupResolver(validateForm),
+  });
+
+  const [areas, setAreas] = useState<IArea[]>([]);
+  const [data, setData] = useState<Disciplinas | null>(null);
 
   useEffect(() => {
     async function getAreas() {
-      const response = await api.get('/areas');
-
-      setAreas(response.data);
+      startLoading();
+      try {
+        const response = await api.get('/areas');
+        setAreas(response.data);
+      } catch (error: any) {
+        message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+      } finally {
+        stopLoading();
+      }
     }
 
     getAreas();
-  }, []);
+  }, [message, startLoading, stopLoading]);
 
   useEffect(() => {
     async function getDisciplina() {
-      const response = await api.get(`/disciplina/${disciplina_id}`);
-
-      setName(response.data.name);
-      setSigla(response.data.sigla);
-      setAreaId(response.data.area.name);
+      startLoading();
+      try {
+        const response = await api.get(`/disciplina/${disciplina_id}`);
+        setData(response.data);
+      } catch (error: any) {
+        message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+      } finally {
+        stopLoading();
+      }
     }
 
     getDisciplina();
-  }, [disciplina_id]);
+  }, [disciplina_id, message, startLoading, stopLoading]);
 
-  const areaOptions = useMemo(() => {
-    return areas.map((area) => {
-      return {
-        id: area.id,
-        label: area.name,
-      };
-    });
-  }, [areas]);
-
-  const handleUpdate = useCallback(async () => {
-    if (areaId !== null) {
+  const handleUpdate = useCallback(
+    async (form: IForm) => {
       try {
-        await api.put(`/disciplinas/${disciplina_id}`, { name, sigla, area_id: areaId.id });
+        await api.put(`/disciplinas/${disciplina_id}`, {
+          name: form.name,
+          sigla: form.sigla,
+          area_id: form.area.id,
+        });
 
         if (reloadList) {
           reloadList();
         }
+        message({ mensagem: 'Disciplina Atualizada', tipo: 'success' });
+        reset();
         onClose();
-      } catch {
-        alert('Isso não deu certo');
+      } catch (error: any) {
+        message({ mensagem: error.response?.data || 'Erro interno do servidor', tipo: 'error' });
       }
-    }
-  }, [areaId, disciplina_id, name, onClose, reloadList, sigla]);
+    },
+    [disciplina_id, message, onClose, reloadList, reset],
+  );
 
   return (
     <Dialog onClose={onClose} open={open}>
@@ -110,60 +135,57 @@ export function UpdateDisciplinaModal({
         </IconButton>
       </Box>
       <Box sx={{ padding: '1rem' }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Nome da Disciplina"
-                variant="outlined"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={12}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Sigla da Disciplina"
-                variant="outlined"
-                value={sigla}
-                onChange={(event) => setSigla(event.target.value)}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={12}>
-            <Box>
-              <Autocomplete
-                value={areaId}
-                onChange={(event: any, newValue) => {
-                  setAreaId(newValue);
-                }}
-                disablePortal
-                id="combo-box-demo"
-                options={areaOptions}
-                renderInput={(params1) => <TextField {...params1} label="Area" fullWidth />}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={12}>
-            <Box display="flex" alignItems="center">
-              <Button
-                fullWidth
-                variant="contained"
-                onClick={handleUpdate}
-                sx={{
-                  background: '#0b0f79',
-                  color: '#E5E5E5',
-                  '&:hover': { background: '#020560' },
-                }}
-              >
-                Atualizar
-              </Button>
-            </Box>
-          </Grid>
-        </Grid>
+        {data && (
+          <form onSubmit={handleSubmit(handleUpdate)} noValidate>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <MyTextField
+                  defaultValue={data.name}
+                  name="name"
+                  control={control}
+                  errors={errors.name}
+                  label="Nome da disciplina"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <MyTextField
+                  defaultValue={data.sigla}
+                  name="sigla"
+                  control={control}
+                  errors={errors.sigla}
+                  label="Sigla"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormSelect
+                  defaultValue={data.area}
+                  name="area"
+                  control={control}
+                  options={areas}
+                  optionLabel="name"
+                  optionValue="id"
+                  label="Area"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Box display="flex" alignItems="center" marginBottom="1rem">
+                  <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    sx={{
+                      background: '#020560',
+                      color: '#E5E5E5',
+                      '&:hover': { background: '#020560' },
+                    }}
+                  >
+                    Atualizar
+                  </Button>
+                </Box>
+              </Grid>
+            </Grid>
+          </form>
+        )}
       </Box>
     </Dialog>
   );

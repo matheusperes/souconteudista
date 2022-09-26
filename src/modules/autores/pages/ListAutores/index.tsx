@@ -1,4 +1,4 @@
-import { Add, ArrowForward } from '@mui/icons-material';
+import { ArrowForward } from '@mui/icons-material';
 import {
   Box,
   Breadcrumbs,
@@ -19,6 +19,7 @@ import Edit from '#shared/images/Edit.svg';
 import { api } from '#shared/services/axios';
 
 import { CreateAutoresModal } from '#modules/autores/components/CreateAutoresModal';
+import { DeleteAutor } from '#modules/autores/components/DeleteAutor';
 import { UpdateAutorModal } from '#modules/autores/components/UpdateAutoresModal';
 
 export type IAutores = {
@@ -36,6 +37,8 @@ export function ListAutores() {
 
   const [openCreate, setOpenCreate] = useState(false);
   const [openUpdate, setOpenUpdate] = useState<string | null>(null);
+  const [openDelete, setOpenDelete] = useState<any>(null);
+
   const [autores, setAutores] = useState<IAutores[]>([]);
   const [search, setSearch] = useState('');
 
@@ -75,13 +78,8 @@ export function ListAutores() {
                 color="primary"
                 onClick={async (e) => {
                   e.stopPropagation();
-                  try {
-                    await api.delete(`/autores/${item.id}`);
 
-                    setAutores(autores.filter((autor2) => item.id !== autor2.id));
-                  } catch {
-                    alert('Você não pode excluir esse autor');
-                  }
+                  setOpenDelete(item.id);
                 }}
               >
                 <img src={Delete} alt="Delete" />
@@ -101,7 +99,7 @@ export function ListAutores() {
         },
       },
     ];
-  }, [autores]);
+  }, []);
 
   return (
     <>
@@ -115,6 +113,14 @@ export function ListAutores() {
           open={!!openUpdate}
           onClose={() => setOpenUpdate(null)}
           autor_id={openUpdate}
+          reloadList={() => getAutores()}
+        />
+      )}
+      {!!openDelete && (
+        <DeleteAutor
+          open={!!openDelete}
+          onClose={() => setOpenDelete(null)}
+          autor_id={openDelete}
           reloadList={() => getAutores()}
         />
       )}
@@ -171,9 +177,8 @@ export function ListAutores() {
           <Box sx={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'space-between' }}>
             <Box>
               <Button
-                variant="text"
-                endIcon={<Add />}
-                sx={{ color: '#000' }}
+                variant="contained"
+                sx={{ background: '#020560', '&:hover': { background: '#020560' } }}
                 onClick={() => {
                   setOpenCreate(true);
                 }}

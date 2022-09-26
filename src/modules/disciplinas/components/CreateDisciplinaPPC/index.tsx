@@ -1,5 +1,3 @@
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
-import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CloseIcon from '@mui/icons-material/Close';
 import {
   Dialog,
@@ -11,18 +9,21 @@ import {
   TextField,
   Button,
   Typography,
-  Checkbox,
 } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 
+import { FormSelect } from '#shared/components/Form/FormSelect';
+import { useLoading } from '#shared/hooks/loading';
+import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
 
 type ICreateDisciplinaPPC = {
   open: boolean;
-  semestre?: number;
-  modulo?: number;
-  ppc_id?: string;
+  semestre: number;
+  modulo: number;
+  ppc_id: string;
   onClose: () => void;
   reloadList?: () => void;
 };
@@ -52,11 +53,6 @@ type Versoes = {
   disciplina: Disciplinas;
 };
 
-type VersaosOption = {
-  id: string;
-  label: string;
-};
-
 type Competencias = {
   id: string;
   ppc_id: string;
@@ -71,6 +67,21 @@ type Perfils = {
   perfilNumero: number;
 };
 
+type IForm = {
+  competencia: Array<{ id: string; label: string }>;
+  perfil: Array<{ id: string; label: string }>;
+  versao: { id: string; label: string };
+};
+
+type IFormApi = {
+  ppc_id: string;
+  disciplina_versao_id: string;
+  modulo: number;
+  semestre: number;
+  perfis_id: string[];
+  competencias_id: string[];
+};
+
 export function CreateDisciplinaPPC({
   open,
   onClose,
@@ -79,57 +90,71 @@ export function CreateDisciplinaPPC({
   modulo,
   reloadList,
 }: ICreateDisciplinaPPC) {
+  const { startLoading, stopLoading } = useLoading();
+  const { message } = useToast();
+
+  const { handleSubmit, control, reset } = useForm<IForm>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const params = useParams();
-  const [competencia, setCompetencia] = useState<Competencias[]>([]);
-  const [perfil, setPerfil] = useState<Perfils[]>([]);
+  const [competencias, setCompetencias] = useState<Competencias[]>([]);
+  const [perfis, setPerfis] = useState<Perfils[]>([]);
   const [disciplinas, setDisciplinas] = useState<Disciplinas[]>([]);
   const [disciplinaId, setDisciplinaId] = useState<DisciplinasOption | null>(null);
   const [versao, setVersao] = useState<Versoes[]>([]);
-  const [versaoId, setVersaoId] = useState<VersaosOption | null>(null);
+  // const [versaoId, setVersaoId] = useState<VersaosOption | null>(null);
   const [versaoRender, setVersaoRender] = useState<Versoes | null>(null);
-
-  const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-  const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
   useEffect(() => {
     async function getCompetencia() {
-      const response = await api.get(`/ppc/${ppc_id}`);
-
-      setCompetencia(response.data.competencias);
-      setPerfil(response.data.perfis);
+      startLoading();
+      try {
+        const response = await api.get(`/ppc/${ppc_id}`);
+        setCompetencias(response.data.competencias);
+        setPerfis(response.data.perfis);
+      } catch (error: any) {
+        message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+      } finally {
+        stopLoading();
+      }
     }
 
     getCompetencia();
-  }, [ppc_id]);
+  }, [message, ppc_id, startLoading, stopLoading]);
 
   const CompetenciaOption = useMemo(() => {
-    return competencia?.map((competencia1) => {
+    return competencias?.map((competencia1) => {
       return {
         id: competencia1.id,
         label: String(competencia1.competenciaNumero),
       };
     });
-  }, [competencia]);
+  }, [competencias]);
 
   const PerfilOption = useMemo(() => {
-    return perfil.map((perfil1) => {
+    return perfis.map((perfil1) => {
       return {
         id: perfil1.id,
         label: String(perfil1.perfilNumero),
       };
     });
-  }, [perfil]);
+  }, [perfis]);
 
   useEffect(() => {
     async function getDisciplinas() {
-      const response = await api.get('/disciplinas');
+      startLoading();
+      try {
+        const response = await api.get('/disciplinas');
 
-      setDisciplinas(response.data);
+        setDisciplinas(response.data);
+      } catch (error: any) {
+        message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+      } finally {
+        stopLoading();
+      }
     }
 
     getDisciplinas();
-  }, []);
+  }, [message, startLoading, stopLoading]);
 
   const DisciplinaOption = useMemo(() => {
     return disciplinas.map((disciplina_1) => {
@@ -142,17 +167,24 @@ export function CreateDisciplinaPPC({
 
   useEffect(() => {
     async function getVersao() {
-      if (disciplinaId !== null) {
-        const response = await api.get('/versoes', {
-          params: { disciplina_id: disciplinaId.id },
-        });
+      startLoading();
+      try {
+        if (disciplinaId !== null) {
+          const response = await api.get('/versoes', {
+            params: { disciplina_id: disciplinaId.id },
+          });
 
-        setVersao(response.data);
+          setVersao(response.data);
+        }
+      } catch (error: any) {
+        message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+      } finally {
+        stopLoading();
       }
     }
 
     getVersao();
-  }, [disciplinaId, disciplinaId?.id]);
+  }, [disciplinaId, disciplinaId?.id, message, startLoading, stopLoading]);
 
   const VersaoOption = useMemo(() => {
     return versao.map((versao_1) => {
@@ -163,31 +195,57 @@ export function CreateDisciplinaPPC({
     });
   }, [versao]);
 
-  const handleSelectVersion = useCallback(async (newVersaoId?: string) => {
-    if (newVersaoId) {
-      const response = await api.get(`/versao/${newVersaoId}`);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleSelectVersion = useCallback(
+    async (newVersaoId?: string) => {
+      if (newVersaoId) {
+        try {
+          const response = await api.get(`/versao/${newVersaoId}`);
 
-      setVersaoRender(response.data);
-    } else {
-      setVersaoRender(null);
-    }
-  }, []);
+          setVersaoRender(response.data);
+        } catch (error: any) {
+          message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+        } finally {
+          stopLoading();
+        }
+      } else {
+        setVersaoRender(null);
+      }
+    },
+    [message, stopLoading],
+  );
 
-  const handleCreate = useCallback(async () => {
-    await api.post('/ppc_disciplina_versao', {
-      ppc_id,
-      disciplina_versao_id: versaoId?.id,
-      modulo,
-      semestre,
-    });
+  const handleCreate = useCallback(
+    async (form: IForm) => {
+      const competencias_id = form.competencia?.map((competencia2) => {
+        return competencia2.id;
+      });
+      const perfis_id = form.perfil?.map((perfil) => {
+        return perfil.id;
+      });
+      try {
+        await api.post<any, any, IFormApi>('/ppc_disciplina_versao', {
+          ppc_id,
+          modulo,
+          semestre,
+          competencias_id,
+          perfis_id,
+          disciplina_versao_id: form.versao.id,
+        });
 
-    if (reloadList) {
-      reloadList();
-    }
-    setVersaoId(null);
-    setDisciplinaId(null);
-    onClose();
-  }, [ppc_id, versaoId?.id, modulo, semestre, reloadList, onClose]);
+        if (reloadList) {
+          reloadList();
+        }
+        setDisciplinaId(null);
+        message({ mensagem: 'Disciplina Cadastrada', tipo: 'success' });
+        onClose();
+        reset();
+      } catch (error: any) {
+        message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+      }
+    },
+    [ppc_id, modulo, semestre, reloadList, message, onClose, reset],
+  );
 
   return (
     <Dialog onClose={onClose} open={open} sx={{ left: '-40%' }}>
@@ -209,81 +267,123 @@ export function CreateDisciplinaPPC({
         </IconButton>
       </Box>
       <Box sx={{ padding: '1rem' }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Autocomplete
-              fullWidth
-              value={disciplinaId}
-              onChange={(event: any, newValue) => {
-                setDisciplinaId(newValue);
-              }}
-              disablePortal
-              id="combo-box-demo"
-              options={DisciplinaOption}
-              renderInput={(params1) => <TextField {...params1} label="Disciplina" fullWidth />}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <Autocomplete
-              fullWidth
-              value={versaoId}
-              onChange={(event: any, newValue) => {
-                setVersaoId(newValue);
+        <form onSubmit={handleSubmit(handleCreate)} noValidate>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Autocomplete
+                fullWidth
+                value={disciplinaId}
+                onChange={(event: any, newValue) => {
+                  setDisciplinaId(newValue);
+                }}
+                disablePortal
+                id="combo-box-demo"
+                options={DisciplinaOption}
+                renderInput={(params1) => <TextField {...params1} label="Disciplina" fullWidth />}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormSelect
+                control={control}
+                name="versao"
+                label="Versão"
+                options={VersaoOption}
+                optionLabel="label"
+                optionValue="id"
+              />
+              {/* <Autocomplete
+                fullWidth
+                value={versaoId}
+                onChange={(event: any, newValue) => {
+                  setVersaoId(newValue);
 
-                handleSelectVersion(newValue?.id);
-              }}
-              disablePortal
-              id="combo-box-demo"
-              options={VersaoOption}
-              renderInput={(params1) => <TextField {...params1} label="Versao" fullWidth />}
-            />
-          </Grid>
-          {versaoRender && (
-            <Dialog
-              onClose={() => setVersaoRender(null)}
-              open={!!versaoRender}
-              sx={{ left: '40%' }}
-            >
-              <Box sx={{ display: 'flex', align: 'center', borderBottom: '1px solid #333' }}>
-                <DialogTitle>Detalhes da Versão</DialogTitle>
-                <IconButton
-                  color="primary"
-                  sx={{ marginLeft: 'auto', padding: '1rem' }}
-                  onClick={() => setVersaoRender(null)}
+                  handleSelectVersion(newValue?.id);
+                }}
+                disablePortal
+                id="combo-box-demo"
+                options={VersaoOption}
+                renderInput={(params1) => <TextField {...params1} label="Versao" fullWidth />}
+              /> */}
+            </Grid>
+            {versaoRender && (
+              <Dialog
+                onClose={() => setVersaoRender(null)}
+                open={!!versaoRender}
+                sx={{ left: '40%' }}
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    align: 'center',
+                    borderBottom: '1px solid #333',
+                    background: '#020560',
+                    color: '#E5E5E5',
+                  }}
                 >
-                  <CloseIcon />
-                </IconButton>
-              </Box>
-              <Grid container spacing={2} sx={{ padding: '1rem' }}>
-                <Grid item xs={6}>
-                  <Typography sx={{ textDecoration: 'underline' }}>Disciplina</Typography>
-                  <Typography>{versaoRender.disciplina.name}</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography sx={{ textDecoration: 'underline' }}>Versão</Typography>
-                  <Typography>{versaoRender.disciplina_versao_nome}</Typography>
-                </Grid>
-                <Grid item xs={6} sx={{ marginTop: '1rem' }}>
-                  <Typography sx={{ textDecoration: 'underline' }}>Código</Typography>
-                  <Typography>{versaoRender.codigo}</Typography>
-                </Grid>
-                <Grid item xs={6} sx={{ marginTop: '1rem' }}>
-                  <Typography sx={{ textDecoration: 'underline' }}>Creditos</Typography>
-                  <Typography>{versaoRender.credito_quantidade}</Typography>
-                </Grid>
-                <Grid item xs={12} sx={{ marginTop: '1rem' }}>
-                  <Typography sx={{ textDecoration: 'underline' }}>Ementa</Typography>
-                  <Typography>{versaoRender.ementa}</Typography>
-                </Grid>
-                <Grid item xs={12} sx={{ marginTop: '1rem' }}>
-                  <Typography sx={{ textDecoration: 'underline' }}>Observação</Typography>
-                  <Typography>{versaoRender.observacao}</Typography>
-                </Grid>
-              </Grid>
-            </Dialog>
-          )}
-          <Grid item xs={12}>
-            <Autocomplete
+                  <DialogTitle>Detalhes da Versão</DialogTitle>
+                  <IconButton
+                    color="primary"
+                    sx={{ marginLeft: 'auto', color: '#E5E5E5', padding: '1rem' }}
+                    onClick={() => setVersaoRender(null)}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Box>
+                <Box>
+                  <Box>
+                    <Grid container spacing={2} sx={{ padding: '1rem' }}>
+                      <Grid item xs={6}>
+                        <Typography sx={{ fontSize: '1rem', color: '#7678D7', fontWeight: 'bold' }}>
+                          Disciplina
+                        </Typography>
+                        <Typography>{versaoRender.disciplina.name}</Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography sx={{ fontSize: '1rem', color: '#7678D7', fontWeight: 'bold' }}>
+                          Versão
+                        </Typography>
+                        <Typography>{versaoRender.disciplina_versao_nome}</Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography sx={{ fontSize: '1rem', color: '#7678D7', fontWeight: 'bold' }}>
+                          Código
+                        </Typography>
+                        <Typography>{versaoRender.codigo}</Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography sx={{ fontSize: '1rem', color: '#7678D7', fontWeight: 'bold' }}>
+                          Creditos
+                        </Typography>
+                        <Typography>{versaoRender.credito_quantidade} Créditos</Typography>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Typography sx={{ fontSize: '1rem', color: '#7678D7', fontWeight: 'bold' }}>
+                          Ementa
+                        </Typography>
+                        <Typography sx={{ textAlign: 'justify' }}>{versaoRender.ementa}</Typography>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Typography sx={{ fontSize: '1rem', color: '#7678D7', fontWeight: 'bold' }}>
+                          Observação
+                        </Typography>
+                        <Typography>{versaoRender.observacao}</Typography>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </Box>
+              </Dialog>
+            )}
+            <Grid item xs={12}>
+              <FormSelect
+                control={control}
+                name="competencias"
+                label="Competncias"
+                options={CompetenciaOption}
+                optionLabel="label"
+                optionValue="id"
+                multiple
+              />
+              {/* <Autocomplete
               fullWidth
               multiple
               id="checkboxes-tags-demo"
@@ -302,47 +402,57 @@ export function CreateDisciplinaPPC({
                 </li>
               )}
               renderInput={(params1) => <TextField {...params1} label="Competencias" />}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <Autocomplete
-              fullWidth
-              multiple
-              id="checkboxes-tags-demo"
-              options={PerfilOption}
-              disableCloseOnSelect
-              getOptionLabel={(option) => option.label}
-              renderOption={(props, option, { selected }) => (
-                <li {...props}>
-                  <Checkbox
-                    icon={icon}
-                    checkedIcon={checkedIcon}
-                    style={{ marginRight: 8 }}
-                    checked={selected}
-                  />
-                  {option.label}
-                </li>
-              )}
-              renderInput={(params1) => <TextField {...params1} label="Perfil" />}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <Box>
-              <Button
+            /> */}
+            </Grid>
+            <Grid item xs={12}>
+              <FormSelect
+                control={control}
+                name="perfil"
+                label="Perfil"
+                options={PerfilOption}
+                optionLabel="label"
+                optionValue="id"
+                multiple
+              />
+              {/* <Autocomplete
                 fullWidth
-                variant="contained"
-                onClick={handleCreate}
-                sx={{
-                  background: '#0b0f79',
-                  color: '#E5E5E5',
-                  '&:hover': { background: '#020560' },
-                }}
-              >
-                Inserir
-              </Button>
-            </Box>
+                multiple
+                id="checkboxes-tags-demo"
+                options={PerfilOption}
+                disableCloseOnSelect
+                getOptionLabel={(option) => option.label}
+                renderOption={(props, option, { selected }) => (
+                  <li {...props}>
+                    <Checkbox
+                      icon={icon}
+                      checkedIcon={checkedIcon}
+                      style={{ marginRight: 8 }}
+                      checked={selected}
+                    />
+                    {option.label}
+                  </li>
+                )}
+                renderInput={(params1) => <TextField {...params1} label="Perfil" />}
+              /> */}
+            </Grid>
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center" marginBottom="1rem">
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  sx={{
+                    background: '#020560',
+                    color: '#E5E5E5',
+                    '&:hover': { background: '#020560' },
+                  }}
+                >
+                  Inserir
+                </Button>
+              </Box>
+            </Grid>
           </Grid>
-        </Grid>
+        </form>
       </Box>
     </Dialog>
   );

@@ -33,8 +33,8 @@ export function getSemestres(ppc: InfoPpcs) {
         disciplinas: disciplinas.map<DisciplimaModulo>((disciplina) => {
           return {
             id: disciplina.id,
-            name: disciplina.disciplinaVersao?.disciplina_versao_nome,
-            creditos: disciplina.disciplinaVersao?.credito_quantidade,
+            name: disciplina.versoes?.disciplina.name,
+            creditos: disciplina.versoes?.credito_quantidade,
           };
         }),
         modulo,

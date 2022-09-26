@@ -1,32 +1,19 @@
+import { yupResolver } from '@hookform/resolvers/yup';
 import CloseIcon from '@mui/icons-material/Close';
-import {
-  Dialog,
-  Box,
-  DialogTitle,
-  IconButton,
-  Grid,
-  Autocomplete,
-  TextField,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-} from '@mui/material';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { Dialog, Box, DialogTitle, IconButton, Grid, Button } from '@mui/material';
+import { useState, useEffect, useCallback } from 'react';
+import { useForm } from 'react-hook-form';
+import * as yup from 'yup';
 
+import { FormCheckbox } from '#shared/components/Form/CheckBox';
+import { FormSelect } from '#shared/components/Form/FormSelect';
+import { MyTextField } from '#shared/components/Form/TextField';
+import { useLoading } from '#shared/hooks/loading';
+import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
 
-type Disciplinas = {
-  id: string;
-  name: string;
-  area_id: string;
-  sigla: string;
-};
-
-type DisciplinaOption = {
-  id: string;
-  label: string;
-};
+import { Area } from '#modules/areas/pages/FilteredDisciplinas';
+import { Versoes } from '#modules/versoes/pages/FilteredVersao';
 
 type IUpdateVersaoModal = {
   open: boolean;
@@ -35,86 +22,103 @@ type IUpdateVersaoModal = {
   reloadList?: () => void;
 };
 
+type Disciplinas = {
+  id: string;
+  name: string;
+  area_id: string;
+  sigla: string;
+  area: Area;
+};
+
+type IForm = {
+  codigo: string;
+  credito: number;
+  oferta: boolean;
+  produzido: boolean;
+  ementa: string;
+  observacao: string;
+  disciplina: Disciplinas;
+};
+
+const validateForm = yup.object().shape({
+  codigo: yup.string().required('código Obrigatória'),
+  credito: yup.number().required('Crédito Obrigatório'),
+  ementa: yup.string().required('Ementa Obrigatória'),
+});
+
 export function UpdateVersaoModal({ open, onClose, versao_id, reloadList }: IUpdateVersaoModal) {
-  // const [versaoName, setVersaoName] = useState('');
+  const { startLoading, stopLoading } = useLoading();
+  const { message } = useToast();
+
+  const {
+    handleSubmit,
+    formState: { errors },
+    control,
+    reset,
+  } = useForm<IForm>({
+    resolver: yupResolver(validateForm),
+  });
+
   const [disciplinas, setDisciplinas] = useState<Disciplinas[]>([]);
-  const [disciplinaId, setDisciplinaId] = useState<DisciplinaOption | null>(null);
-  const [codigo, setCodigo] = useState('');
-  const [credito, setCredito] = useState(0);
-  const [ementa, setEmenta] = useState('');
-  const [observacao, setObservacao] = useState('');
-  const [oferta, setOferta] = useState(true);
-  const [produzido, setProduzido] = useState(true);
+  const [data, setData] = useState<Versoes | null>(null);
 
   useEffect(() => {
     async function getDisciplinas() {
-      const response = await api.get('/disciplinas');
-
-      setDisciplinas(response.data);
+      startLoading();
+      try {
+        const response = await api.get('/disciplinas');
+        setDisciplinas(response.data);
+      } catch (error: any) {
+        message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+      } finally {
+        stopLoading();
+      }
     }
 
     getDisciplinas();
-  }, []);
+  }, [message, startLoading, stopLoading]);
 
   useEffect(() => {
     async function getVersao() {
-      const response = await api.get(`/versao/${versao_id}`);
-
-      setDisciplinaId(response.data.disciplina.name);
-      setCodigo(response.data.codigo);
-      setCredito(response.data.credito_quantidade);
-      setEmenta(response.data.ementa);
-      setObservacao(response.data.observacao);
-      setOferta(response.data.em_oferta);
-      setProduzido(response.data.produzido);
-      // setVersaoName(response.data.disciplina_versao_nome);
+      startLoading();
+      try {
+        const response = await api.get(`/versao/${versao_id}`);
+        setData(response.data);
+      } catch (error: any) {
+        message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+      } finally {
+        stopLoading();
+      }
     }
 
     getVersao();
-  }, [versao_id]);
+  }, [message, startLoading, stopLoading, versao_id]);
 
-  const disciplinaOptions = useMemo(() => {
-    return disciplinas.map((disciplina) => {
-      return {
-        id: disciplina.id,
-        label: disciplina.name,
-      };
-    });
-  }, [disciplinas]);
-
-  const handleUpdate = useCallback(async () => {
-    if (disciplinaId !== null) {
+  const handleUpdate = useCallback(
+    async (form: IForm) => {
       try {
         await api.put(`/versoes/${versao_id}`, {
-          disciplina_id: disciplinaId.id,
-          codigo,
-          credito_quantidade: credito,
-          ementa,
-          observacao,
-          em_oferta: oferta,
-          produzido,
+          disciplina_id: form.disciplina.id,
+          codigo: form.codigo,
+          credito_quantidade: form.credito,
+          ementa: form.ementa,
+          observacao: form.observacao,
+          em_oferta: form.oferta,
+          produzido: form.produzido,
         });
 
         if (reloadList) {
           reloadList();
         }
+        message({ mensagem: 'Disciplina Atualizada', tipo: 'success' });
+        reset();
         onClose();
-      } catch {
-        alert('Isso não deu certo');
+      } catch (error: any) {
+        message({ mensagem: error.response?.data || 'Erro interno do servidor', tipo: 'error' });
       }
-    }
-  }, [
-    disciplinaId,
-    versao_id,
-    codigo,
-    credito,
-    ementa,
-    observacao,
-    oferta,
-    produzido,
-    reloadList,
-    onClose,
-  ]);
+    },
+    [versao_id, reloadList, message, reset, onClose],
+  );
 
   return (
     <Dialog onClose={onClose} open={open}>
@@ -136,121 +140,89 @@ export function UpdateVersaoModal({ open, onClose, versao_id, reloadList }: IUpd
         </IconButton>
       </Box>
       <Box sx={{ padding: '1rem' }}>
-        <Grid container spacing={2}>
-          {/* <Grid item xs={12}>
-            <Box>
-              <TextField
-                fullWidth
-                label="Nome da Versão"
-                variant="outlined"
-                value={versaoName}
-                disabled
-              />
-            </Box>
-          </Grid> */}
-          <Grid item xs={12}>
-            <Box>
-              <Autocomplete
-                value={disciplinaId}
-                onChange={(event: any, newValue) => {
-                  setDisciplinaId(newValue);
-                }}
-                disablePortal
-                id="combo-box-demo"
-                options={disciplinaOptions}
-                renderInput={(params1) => <TextField {...params1} label="Disciplina" fullWidth />}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={6}>
-            <Box>
-              <TextField
-                fullWidth
-                label="Codigo"
-                variant="outlined"
-                value={codigo}
-                onChange={(event) => setCodigo(event.target.value)}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={6}>
-            <Box>
-              <TextField
-                fullWidth
-                label="Credito"
-                variant="outlined"
-                value={credito}
-                onChange={(event) => setCredito(Number(event.target.value))}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={6}>
-            <Box>
-              <FormGroup>
-                <FormControlLabel
-                  control={<Checkbox />}
+        {data && (
+          <form onSubmit={handleSubmit(handleUpdate)} noValidate>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <FormSelect
+                  defaultValue={data.disciplina}
+                  name="disciplina"
+                  control={control}
+                  options={disciplinas}
+                  optionLabel="name"
+                  optionValue="id"
+                  label="Disciplina"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <MyTextField
+                  defaultValue={data.codigo}
+                  name="codigo"
+                  control={control}
+                  errors={errors.codigo}
+                  label="Código"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <MyTextField
+                  defaultValue={data.credito_quantidade}
+                  name="credito"
+                  control={control}
+                  errors={errors.credito}
+                  label="Créditos"
+                  inputProps={{ inputMode: 'numeric' }}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <FormCheckbox
+                  defaultValue={data.em_oferta}
+                  name="oferta"
+                  control={control}
                   label="Em Oferta"
-                  checked={oferta}
-                  onChange={() => setOferta(!oferta)}
                 />
-              </FormGroup>
-            </Box>
-          </Grid>
-          <Grid item xs={6}>
-            <Box>
-              <FormGroup>
-                <FormControlLabel
-                  control={<Checkbox />}
+              </Grid>
+              <Grid item xs={6}>
+                <FormCheckbox
+                  defaultValue={data.produzido}
+                  name="produzido"
+                  control={control}
                   label="Produzido"
-                  checked={produzido}
-                  onChange={() => setProduzido(!produzido)}
                 />
-              </FormGroup>
-            </Box>
-          </Grid>
-          <Grid item xs={12}>
-            <Box>
-              <TextField
-                fullWidth
-                id="outlined-textarea"
-                label="Ementa"
-                placeholder="Ementa"
-                value={ementa}
-                onChange={(event) => setEmenta(event.target.value)}
-                multiline
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={12}>
-            <Box>
-              <TextField
-                fullWidth
-                placeholder="Observção"
-                label="Observção"
-                variant="outlined"
-                value={observacao}
-                onChange={(event) => setObservacao(event.target.value)}
-                multiline
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={12}>
-            <Box display="flex" alignItems="center">
-              <Button
-                fullWidth
-                variant="contained"
-                onClick={handleUpdate}
-                sx={{
-                  background: '#0b0f79',
-                  color: '#E5E5E5',
-                  '&:hover': { background: '#020560' },
-                }}
-              >
-                Atualizar
-              </Button>
-            </Box>
-          </Grid>
-        </Grid>
+              </Grid>
+              <Grid item xs={12}>
+                <MyTextField
+                  defaultValue={data.ementa}
+                  name="ementa"
+                  control={control}
+                  errors={errors.ementa}
+                  label="Ementa"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <MyTextField
+                  defaultValue={data.observacao}
+                  name="observacao"
+                  control={control}
+                  label="Observação"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  sx={{
+                    background: '#020560',
+                    color: '#E5E5E5',
+                    '&:hover': { background: '#020560' },
+                  }}
+                >
+                  Inserir
+                </Button>
+              </Grid>
+            </Grid>
+          </form>
+        )}
       </Box>
     </Dialog>
   );

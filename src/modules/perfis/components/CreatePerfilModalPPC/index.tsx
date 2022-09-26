@@ -1,7 +1,12 @@
+import { yupResolver } from '@hookform/resolvers/yup';
 import CloseIcon from '@mui/icons-material/Close';
-import { Dialog, Box, DialogTitle, IconButton, Grid, TextField, Button } from '@mui/material';
-import { useCallback, useState } from 'react';
+import { Dialog, Box, DialogTitle, IconButton, Grid, Button } from '@mui/material';
+import { useCallback } from 'react';
+import { useForm } from 'react-hook-form';
+import * as yup from 'yup';
 
+import { MyTextField } from '#shared/components/Form/TextField';
+import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
 
 type ICreatePerfilModalPPC = {
@@ -11,24 +16,50 @@ type ICreatePerfilModalPPC = {
   ppc_id: string;
 };
 
+type IForm = {
+  ppc_id: string;
+  perfil: string;
+  perfilNumero: number;
+};
+
+const validateForm = yup.object().shape({
+  perfil: yup.string().required('Perfil precisa ter um nome'),
+  perfilNumero: yup.number().required('Perfil precisa ter um número'),
+});
+
 export function CreatePerfilModalPPC({ reloadList, open, onClose, ppc_id }: ICreatePerfilModalPPC) {
-  const [perfil, SetPerfil] = useState('');
-  const [perfilNumero, setPerfilNumero] = useState(0);
+  const { message } = useToast();
 
-  const handleCreate = useCallback(async () => {
-    await api.post('/perfis', {
-      perfil,
-      perfilNumero,
-      ppc_id,
-    });
+  const {
+    handleSubmit,
+    formState: { errors },
+    control,
+    reset,
+  } = useForm<IForm>({
+    resolver: yupResolver(validateForm),
+  });
 
-    if (reloadList) {
-      reloadList();
-    }
-    SetPerfil('');
-    setPerfilNumero(0);
-    onClose();
-  }, [perfil, perfilNumero, ppc_id, reloadList, onClose]);
+  const handleCreate = useCallback(
+    async (form: IForm) => {
+      try {
+        await api.post('/perfis', {
+          perfil: form.perfil,
+          perfilNumero: form.perfilNumero,
+          ppc_id,
+        });
+
+        if (reloadList) {
+          reloadList();
+        }
+        message({ mensagem: 'Perfil Cadastrado', tipo: 'success' });
+        reset();
+        onClose();
+      } catch (error: any) {
+        message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+      }
+    },
+    [ppc_id, reloadList, message, reset, onClose],
+  );
 
   return (
     <Dialog onClose={onClose} open={open}>
@@ -50,48 +81,36 @@ export function CreatePerfilModalPPC({ reloadList, open, onClose, ppc_id }: ICre
         </IconButton>
       </Box>
       <Box sx={{ padding: '1rem' }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Perfil"
-                variant="outlined"
-                multiline
-                value={perfil}
-                onChange={(event) => SetPerfil(event.target.value)}
+        <form onSubmit={handleSubmit(handleCreate)} noValidate>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <MyTextField name="perfil" control={control} errors={errors.perfil} label="Perfil" />
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField
+                name="perfilNumero"
+                control={control}
+                errors={errors.perfilNumero}
+                label="Número do perfil"
+                inputProps={{ inputMode: 'numeric' }}
               />
-            </Box>
-          </Grid>
-          <Grid item xs={12}>
-            <Box>
-              <TextField
-                fullWidth
-                label="Número"
-                variant="outlined"
-                multiline
-                value={perfilNumero}
-                onChange={(event) => setPerfilNumero(Number(event.target.value))}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={12}>
-            <Box>
+            </Grid>
+            <Grid item xs={12} sx={{ marginBottom: '1rem' }}>
               <Button
-                fullWidth
-                variant="contained"
-                onClick={handleCreate}
                 sx={{
                   background: '#0b0f79',
                   color: '#E5E5E5',
                   '&:hover': { background: '#020560' },
                 }}
+                fullWidth
+                variant="contained"
+                type="submit"
               >
                 Inserir
               </Button>
-            </Box>
+            </Grid>
           </Grid>
-        </Grid>
+        </form>
       </Box>
     </Dialog>
   );
