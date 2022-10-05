@@ -1,10 +1,10 @@
 import { ArrowForward, FileDownloadOutlined } from '@mui/icons-material';
 import {
   Box,
-  Breadcrumbs,
   Typography,
   Stack,
   Button,
+  Breadcrumbs,
   TextField,
   ButtonGroup,
   IconButton,
@@ -23,36 +23,43 @@ import Delete from '#shared/images/Delete.svg';
 import Edit from '#shared/images/Edit.svg';
 import { api } from '#shared/services/axios';
 
-import { CreateVersaoModal } from '#modules/versoes/components/CreateVersaoModal';
-import { DeleteVersão } from '#modules/versoes/components/DeleteVersao';
-import { UpdateVersaoModal } from '#modules/versoes/components/UpdateVersaoModal';
+import { CreateInstituicaoModal } from '#modules/instituicoes/components/CreateInstituicoes';
+import { DeleteInstituicaoModal } from '#modules/instituicoes/components/DeleteInstituicao';
+import { UpdateInstituicaoModal } from '#modules/instituicoes/components/UpdateInstituicoes';
 
-import { Versoes } from '../FilteredVersao';
+export type IInstituicoes = {
+  id: string;
+  name: string;
+  description: string;
+  sigla: string;
+  link: string;
+  padrao: boolean;
+};
 
-export function ListVersoes() {
+export function ListInstituicoes() {
   const { setTitle } = useTitle();
-  const navigate = useNavigate();
   const { message } = useToast();
+  const navigate = useNavigate();
   const { startLoading, stopLoading } = useLoading();
   const { instituicao } = useInstitution();
 
-  const [openCreate, setOpenCreate] = useState(false);
-  const [openUpdateVersao, setOpenUpdateVersao] = useState<string | null>(null);
-  const [openDelete, setOpenDelete] = useState<any>(null);
   const [search, setSearch] = useState('');
-  const [versoes, setVersoes] = useState<Versoes[]>([]);
+  const [openCreate, setOpenCreate] = useState(false);
+  const [openUpdate, setOpenUpdate] = useState<any>(null);
+  const [openDelete, setOpenDelete] = useState<any>(null);
+  const [instituicoes, setInstituicoes] = useState<IInstituicoes[]>([]);
 
   useEffect(() => {
-    setTitle('Versões');
+    setTitle('Instituições');
   }, [setTitle]);
 
-  const getVersoes = useCallback(async () => {
+  const getInstituicoes = useCallback(async () => {
     startLoading();
     try {
-      const response = await api.get('/versoes', {
+      const response = await api.get('/instituicoes', {
         params: { instituicao_id: instituicao?.id },
       });
-      setVersoes(response.data);
+      setInstituicoes(response.data);
     } catch (error: any) {
       message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
     } finally {
@@ -61,23 +68,20 @@ export function ListVersoes() {
   }, [instituicao?.id, message, startLoading, stopLoading]);
 
   useEffect(() => {
-    getVersoes();
-  }, [getVersoes]);
+    getInstituicoes();
+  }, [getInstituicoes]);
 
-  const filteredVersoes = useMemo(() => {
-    return versoes.filter((versao) => {
-      return versao.disciplina_versao_nome.toLowerCase().includes(search.toLowerCase());
+  const filteredInstituicao = useMemo(() => {
+    return instituicoes.filter((instituicao1) => {
+      return instituicao1.name.toLowerCase().includes(search.toLowerCase());
     });
-  }, [versoes, search]);
+  }, [instituicoes, search]);
 
-  const colunas = useMemo<Col<Versoes>[]>(() => {
+  const colunas = useMemo<Col<IInstituicoes>[]>(() => {
     return [
-      { name: 'Sigla', propriedadeName: 'disciplina_versao_nome' },
-      { name: 'Disciplina', personalizarCol: (item) => item.disciplina.name },
-      { name: 'Código', propriedadeName: 'codigo' },
-      { name: 'Creditos', propriedadeName: 'credito_quantidade' },
-      { name: 'Oferta', personalizarCol: (item) => (item.em_oferta ? 'Sim' : 'Não') },
-      { name: 'Produzido', personalizarCol: (item) => (item.produzido ? 'Sim' : 'Não') },
+      { name: 'Instituição', propriedadeName: 'name' },
+      { name: 'Sigla', propriedadeName: 'sigla' },
+      { name: 'Descrição', propriedadeName: 'description' },
       {
         name: 'Ações',
         personalizarCol: (item) => {
@@ -98,7 +102,7 @@ export function ListVersoes() {
                 onClick={async (e) => {
                   e.stopPropagation();
 
-                  setOpenUpdateVersao(item.id);
+                  setOpenUpdate(item.id);
                 }}
               >
                 <img src={Edit} alt="Edit" />
@@ -112,49 +116,43 @@ export function ListVersoes() {
 
   const headers = [
     { label: 'id', key: 'id' },
-    { label: 'Nome da Disciplina', key: 'disciplina' },
-    { label: 'Nome da Versao', key: 'versao' },
-    { label: 'Codigo', key: 'codigo' },
-    { label: 'Creditos', key: 'creditos' },
-    { label: 'Oferta', key: 'oferta' },
-    { label: 'Produzido', key: 'produzido' },
-    { label: 'Ementa', key: 'ementa' },
-    { label: 'Observacao', key: 'observacao' },
+    { label: 'Instituição', key: 'name' },
+    { label: 'Descricao', key: 'description' },
+    { label: 'Sigla', key: 'sigla' },
+    { label: 'Ativo', key: 'padrao' },
+    { label: 'Link', key: 'link' },
   ];
 
-  const data = versoes.map((versao) => ({
-    id: versao.id,
-    disciplina: versao.disciplina.name,
-    versao: versao.disciplina_versao_nome,
-    codigo: versao.codigo,
-    creditos: versao.credito_quantidade,
-    oferta: versao.em_oferta ? 'sim' : 'nao',
-    produzido: versao.produzido ? 'sim' : 'nao',
-    ementa: versao.ementa,
-    observacao: versao.observacao,
+  const data = instituicoes.map((instituicao2) => ({
+    id: instituicao2.id,
+    name: instituicao2.name,
+    description: instituicao2.description,
+    sigla: instituicao2.sigla,
+    padrao: instituicao2.padrao,
+    link: instituicao2.link,
   }));
 
   return (
     <>
-      <CreateVersaoModal
+      <CreateInstituicaoModal
         open={openCreate}
         onClose={() => setOpenCreate(false)}
-        updateListVersoes={(versao2) => setVersoes([...versoes, versao2])}
+        updateListInstituicao={(inst) => setInstituicoes([...instituicoes, inst])}
       />
-      {!!openUpdateVersao && (
-        <UpdateVersaoModal
-          open={!!openUpdateVersao}
-          onClose={() => setOpenUpdateVersao(null)}
-          versao_id={openUpdateVersao}
-          reloadList={() => getVersoes()}
+      {openUpdate && (
+        <UpdateInstituicaoModal
+          open={!!openUpdate}
+          onClose={() => setOpenUpdate(null)}
+          instituicao1_id={openUpdate}
+          reloadList={() => getInstituicoes()}
         />
       )}
-      {!!openDelete && (
-        <DeleteVersão
+      {openDelete && (
+        <DeleteInstituicaoModal
           open={!!openDelete}
           onClose={() => setOpenDelete(null)}
-          versao_id={openDelete}
-          reloadList={() => getVersoes()}
+          instituicao1_id={openDelete}
+          reloadList={() => getInstituicoes()}
         />
       )}
       <Box className="Pagina">
@@ -162,7 +160,7 @@ export function ListVersoes() {
           <Box>
             <Breadcrumbs separator={<ArrowForward fontSize="small" />}>
               <Link to="/">Home</Link>
-              <Typography>Versões</Typography>
+              <Typography>Instituições</Typography>
             </Breadcrumbs>
           </Box>
           <Box
@@ -175,7 +173,14 @@ export function ListVersoes() {
           >
             <Stack direction="row" spacing={8}>
               <Button
-                sx={{ color: '#000', fontWeight: 'bold' }}
+                sx={{
+                  color: '#020560',
+                  fontWeight: 'bold',
+                  textDecoration: 'underline 2px',
+                  textUnderlineOffset: '10px',
+                  borderRadius: '50px',
+                  '&:hover': { textDecoration: 'underline 2px', background: '#E5E5E5' },
+                }}
                 onClick={() => navigate('/instituicoes')}
               >
                 Instituições
@@ -190,14 +195,7 @@ export function ListVersoes() {
                 Disciplinas
               </Button>
               <Button
-                sx={{
-                  color: '#020560',
-                  fontWeight: 'bold',
-                  textDecoration: 'underline 2px',
-                  textUnderlineOffset: '10px',
-                  borderRadius: '50px',
-                  '&:hover': { textDecoration: 'underline 2px', background: '#E5E5E5' },
-                }}
+                sx={{ color: '#000', fontWeight: 'bold' }}
                 onClick={() => navigate('/versoes')}
               >
                 Versões de Disciplinas
@@ -222,7 +220,7 @@ export function ListVersoes() {
                   setOpenCreate(true);
                 }}
               >
-                Adicionar Versão da Disciplina
+                Adicionar Instituição
               </Button>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', marginLeft: 'auto' }}>
@@ -246,7 +244,7 @@ export function ListVersoes() {
             }}
           >
             <Box />
-            <CSVLink data={data} headers={headers} filename="versoes.csv">
+            <CSVLink data={data} headers={headers} filename="instituicoes.csv">
               <Tooltip title="Export CSV" placement="left">
                 <IconButton>
                   <FileDownloadOutlined />
@@ -255,13 +253,7 @@ export function ListVersoes() {
             </CSVLink>
           </Box>
           <Box sx={{ marginTop: '1rem' }}>
-            <StyledTable
-              colunas={colunas}
-              conteudo={filteredVersoes}
-              navegationLine={(item) =>
-                navigate(`/disciplinas/${item.disciplina_id}/versao/${item.id}`)
-              }
-            />
+            <StyledTable colunas={colunas} conteudo={filteredInstituicao} />
           </Box>
         </Box>
       </Box>

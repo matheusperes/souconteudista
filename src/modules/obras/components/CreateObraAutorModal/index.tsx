@@ -14,7 +14,6 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { api } from '#shared/services/axios';
 
 import { IObras, IObrasAutor } from '../../pages/ListObras';
-import { ObraOption } from '../CreateObrasModal';
 
 type ICreateObraAutorModal = {
   updateListObrasAutor: (obraAutor: IObrasAutor) => void;
@@ -29,6 +28,11 @@ export type IAutores = {
   last_name: string;
   quote: string;
   nationality: string;
+};
+
+export type ObraOption = {
+  id: string;
+  label: string;
 };
 
 export function CreateObraAutorModal({

@@ -1,4 +1,4 @@
-import { ArrowForward } from '@mui/icons-material';
+import { ArrowForward, FileDownloadOutlined } from '@mui/icons-material';
 import {
   Box,
   Breadcrumbs,
@@ -7,12 +7,15 @@ import {
   Divider,
   IconButton,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CSVLink } from 'react-csv';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { Col, StyledTable } from '#shared/components/StyledTable';
+import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
 import { useToast } from '#shared/hooks/toast';
@@ -44,6 +47,7 @@ export function FilteredDisciplinas() {
   const params = useParams();
   const { message } = useToast();
   const { startLoading, stopLoading } = useLoading();
+  const { instituicao } = useInstitution();
 
   const [disciplinas, setDisciplinas] = useState<IDisciplinas[]>([]);
   const [area, setArea] = useState<Area>();
@@ -60,7 +64,7 @@ export function FilteredDisciplinas() {
     startLoading();
     try {
       const response = await api.get('/disciplinas', {
-        params: { area_id: params?.id },
+        params: { area_id: params?.id, instituicao_id: instituicao?.id },
       });
       setDisciplinas(response.data);
     } catch (error: any) {
@@ -68,7 +72,7 @@ export function FilteredDisciplinas() {
     } finally {
       stopLoading();
     }
-  }, [message, params?.id, startLoading, stopLoading]);
+  }, [instituicao?.id, message, params?.id, startLoading, stopLoading]);
 
   useEffect(() => {
     getDisciplinas();
@@ -132,6 +136,24 @@ export function FilteredDisciplinas() {
       return disciplina.name.toLowerCase().includes(search.toLowerCase());
     });
   }, [disciplinas, search]);
+
+  const headers = [
+    { label: 'id', key: 'id' },
+    { label: 'Nome da Disciplina', key: 'disciplina' },
+    { label: 'Sigla', key: 'sigla' },
+    { label: 'Area id', key: 'area_id' },
+    { label: 'Nome da Area', key: 'area_name' },
+    { label: 'Descricao da Area', key: 'area_description' },
+  ];
+
+  const data = disciplinas.map((disciplina) => ({
+    id: disciplina.id,
+    disciplina: disciplina.name,
+    sigla: disciplina.sigla,
+    area_id: disciplina.area_id,
+    area_name: disciplina.area.name,
+    area_description: disciplina.area.description,
+  }));
 
   return (
     <>
@@ -198,6 +220,23 @@ export function FilteredDisciplinas() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </Box>
+          </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              mt: '0.5rem',
+            }}
+          >
+            <Box />
+            <CSVLink data={data} headers={headers} filename={`${area?.name}-disciplinas.csv`}>
+              <Tooltip title="Export CSV" placement="left">
+                <IconButton>
+                  <FileDownloadOutlined />
+                </IconButton>
+              </Tooltip>
+            </CSVLink>
           </Box>
           <Box sx={{ marginTop: '1rem' }}>
             <StyledTable

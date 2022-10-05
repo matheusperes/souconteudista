@@ -1,7 +1,7 @@
 import { ArrowForward } from '@mui/icons-material';
 import { Box, Breadcrumbs, Grid, IconButton, Typography } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
@@ -11,6 +11,26 @@ import { api } from '#shared/services/axios';
 
 import { InfoPpcs } from '#modules/ppcs/pages/ListPpcInfo';
 import { toRoman } from '#modules/ppcs/pages/ListPpcInfo/roman';
+
+type DisciplinaCompetencia = {
+  id: string;
+  ppc_id: string;
+  disciplina_versao_id: string;
+  modulo: number;
+  semestre: number;
+  versoes: {
+    id: string;
+    disciplina_id: string;
+    disciplina_versao_nome: string;
+    codigo: string;
+    credito_quantidade: string;
+    ementa: string;
+    observacao: string;
+    em_oferta: boolean;
+    produzido: boolean;
+    disciplina: { id: string; name: string; sigla: string; area_id: string };
+  };
+};
 
 type Versoes = {
   id: string;
@@ -59,11 +79,13 @@ type ICompetencia = {
 
 export function FilteredCompetencia() {
   const params = useParams();
+  const navigate = useNavigate();
   const { setTitle } = useTitle();
   const { message } = useToast();
   const { startLoading, stopLoading } = useLoading();
 
   const [competencia, setCompetencia] = useState<ICompetencia>();
+  const [disciplinaCompetencia, setDisciplinaCompetencia] = useState<DisciplinaCompetencia[]>([]);
   const [ppc, setPpc] = useState<InfoPpcs>();
 
   useEffect(() => {
@@ -85,6 +107,22 @@ export function FilteredCompetencia() {
   useEffect(() => {
     getCompetencia();
   }, [getCompetencia]);
+
+  const getDisciplinaCompetencia = useCallback(async () => {
+    startLoading();
+    try {
+      const response = await api.get(`/ppc_disciplina_versao/competencia/${params?.id}`);
+      setDisciplinaCompetencia(response.data);
+    } catch (error: any) {
+      message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+    } finally {
+      stopLoading();
+    }
+  }, [message, params?.id, startLoading, stopLoading]);
+
+  useEffect(() => {
+    getDisciplinaCompetencia();
+  }, [getDisciplinaCompetencia]);
 
   const getPpc = useCallback(async () => {
     startLoading();
@@ -124,13 +162,22 @@ export function FilteredCompetencia() {
                   competencia?.competencia
                 }`}</Typography>
 
-                <Typography sx={{}} />
+                <Typography />
               </Box>
             </Box>
             <Box sx={{ padding: '1rem' }}>
               <Grid container spacing={2}>
-                {competencia.ppc.ppcDisciplinaVersoes?.map((versao) => (
-                  <Grid item xs={3}>
+                {disciplinaCompetencia.map((versao) => (
+                  <Grid
+                    item
+                    xs={3}
+                    key={versao.id}
+                    onClick={() =>
+                      navigate(
+                        `/disciplinas/${versao.versoes.disciplina_id}/versao/${versao.versoes.id}`,
+                      )
+                    }
+                  >
                     <Box
                       sx={{
                         display: 'flex',
@@ -146,7 +193,7 @@ export function FilteredCompetencia() {
                       >
                         <img src={DisciplinaIcon} alt="Icon" />
                       </IconButton>
-                      <Typography>{versao.versoes.disciplina_versao_nome}</Typography>
+                      <Typography>{versao.versoes.disciplina.name}</Typography>
                     </Box>
                   </Grid>
                 ))}

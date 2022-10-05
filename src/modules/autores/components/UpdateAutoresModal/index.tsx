@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 
 import { MyTextField } from '#shared/components/Form/TextField';
+import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
@@ -44,6 +45,7 @@ type IUpdateAutorModal = {
 export function UpdateAutorModal({ open, onClose, autor_id, reloadList }: IUpdateAutorModal) {
   const { startLoading, stopLoading } = useLoading();
   const { message } = useToast();
+  const { instituicao } = useInstitution();
 
   const {
     handleSubmit,
@@ -76,6 +78,7 @@ export function UpdateAutorModal({ open, onClose, autor_id, reloadList }: IUpdat
     async (form: IForm) => {
       try {
         await api.put(`/autores/${autor_id}`, {
+          instituicao_id: instituicao?.id,
           first_name: form.primeiroNome,
           middle_name: form.nomeMeio,
           last_name: form.ultimoNome,
@@ -94,7 +97,7 @@ export function UpdateAutorModal({ open, onClose, autor_id, reloadList }: IUpdat
         message({ mensagem: error.response?.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [autor_id, reloadList, onClose, message, reset],
+    [autor_id, instituicao?.id, reloadList, onClose, message, reset],
   );
 
   return (

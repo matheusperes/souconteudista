@@ -8,6 +8,7 @@ import * as yup from 'yup';
 import { FormCheckbox } from '#shared/components/Form/CheckBox';
 import { FormSelect } from '#shared/components/Form/FormSelect';
 import { MyTextField } from '#shared/components/Form/TextField';
+import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
@@ -54,6 +55,7 @@ export type DisciplinaOption = {
 export function CreateVersaoModal({ updateListVersoes, open, onClose }: ICreateVersaoModal) {
   const { startLoading, stopLoading } = useLoading();
   const { message } = useToast();
+  const { instituicao } = useInstitution();
 
   const {
     handleSubmit,
@@ -70,7 +72,9 @@ export function CreateVersaoModal({ updateListVersoes, open, onClose }: ICreateV
     async function getDisciplinas() {
       startLoading();
       try {
-        const response = await api.get('/disciplinas');
+        const response = await api.get('/disciplinas', {
+          params: { instituicao_id: instituicao?.id },
+        });
         setDisciplinas(response.data);
       } catch (error: any) {
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
@@ -80,12 +84,13 @@ export function CreateVersaoModal({ updateListVersoes, open, onClose }: ICreateV
     }
 
     getDisciplinas();
-  }, [message, startLoading, stopLoading]);
+  }, [instituicao?.id, message, startLoading, stopLoading]);
 
   const handleCreate = useCallback(
     async (form: IForm) => {
       try {
         const response = await api.post('/versoes', {
+          instituicao_id: instituicao?.id,
           disciplina_id: form.disciplina.id,
           codigo: form.codigo,
           credito_quantidade: form.credito,
@@ -102,7 +107,7 @@ export function CreateVersaoModal({ updateListVersoes, open, onClose }: ICreateV
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [message, onClose, reset, updateListVersoes],
+    [instituicao?.id, message, onClose, reset, updateListVersoes],
   );
 
   return (

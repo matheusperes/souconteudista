@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 
 import { MyTextField } from '#shared/components/Form/TextField';
+import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
@@ -32,6 +33,8 @@ const validateForm = yup.object().shape({
 export function UpdateAreaModal({ open, onClose, area_id, reloadList }: IUpdateAreaModal) {
   const { startLoading, stopLoading } = useLoading();
   const { message } = useToast();
+  const { instituicao } = useInstitution();
+
   const [data, setData] = useState<IArea | null>(null);
 
   const {
@@ -62,7 +65,11 @@ export function UpdateAreaModal({ open, onClose, area_id, reloadList }: IUpdateA
   const handleUpdate = useCallback(
     async (form: IForm) => {
       try {
-        await api.put(`/areas/${area_id}`, { name: form.name, description: form.description });
+        await api.put(`/areas/${area_id}`, {
+          instituicao_id: instituicao?.id,
+          name: form.name,
+          description: form.description,
+        });
 
         if (reloadList) {
           reloadList();
@@ -74,7 +81,7 @@ export function UpdateAreaModal({ open, onClose, area_id, reloadList }: IUpdateA
         message({ mensagem: error.response?.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [area_id, reloadList, message, reset, onClose],
+    [area_id, instituicao?.id, reloadList, message, reset, onClose],
   );
 
   return (

@@ -1,51 +1,49 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import CloseIcon from '@mui/icons-material/Close';
 import { Dialog, Box, DialogTitle, IconButton, Grid, Button } from '@mui/material';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 
+import { FormCheckbox } from '#shared/components/Form/CheckBox';
 import { MyTextField } from '#shared/components/Form/TextField';
-import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
 
-type IUpdateCompetenciaModal = {
-  reloadList?: () => void;
+import { IInstituicoes } from '#modules/instituicoes/pages/ListInstituicoes';
+
+type IUpdateInstituicaoModal = {
   open: boolean;
   onClose: () => void;
-  competencia_id: string;
-};
-
-type Competencia = {
-  ppc_id: string;
-  competencia: string;
-  competenciaNumero: number;
+  instituicao1_id: string;
+  reloadList: () => void;
 };
 
 type IForm = {
-  ppc_id: string;
-  competencia: string;
-  competenciaNumero: number;
+  name: string;
+  sigla: string;
+  description: string;
+  link: string;
+  padrao: boolean;
 };
-
 const validateForm = yup.object().shape({
-  competencia: yup.string().required('Competência precisa ter um nome'),
-  competenciaNumero: yup.number().required('Competência precisa ter um número'),
+  name: yup.string().required('Instituição precisa ter um nome'),
+  description: yup.string().required('Instituição precisa ter uma descrição'),
+  sigla: yup.string().required('Instituição precisa ter uma sigla'),
+  link: yup.string().required('Instituição precisa ter um link'),
 });
 
-export function UpdateCompetenciaModal({
-  reloadList,
+export function UpdateInstituicaoModal({
   open,
   onClose,
-  competencia_id,
-}: IUpdateCompetenciaModal) {
+  instituicao1_id,
+  reloadList,
+}: IUpdateInstituicaoModal) {
   const { startLoading, stopLoading } = useLoading();
   const { message } = useToast();
-  const { instituicao } = useInstitution();
 
-  const [data, setData] = useState<Competencia | null>(null);
+  const [data, setData] = useState<IInstituicoes | null>(null);
 
   const {
     handleSubmit,
@@ -57,10 +55,10 @@ export function UpdateCompetenciaModal({
   });
 
   useEffect(() => {
-    async function getCompetencia() {
+    async function getInstituicao() {
       startLoading();
       try {
-        const response = await api.get(`/competencia/${competencia_id}`);
+        const response = await api.get(`/instituicao/${instituicao1_id}`);
         setData(response.data);
       } catch (error: any) {
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
@@ -68,29 +66,32 @@ export function UpdateCompetenciaModal({
         stopLoading();
       }
     }
-    getCompetencia();
-  }, [competencia_id, message, startLoading, stopLoading]);
+
+    getInstituicao();
+  }, [instituicao1_id, message, startLoading, stopLoading]);
 
   const handleUpdate = useCallback(
     async (form: IForm) => {
       try {
-        await api.put(`/competencias/${competencia_id}`, {
-          instituicao_id: instituicao?.id,
-          competencia: form.competencia,
-          competenciaNumero: form.competenciaNumero,
+        await api.put(`/instituicoes/${instituicao1_id}`, {
+          name: form.name,
+          description: form.description,
+          sigla: form.sigla,
+          link: form.link,
+          padrao: form.padrao,
         });
 
         if (reloadList) {
           reloadList();
         }
-        message({ mensagem: 'Competência Atualizada', tipo: 'success' });
+        message({ mensagem: 'Instituição Atualizada', tipo: 'success' });
         reset();
         onClose();
       } catch (error: any) {
         message({ mensagem: error.response?.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [competencia_id, instituicao?.id, reloadList, message, reset, onClose],
+    [instituicao1_id, reloadList, message, reset, onClose],
   );
 
   return (
@@ -104,7 +105,7 @@ export function UpdateCompetenciaModal({
         }}
       >
         <DialogTitle sx={{ background: '#020560', color: '#E5E5E5' }}>
-          Editar Competencia
+          Editar Instituição
         </DialogTitle>
         <IconButton
           color="primary"
@@ -120,22 +121,46 @@ export function UpdateCompetenciaModal({
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <MyTextField
-                  name="competencia"
-                  defaultValue={data.competencia}
+                  defaultValue={data.name}
+                  name="name"
                   control={control}
-                  errors={errors.competencia}
-                  label="Competencia"
+                  errors={errors.name}
+                  label="Nome da Instituição"
                 />
               </Grid>
               <Grid item xs={12}>
                 <MyTextField
-                  multiline
-                  defaultValue={data.competenciaNumero}
-                  name="competenciaNumero"
+                  defaultValue={data.description}
+                  name="description"
                   control={control}
-                  errors={errors.competenciaNumero}
-                  label="Número da competencia"
-                  inputProps={{ inputMode: 'numeric' }}
+                  errors={errors.description}
+                  label="Descrição"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <MyTextField
+                  defaultValue={data.sigla}
+                  name="sigla"
+                  control={control}
+                  errors={errors.sigla}
+                  label="Sigla"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <MyTextField
+                  defaultValue={data.link}
+                  name="link"
+                  control={control}
+                  errors={errors.link}
+                  label="Link"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <FormCheckbox
+                  defaultValue={data.padrao}
+                  name="padrao"
+                  control={control}
+                  label="Instituição Padrão"
                 />
               </Grid>
               <Grid item xs={12} sx={{ marginBottom: '1rem' }}>
@@ -149,7 +174,7 @@ export function UpdateCompetenciaModal({
                   variant="contained"
                   type="submit"
                 >
-                  Atualizar
+                  Inserir
                 </Button>
               </Grid>
             </Grid>

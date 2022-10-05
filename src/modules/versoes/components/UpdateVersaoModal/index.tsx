@@ -8,6 +8,7 @@ import * as yup from 'yup';
 import { FormCheckbox } from '#shared/components/Form/CheckBox';
 import { FormSelect } from '#shared/components/Form/FormSelect';
 import { MyTextField } from '#shared/components/Form/TextField';
+import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
@@ -49,6 +50,7 @@ const validateForm = yup.object().shape({
 export function UpdateVersaoModal({ open, onClose, versao_id, reloadList }: IUpdateVersaoModal) {
   const { startLoading, stopLoading } = useLoading();
   const { message } = useToast();
+  const { instituicao } = useInstitution();
 
   const {
     handleSubmit,
@@ -66,7 +68,9 @@ export function UpdateVersaoModal({ open, onClose, versao_id, reloadList }: IUpd
     async function getDisciplinas() {
       startLoading();
       try {
-        const response = await api.get('/disciplinas');
+        const response = await api.get('/disciplinas', {
+          params: { instituicao_id: instituicao?.id },
+        });
         setDisciplinas(response.data);
       } catch (error: any) {
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
@@ -76,7 +80,7 @@ export function UpdateVersaoModal({ open, onClose, versao_id, reloadList }: IUpd
     }
 
     getDisciplinas();
-  }, [message, startLoading, stopLoading]);
+  }, [instituicao?.id, message, startLoading, stopLoading]);
 
   useEffect(() => {
     async function getVersao() {
@@ -98,6 +102,7 @@ export function UpdateVersaoModal({ open, onClose, versao_id, reloadList }: IUpd
     async (form: IForm) => {
       try {
         await api.put(`/versoes/${versao_id}`, {
+          instituicao_id: instituicao?.id,
           disciplina_id: form.disciplina.id,
           codigo: form.codigo,
           credito_quantidade: form.credito,
@@ -117,7 +122,7 @@ export function UpdateVersaoModal({ open, onClose, versao_id, reloadList }: IUpd
         message({ mensagem: error.response?.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [versao_id, reloadList, message, reset, onClose],
+    [versao_id, instituicao?.id, reloadList, message, reset, onClose],
   );
 
   return (

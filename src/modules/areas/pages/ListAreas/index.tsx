@@ -1,4 +1,4 @@
-import { ArrowForward } from '@mui/icons-material';
+import { ArrowForward, FileDownloadOutlined } from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -8,11 +8,14 @@ import {
   TextField,
   ButtonGroup,
   IconButton,
+  Tooltip,
 } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CSVLink } from 'react-csv';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { Col, StyledTable } from '#shared/components/StyledTable';
+import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
 import { useToast } from '#shared/hooks/toast';
@@ -35,6 +38,7 @@ export function ListAreas() {
   const navigate = useNavigate();
   const { message } = useToast();
   const { startLoading, stopLoading } = useLoading();
+  const { instituicao } = useInstitution();
 
   const [search, setSearch] = useState('');
   const [openCreate, setOpenCreate] = useState(false);
@@ -49,14 +53,16 @@ export function ListAreas() {
   const getAreas = useCallback(async () => {
     startLoading();
     try {
-      const response = await api.get('/areas');
+      const response = await api.get('/areas', {
+        params: { instituicao_id: instituicao?.id },
+      });
       setAreas(response.data);
     } catch (error: any) {
       message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
     } finally {
       stopLoading();
     }
-  }, [message, startLoading, stopLoading]);
+  }, [instituicao?.id, message, startLoading, stopLoading]);
 
   useEffect(() => {
     getAreas();
@@ -104,6 +110,18 @@ export function ListAreas() {
     ];
   }, []);
 
+  const headers = [
+    { label: 'id', key: 'id' },
+    { label: 'Area', key: 'area' },
+    { label: 'Descricao', key: 'description' },
+  ];
+
+  const data = areas.map((area) => ({
+    id: area.id,
+    area: area.name,
+    description: area.description,
+  }));
+
   return (
     <>
       <CreateAreaModal
@@ -144,6 +162,12 @@ export function ListAreas() {
             }}
           >
             <Stack direction="row" spacing={8}>
+              <Button
+                sx={{ color: '#000', fontWeight: 'bold' }}
+                onClick={() => navigate('/instituicoes')}
+              >
+                Instituições
+              </Button>
               <Button
                 sx={{
                   color: '#020560',
@@ -203,6 +227,23 @@ export function ListAreas() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </Box>
+          </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              mt: '0.5rem',
+            }}
+          >
+            <Box />
+            <CSVLink data={data} headers={headers} filename="areas.csv">
+              <Tooltip title="Export CSV" placement="left">
+                <IconButton>
+                  <FileDownloadOutlined />
+                </IconButton>
+              </Tooltip>
+            </CSVLink>
           </Box>
           <Box sx={{ marginTop: '1rem' }}>
             <StyledTable

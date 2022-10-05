@@ -7,6 +7,7 @@ import * as yup from 'yup';
 
 import { FormSelect } from '#shared/components/Form/FormSelect';
 import { MyTextField } from '#shared/components/Form/TextField';
+import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
@@ -46,6 +47,7 @@ export function UpdateDisciplinaModal({
 }: IUpdateDisciplinaModal) {
   const { startLoading, stopLoading } = useLoading();
   const { message } = useToast();
+  const { instituicao } = useInstitution();
 
   const {
     handleSubmit,
@@ -63,7 +65,9 @@ export function UpdateDisciplinaModal({
     async function getAreas() {
       startLoading();
       try {
-        const response = await api.get('/areas');
+        const response = await api.get('/areas', {
+          params: { instituicao_id: instituicao?.id },
+        });
         setAreas(response.data);
       } catch (error: any) {
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
@@ -73,7 +77,7 @@ export function UpdateDisciplinaModal({
     }
 
     getAreas();
-  }, [message, startLoading, stopLoading]);
+  }, [instituicao?.id, message, startLoading, stopLoading]);
 
   useEffect(() => {
     async function getDisciplina() {
@@ -95,6 +99,7 @@ export function UpdateDisciplinaModal({
     async (form: IForm) => {
       try {
         await api.put(`/disciplinas/${disciplina_id}`, {
+          instituicao_id: instituicao?.id,
           name: form.name,
           sigla: form.sigla,
           area_id: form.area.id,
@@ -110,7 +115,7 @@ export function UpdateDisciplinaModal({
         message({ mensagem: error.response?.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [disciplina_id, message, onClose, reloadList, reset],
+    [disciplina_id, instituicao?.id, message, onClose, reloadList, reset],
   );
 
   return (

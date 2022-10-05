@@ -1,4 +1,4 @@
-import { ArrowForward } from '@mui/icons-material';
+import { ArrowForward, FileDownloadOutlined } from '@mui/icons-material';
 import {
   Box,
   Breadcrumbs,
@@ -8,11 +8,14 @@ import {
   TextField,
   ButtonGroup,
   IconButton,
+  Tooltip,
 } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CSVLink } from 'react-csv';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 
 import { Col, StyledTable } from '#shared/components/StyledTable';
+import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
 import { useToast } from '#shared/hooks/toast';
@@ -57,6 +60,7 @@ export function FilteredVersoes() {
   const navigate = useNavigate();
   const { message } = useToast();
   const { startLoading, stopLoading } = useLoading();
+  const { instituicao } = useInstitution();
 
   const [openUpdateVersao, setOpenUpdateVersao] = useState<string | null>(null);
   const [openCreate, setOpenCreate] = useState(false);
@@ -74,7 +78,7 @@ export function FilteredVersoes() {
     startLoading();
     try {
       const response = await api.get('/versoes', {
-        params: { disciplina_id: params?.id },
+        params: { disciplina_id: params?.id, instituicao_id: instituicao?.id },
       });
       setVersoes(response.data);
     } catch (error: any) {
@@ -82,7 +86,7 @@ export function FilteredVersoes() {
     } finally {
       stopLoading();
     }
-  }, [message, params?.id, startLoading, stopLoading]);
+  }, [instituicao?.id, message, params?.id, startLoading, stopLoading]);
 
   useEffect(() => {
     getVersoes();
@@ -149,6 +153,30 @@ export function FilteredVersoes() {
       },
     ];
   }, []);
+
+  const headers = [
+    { label: 'id', key: 'id' },
+    { label: 'Nome da Disciplina', key: 'disciplina' },
+    { label: 'Nome da Versao', key: 'versao' },
+    { label: 'Codigo', key: 'codigo' },
+    { label: 'Creditos', key: 'creditos' },
+    { label: 'Oferta', key: 'oferta' },
+    { label: 'Produzido', key: 'produzido' },
+    { label: 'Ementa', key: 'ementa' },
+    { label: 'Observacao', key: 'observacao' },
+  ];
+
+  const data = versoes.map((versao) => ({
+    id: versao.id,
+    disciplina: versao.disciplina.name,
+    versao: versao.disciplina_versao_nome,
+    codigo: versao.codigo,
+    creditos: versao.credito_quantidade,
+    oferta: versao.em_oferta ? 'sim' : 'nao',
+    produzido: versao.produzido ? 'sim' : 'nao',
+    ementa: versao.ementa,
+    observacao: versao.observacao,
+  }));
 
   return (
     <>
@@ -220,6 +248,23 @@ export function FilteredVersoes() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </Box>
+          </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              mt: '0.5rem',
+            }}
+          >
+            <Box />
+            <CSVLink data={data} headers={headers} filename={`${disciplina?.name}-versoes.csv`}>
+              <Tooltip title="Export CSV" placement="left">
+                <IconButton>
+                  <FileDownloadOutlined />
+                </IconButton>
+              </Tooltip>
+            </CSVLink>
           </Box>
           <Box sx={{ marginTop: '1rem' }}>
             <StyledTable

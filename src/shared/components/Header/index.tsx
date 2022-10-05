@@ -22,12 +22,10 @@ import { useNavigate } from 'react-router-dom';
 import { Router } from '#shared/routes';
 
 import { useTitle } from '../../hooks/title';
-import Vector2 from '../../images/Brightplanning.svg';
-import Vector1 from '../../images/file-add.svg';
+import Home from '../../images/Home.svg';
 import Vector from '../../images/Librarybooks.svg';
+import Logo2 from '../../images/logo_sistema2.png';
 import Vector4 from '../../images/Paper.svg';
-import Vector3 from '../../images/people.svg';
-import LOGO from '../../images/SOUCONTEUDISTA.svg';
 
 const drawerWidth = 270;
 
@@ -127,11 +125,21 @@ export default function PersistentDrawerLeft() {
           }}
         >
           <Box onClick={() => navigate('/')} sx={{ cursor: 'pointer' }}>
-            <img width="218px" src={LOGO} alt="Sou Conteudista" />
+            <img width="218px" src={Logo2} alt="Sou Conteudista" />
           </Box>
         </DrawerHeader>
         <Divider sx={{ background: '#9193b95d', height: '0.25rem' }} />
         <List sx={{ background: '#020560', color: 'white', marginTop: '3.43rem' }}>
+          <ListItem onClick={() => navigate('/')}>
+            <ListItemButton>
+              <ListItemIcon>
+                <Icon>
+                  <img src={Home} alt="Home" />
+                </Icon>
+              </ListItemIcon>
+              <ListItemText primary="Home" />
+            </ListItemButton>
+          </ListItem>
           <ListItem onClick={() => navigate('/cursos')}>
             <ListItemButton>
               <ListItemIcon>
@@ -150,36 +158,6 @@ export default function PersistentDrawerLeft() {
                 </Icon>
               </ListItemIcon>
               <ListItemText primary="Disciplinas" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem onClick={() => navigate('/pedidos')}>
-            <ListItemButton>
-              <ListItemIcon>
-                <Icon>
-                  <img src={Vector1} alt="Pedidos" />
-                </Icon>
-              </ListItemIcon>
-              <ListItemText primary="Pedidos" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem>
-            <ListItemButton>
-              <ListItemIcon>
-                <Icon>
-                  <img src={Vector2} alt="Produção" />
-                </Icon>
-              </ListItemIcon>
-              <ListItemText primary="Produção" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem>
-            <ListItemButton>
-              <ListItemIcon>
-                <Icon>
-                  <img src={Vector3} alt="Pessoas" />
-                </Icon>
-              </ListItemIcon>
-              <ListItemText primary="Pessoas" />
             </ListItemButton>
           </ListItem>
         </List>

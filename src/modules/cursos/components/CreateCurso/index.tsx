@@ -7,6 +7,7 @@ import * as yup from 'yup';
 
 import { FormCheckbox } from '#shared/components/Form/CheckBox';
 import { MyTextField } from '#shared/components/Form/TextField';
+import { useInstitution } from '#shared/hooks/institution';
 import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
 
@@ -29,6 +30,7 @@ const validateForm = yup.object().shape({
 
 export function CreateCursoModal({ updateListCursos, open, onClose }: ICreateCursoModal) {
   const { message } = useToast();
+  const { instituicao } = useInstitution();
 
   const {
     handleSubmit,
@@ -42,7 +44,11 @@ export function CreateCursoModal({ updateListCursos, open, onClose }: ICreateCur
   const handleCreate = useCallback(
     async (form: IForm) => {
       try {
-        const response = await api.post('/cursos', { name: form.name, active: form.active });
+        const response = await api.post('/cursos', {
+          instituicao_id: instituicao?.id,
+          name: form.name,
+          active: form.active,
+        });
 
         updateListCursos(response.data);
 
@@ -55,7 +61,7 @@ export function CreateCursoModal({ updateListCursos, open, onClose }: ICreateCur
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [message, onClose, reset, updateListCursos],
+    [instituicao?.id, message, onClose, reset, updateListCursos],
   );
 
   return (

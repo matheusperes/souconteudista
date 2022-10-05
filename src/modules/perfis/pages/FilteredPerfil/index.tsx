@@ -1,21 +1,55 @@
 import { ArrowForward } from '@mui/icons-material';
-import { Box, Breadcrumbs, Typography } from '@mui/material';
+import { Box, Breadcrumbs, Grid, IconButton, Typography } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
 import { useToast } from '#shared/hooks/toast';
+import DisciplinaIcon from '#shared/images/IconDisciplina.svg';
 import { api } from '#shared/services/axios';
 
 import { InfoPpcs } from '#modules/ppcs/pages/ListPpcInfo';
 import { toRoman } from '#modules/ppcs/pages/ListPpcInfo/roman';
+
+type DisciplinaPerfil = {
+  id: string;
+  ppc_id: string;
+  disciplina_versao_id: string;
+  modulo: number;
+  semestre: number;
+  versoes: {
+    id: string;
+    disciplina_id: string;
+    disciplina_versao_nome: string;
+    codigo: string;
+    credito_quantidade: string;
+    ementa: string;
+    observacao: string;
+    em_oferta: boolean;
+    produzido: boolean;
+    disciplina: { id: string; name: string; sigla: string; area_id: string };
+  };
+};
+
+type Versoes = {
+  id: string;
+  disciplina_id: string;
+  disciplina_versao_nome: string;
+  codigo: string;
+  credito_quantidade: number;
+  ementa: string;
+  observacao: string;
+  em_oferta: boolean;
+  produzido: boolean;
+};
 
 type DisciplinaAPI = {
   id: string;
   modulo: number;
   semestre: number;
   created_at: string;
+  versoes: Versoes;
 };
 
 type Curso = {
@@ -45,11 +79,13 @@ type IPerfil = {
 
 export function FilteredPerfil() {
   const params = useParams();
+  const navigate = useNavigate();
   const { setTitle } = useTitle();
   const { message } = useToast();
   const { startLoading, stopLoading } = useLoading();
 
   const [perfil, setPerfil] = useState<IPerfil>();
+  const [disciplinaPerfil, setDisciplinaPerfil] = useState<DisciplinaPerfil[]>([]);
   const [ppc, setPpc] = useState<InfoPpcs>();
 
   useEffect(() => {
@@ -71,6 +107,22 @@ export function FilteredPerfil() {
   useEffect(() => {
     getPerfil();
   }, [getPerfil]);
+
+  const getDisciplinaPerfil = useCallback(async () => {
+    startLoading();
+    try {
+      const response = await api.get(`/ppc_disciplina_versao/perfil/${params?.id}`);
+      setDisciplinaPerfil(response.data);
+    } catch (error: any) {
+      message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+    } finally {
+      stopLoading();
+    }
+  }, [message, params?.id, startLoading, stopLoading]);
+
+  useEffect(() => {
+    getDisciplinaPerfil();
+  }, [getDisciplinaPerfil]);
 
   const getPpc = useCallback(async () => {
     startLoading();
@@ -103,15 +155,51 @@ export function FilteredPerfil() {
           </Breadcrumbs>
         </Box>
         {perfil && (
-          <Box sx={{ marginTop: '0.5rem', textAlign: 'justify' }}>
-            <Box sx={{ background: 'rgba(239, 239, 239, 0.45)', padding: '1.5rem ' }}>
-              <Typography>{`${toRoman(Number(perfil?.perfilNumero))} - ${
-                perfil?.perfil
-              }`}</Typography>
+          <>
+            <Box sx={{ marginTop: '0.5rem', textAlign: 'justify' }}>
+              <Box sx={{ background: 'rgba(239, 239, 239, 0.45)', padding: '1.5rem ' }}>
+                <Typography>{`${toRoman(Number(perfil?.perfilNumero))} - ${
+                  perfil?.perfil
+                }`}</Typography>
 
-              <Typography sx={{}} />
+                <Typography />
+              </Box>
             </Box>
-          </Box>
+            <Box sx={{ padding: '1rem' }}>
+              <Grid container spacing={2}>
+                {disciplinaPerfil.map((perfil1) => (
+                  <Grid
+                    item
+                    xs={3}
+                    key={perfil1.id}
+                    onClick={() =>
+                      navigate(
+                        `/disciplinas/${perfil1.versoes.disciplina_id}/versao/${perfil1.versoes.id}`,
+                      )
+                    }
+                  >
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <IconButton
+                        sx={{
+                          cursor: 'default',
+                        }}
+                      >
+                        <img src={DisciplinaIcon} alt="Icon" />
+                      </IconButton>
+                      <Typography>{perfil1.versoes.disciplina.name}</Typography>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+          </>
         )}
       </Box>
     </Box>

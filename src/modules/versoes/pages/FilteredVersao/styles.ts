@@ -1,10 +1,10 @@
 import { styled, TableContainer } from '@mui/material';
 
-export const StyledTableContainer = styled(TableContainer)`
+export const StyledTableContainer2 = styled(TableContainer)`
   table {
     width: 100%;
     border-spacing: 0 1rem;
-    background: #e5e5e5;
+    background: #fff;
     border-collapse: separate;
     min-width: 650px;
     tr {
@@ -18,7 +18,7 @@ export const StyledTableContainer = styled(TableContainer)`
       text-align: center;
 
       &:first-of-type {
-        text-align: left;
+        text-align: center;
       }
     }
 
@@ -27,12 +27,12 @@ export const StyledTableContainer = styled(TableContainer)`
       border: 0;
       background: #f4f4f4;
       color: #000;
-      box-shadow: 0px 5px rgba(164, 163, 163, 0.45);
+      /* box-shadow: 0px 5px rgba(164, 163, 163, 0.45); */
       text-align: center;
 
       &:first-of-type {
         border-radius: 10px 0 0 10px;
-        text-align: left;
+        text-align: center;
       }
 
       &:last-child {

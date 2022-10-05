@@ -8,6 +8,7 @@ import * as yup from 'yup';
 
 import { FormCheckbox } from '#shared/components/Form/CheckBox';
 import { MyTextField } from '#shared/components/Form/TextField';
+import { useInstitution } from '#shared/hooks/institution';
 import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
 
@@ -40,6 +41,7 @@ const validateForm = yup.object().shape({
 export function CreateFilteredPpcModal({ updateListPpcs, open, onClose }: ICreateFilteredPpcModal) {
   const { message } = useToast();
   const params = useParams();
+  const { instituicao } = useInstitution();
 
   const {
     handleSubmit,
@@ -55,6 +57,7 @@ export function CreateFilteredPpcModal({ updateListPpcs, open, onClose }: ICreat
       try {
         if (params?.curso_id !== null) {
           const response = await api.post('/ppcs', {
+            instituicao_id: instituicao?.id,
             curso_id: params.curso_id,
             anoVoto: form.anoVoto,
             dataInicio: form.dataInicio,
@@ -75,7 +78,7 @@ export function CreateFilteredPpcModal({ updateListPpcs, open, onClose }: ICreat
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [params.curso_id, updateListPpcs, message, reset, onClose],
+    [params.curso_id, instituicao?.id, updateListPpcs, message, reset, onClose],
   );
 
   return (
@@ -144,10 +147,10 @@ export function CreateFilteredPpcModal({ updateListPpcs, open, onClose }: ICreat
               />
             </Grid>
             <Grid item xs={6}>
-              <FormCheckbox name="active" control={control} label="PPC Ativo" />
+              <FormCheckbox name="ppc_ativo" control={control} label="PPC Ativo" />
             </Grid>
             <Grid item xs={6}>
-              <FormCheckbox name="ppc_ativo" control={control} label="PPC Atual" />
+              <FormCheckbox name="active" control={control} label="PPC Atual" />
             </Grid>
 
             <Grid item xs={12} sx={{ marginBottom: '1rem' }}>

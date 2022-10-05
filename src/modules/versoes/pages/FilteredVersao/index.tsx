@@ -23,6 +23,7 @@ import {
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
+import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
 import { useToast } from '#shared/hooks/toast';
@@ -32,6 +33,8 @@ import image10 from '#shared/images/image10.svg';
 import { api } from '#shared/services/axios';
 
 import { Area } from '#modules/areas/pages/FilteredDisciplinas';
+
+import { StyledTableContainer2 } from './styles';
 // import { DeleteEspecificVersão } from '#modules/versoes/components/DeleteEspecificVersao';
 // import { UpdateVersaoModal } from '#modules/versoes/components/UpdateVersaoModal';
 
@@ -45,6 +48,44 @@ type Disciplinas = {
   area: Area;
 };
 
+type Bibliografias = {};
+
+type Competencia = {
+  id: string;
+  ppc_id: string;
+  competencia: string;
+  competenciaNumero: number;
+};
+
+type Perfis = {
+  id: string;
+  ppc_id: string;
+  perfil: string;
+  perfilNumero: number;
+};
+
+type ppc = {
+  id: string;
+  curso_id: string;
+  anoVoto: number;
+  dataInicio: string;
+  dataFim: string;
+  horaCredito: number;
+  quantSemestres: number;
+  ppc_ativo: true;
+  competencias: Competencia[];
+  perfis: Perfis[];
+};
+
+type PPCDisciplinaVersoes = {
+  id: string;
+  ppc_id: string;
+  disciplina_versao_id: string;
+  modulo: number;
+  semestre: number;
+  ppc: ppc;
+};
+
 export type Versoes = {
   id: string;
   disciplina_id: string;
@@ -56,6 +97,8 @@ export type Versoes = {
   ementa: string;
   observacao: string;
   disciplina: Disciplinas;
+  bibliografias: Bibliografias[];
+  ppcDisciplinaVersoes: PPCDisciplinaVersoes[];
 };
 
 type DisciplinaOption = {
@@ -65,7 +108,7 @@ type DisciplinaOption = {
 
 type VersaoOption = {
   id: string;
-  label: number;
+  label: string;
 };
 
 const StyledTableContainer = styled(TableContainer)`
@@ -90,7 +133,7 @@ const StyledTableContainer = styled(TableContainer)`
       background: #fff;
       color: #000;
 
-      &:first-child {
+      &:first-of-type {
         border-radius: 10px 0 0 0px;
       }
 
@@ -106,6 +149,7 @@ export function FilteredVersao() {
   const params = useParams();
   const { message } = useToast();
   const { startLoading, stopLoading } = useLoading();
+  const { instituicao } = useInstitution();
 
   const [versaoCollapse, setVersaoCollapse] = useState(true);
 
@@ -162,7 +206,7 @@ export function FilteredVersao() {
       startLoading();
       try {
         const response = await api.get('/versoes', {
-          params: { disciplina_id: DisciplinasId.id },
+          params: { disciplina_id: DisciplinasId.id, instituicao_id: instituicao?.id },
         });
         setVersoes(response.data);
       } catch (error: any) {
@@ -171,7 +215,7 @@ export function FilteredVersao() {
         stopLoading();
       }
     }
-  }, [DisciplinasId, message, startLoading, stopLoading]);
+  }, [DisciplinasId, instituicao?.id, message, startLoading, stopLoading]);
 
   useEffect(() => {
     getVersoes();
@@ -196,14 +240,16 @@ export function FilteredVersao() {
   const getDisciplinas = useCallback(async () => {
     startLoading();
     try {
-      const response = await api.get('/disciplinas');
+      const response = await api.get('/disciplinas', {
+        params: { instituicao_id: instituicao?.id },
+      });
       setDisciplinas(response.data);
     } catch (error: any) {
       message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
     } finally {
       stopLoading();
     }
-  }, [message, startLoading, stopLoading]);
+  }, [instituicao?.id, message, startLoading, stopLoading]);
 
   useEffect(() => {
     getDisciplinas();
@@ -222,7 +268,7 @@ export function FilteredVersao() {
     return versoes.map((versao1) => {
       return {
         id: versao1.id,
-        label: versao1.credito_quantidade,
+        label: String(versao1.credito_quantidade),
       };
     });
   }, [versoes]);
@@ -404,7 +450,7 @@ export function FilteredVersao() {
                             }}
                           >
                             <Collapse in={versaoCollapse}>
-                              <Box sx={{ margin: '1rem' }}>
+                              <Box>
                                 {/* Ementa Collapse */}
                                 <Box
                                   sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
@@ -420,7 +466,7 @@ export function FilteredVersao() {
                                   <Typography sx={{ fontWeight: 'bold' }}>Ementa</Typography>
                                 </Box>
                                 <Collapse in={ementaCollapse}>
-                                  <Box sx={{ padding: '1rem' }}>
+                                  <Box>
                                     <Box>
                                       <Typography whiteSpace="pre-wrap">
                                         {versao?.ementa}
@@ -448,7 +494,7 @@ export function FilteredVersao() {
                                   <Typography sx={{ fontWeight: 'bold' }}>Bibliografias</Typography>
                                 </Box>
                                 <Collapse in={bibliografiaCollapse}>
-                                  <Box sx={{ padding: '1rem' }}>
+                                  <Box>
                                     <Box>
                                       <Typography whiteSpace="pre-wrap">
                                         Alguma coisa deve aparecer aqui
@@ -476,11 +522,114 @@ export function FilteredVersao() {
                                   <Typography sx={{ fontWeight: 'bold' }}>PPCs</Typography>
                                 </Box>
                                 <Collapse in={ppcsCollapse}>
-                                  <Box sx={{ padding: '1rem' }}>
+                                  <Box>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                      <Box />
+                                      <Box sx={{ display: 'flex' }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                          <Box
+                                            sx={{
+                                              borderRadius: '50%',
+                                              background: '#8CC59A',
+                                              width: '15px',
+                                              height: '15px',
+                                              marginRight: '3px',
+                                            }}
+                                          />
+                                          <Typography>Atual</Typography>
+                                        </Box>
+                                        <Box
+                                          sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            marginLeft: '1.25rem',
+                                          }}
+                                        >
+                                          <Box
+                                            sx={{
+                                              borderRadius: '50%',
+                                              background: '#FFF174',
+                                              width: '15px',
+                                              height: '15px',
+                                              marginRight: '3px',
+                                            }}
+                                          />
+                                          <Typography>Ativo</Typography>
+                                        </Box>
+                                        <Box
+                                          sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            marginLeft: '1.25rem',
+                                          }}
+                                        >
+                                          <Box
+                                            sx={{
+                                              borderRadius: '50%',
+                                              background: '#E05959',
+                                              width: '15px',
+                                              height: '15px',
+                                              marginRight: '3px',
+                                            }}
+                                          />
+                                          <Typography>Inativo</Typography>
+                                        </Box>
+                                      </Box>
+                                    </Box>
                                     <Box>
-                                      <Typography whiteSpace="pre-wrap">
-                                        Alguma coisa deve aparecer aqui tambem
-                                      </Typography>
+                                      <StyledTableContainer2>
+                                        <Table sx={{ background: '#fff' }}>
+                                          <TableHead sx={{ background: '#fff' }}>
+                                            <TableRow sx={{ background: '#fff' }}>
+                                              <TableCell>Curso</TableCell>
+                                              <TableCell align="center">Ano Voto</TableCell>
+                                              <TableCell align="center">Data Inicio</TableCell>
+                                              <TableCell align="center">Data Fim</TableCell>
+                                              <TableCell align="center">Horas/Creditos</TableCell>
+                                              <TableCell align="center">Semestres</TableCell>
+                                            </TableRow>
+                                          </TableHead>
+                                          <TableBody sx={{ background: '#fff' }}>
+                                            {versao.ppcDisciplinaVersoes.map((ppcDisciplina) => (
+                                              <TableRow
+                                                key={ppcDisciplina.ppc.id}
+                                                sx={{
+                                                  background: '#fff',
+                                                  ...(ppcDisciplina.ppc.ppc_ativo && {
+                                                    borderRadius: '10px',
+                                                    boxShadow: '0px 5px rgba(237, 229, 41, 0.25)',
+                                                  }),
+                                                  ...(!ppcDisciplina.ppc.ppc_ativo === false && {
+                                                    borderRadius: '10px',
+                                                    boxShadow: '0px 5px rgba(216, 68, 68, 0.25)',
+                                                  }),
+                                                  // ...(ppcDisciplina.ppc.curso.ppc_ativo === ppcDisciplina.ppc.id && {
+                                                  //   borderRadius: '10px',
+                                                  //   boxShadow: '0px 5px rgba(67, 200, 104, 0.25)',
+                                                  // }),
+                                                }}
+                                              >
+                                                <TableCell>{disciplina?.area.name}</TableCell>
+                                                <TableCell align="center">
+                                                  {ppcDisciplina.ppc.anoVoto}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                  {ppcDisciplina.ppc.dataInicio}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                  {ppcDisciplina.ppc.dataFim}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                  {ppcDisciplina.ppc.horaCredito}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                  {ppcDisciplina.ppc.quantSemestres}
+                                                </TableCell>
+                                              </TableRow>
+                                            ))}
+                                          </TableBody>
+                                        </Table>
+                                      </StyledTableContainer2>
                                     </Box>
                                   </Box>
                                 </Collapse>
@@ -690,7 +839,7 @@ export function FilteredVersao() {
                                 }}
                               >
                                 <Collapse in={versaoCollapse}>
-                                  <Box sx={{ margin: '1rem' }}>
+                                  <Box>
                                     {/* Ementa Collapse */}
                                     <Box
                                       sx={{
@@ -710,7 +859,7 @@ export function FilteredVersao() {
                                       <Typography sx={{ fontWeight: 'bold' }}>Ementa</Typography>
                                     </Box>
                                     <Collapse in={ementaCollapse2}>
-                                      <Box sx={{ padding: '1rem' }}>
+                                      <Box>
                                         <Box>
                                           <Typography whiteSpace="pre-wrap">
                                             {versaoRender?.ementa}
@@ -740,7 +889,7 @@ export function FilteredVersao() {
                                       </Typography>
                                     </Box>
                                     <Collapse in={bibliografiaCollapse2}>
-                                      <Box sx={{ padding: '1rem' }}>
+                                      <Box>
                                         <Box>
                                           <Typography whiteSpace="pre-wrap">
                                             Alguma coisa deve aparecer aqui
@@ -768,7 +917,7 @@ export function FilteredVersao() {
                                       <Typography sx={{ fontWeight: 'bold' }}>PPCs</Typography>
                                     </Box>
                                     <Collapse in={ppcsCollapse2}>
-                                      <Box sx={{ padding: '1rem' }}>
+                                      <Box>
                                         <Box>
                                           <Typography whiteSpace="pre-wrap">
                                             Alguma coisa deve aparecer aqui tambem

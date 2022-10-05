@@ -1,42 +1,37 @@
 import { yupResolver } from '@hookform/resolvers/yup';
-import CloseIcon from '@mui/icons-material/Close';
-import { Dialog, Box, DialogTitle, IconButton, Grid, Button } from '@mui/material';
+import { Grid, Box, Button, Dialog, DialogTitle } from '@mui/material';
 import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import { useParams } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { MyTextField } from '#shared/components/Form/TextField';
-import { useInstitution } from '#shared/hooks/institution';
 import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
 
-import { IDisciplinas } from '#modules/areas/pages/FilteredDisciplinas';
+type IInstituicao = {
+  id: string;
+  name: string;
+};
 
-type ICreateFilteredDisciplinaModal = {
-  updateListDisciplinas: (disciplina: IDisciplinas) => void;
+type IInstituicaoModal = {
   open: boolean;
   onClose: () => void;
+  updateDefaultInstituicao: (instituicao: IInstituicao) => void;
 };
 
 type IForm = {
-  name: number;
+  name: string;
+  description?: string;
   sigla: string;
+  link: string;
 };
 
 const validateForm = yup.object().shape({
   name: yup.string().required('Nome Obrigatório'),
-  sigla: yup.string().required('Sigla Obrigatória'),
 });
 
-export function CreateFilteredDisciplinaModal({
-  updateListDisciplinas,
-  open,
-  onClose,
-}: ICreateFilteredDisciplinaModal) {
-  const params = useParams();
+export function InstituicaoModal({ open, onClose, updateDefaultInstituicao }: IInstituicaoModal) {
   const { message } = useToast();
-  const { instituicao } = useInstitution();
 
   const {
     handleSubmit,
@@ -50,27 +45,30 @@ export function CreateFilteredDisciplinaModal({
   const handleCreate = useCallback(
     async (form: IForm) => {
       try {
-        if (params?.id !== null) {
-          const response = await api.post('/disciplinas', {
-            instituicao_id: instituicao?.id,
-            name: form.name,
-            area_id: params.id,
-            sigla: form.sigla,
-          });
-          updateListDisciplinas(response.data);
-          message({ mensagem: 'Disciplina Cadastrada', tipo: 'success' });
-          reset();
-          onClose();
-        }
+        const response = await api.post('/instituicoes', {
+          name: form.name,
+          description: form.description,
+          sigla: form.sigla,
+          link: form.link,
+          padrao: true,
+        });
+
+        updateDefaultInstituicao(response.data);
+
+        message({ mensagem: 'Instituição Cadastrada', tipo: 'success' });
+
+        reset();
+
+        onClose();
       } catch (error: any) {
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [params.id, instituicao?.id, updateListDisciplinas, message, reset, onClose],
+    [message, onClose, reset, updateDefaultInstituicao],
   );
 
   return (
-    <Dialog onClose={onClose} open={open}>
+    <Dialog open={open}>
       <Box
         sx={{
           display: 'flex',
@@ -80,15 +78,8 @@ export function CreateFilteredDisciplinaModal({
         }}
       >
         <DialogTitle sx={{ background: '#020560', color: '#E5E5E5' }}>
-          Cadastrar Disciplina
+          Cadastrar Instituição
         </DialogTitle>
-        <IconButton
-          color="primary"
-          sx={{ marginLeft: 'auto', padding: '1rem', color: '#E5E5E5' }}
-          onClick={onClose}
-        >
-          <CloseIcon />
-        </IconButton>
       </Box>
       <Box sx={{ padding: '1rem' }}>
         <form onSubmit={handleSubmit(handleCreate)} noValidate>
@@ -98,12 +89,19 @@ export function CreateFilteredDisciplinaModal({
                 name="name"
                 control={control}
                 errors={errors.name}
-                label="Nome da disciplina"
+                label="Nome da Instituição"
               />
             </Grid>
             <Grid item xs={12}>
-              <MyTextField name="sigla" control={control} errors={errors.sigla} label="Sigla" />
+              <MyTextField name="description" control={control} label="Descrição" multiline />
             </Grid>
+            <Grid item xs={12}>
+              <MyTextField name="sigla" control={control} label="Sigla" />
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField name="link" control={control} label="Link" multiline />
+            </Grid>
+
             <Grid item xs={12}>
               <Box display="flex" alignItems="center" marginBottom="1rem">
                 <Button
@@ -116,7 +114,7 @@ export function CreateFilteredDisciplinaModal({
                     '&:hover': { background: '#020560' },
                   }}
                 >
-                  Atualizar
+                  Inserir
                 </Button>
               </Box>
             </Grid>

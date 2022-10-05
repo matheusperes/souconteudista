@@ -8,11 +8,31 @@ import * as yup from 'yup';
 import { FormCheckbox } from '#shared/components/Form/CheckBox';
 import { FormSelect } from '#shared/components/Form/FormSelect';
 import { MyTextField } from '#shared/components/Form/TextField';
+import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
 
 import { Ppc } from '#modules/ppcs/pages/ListPpcsCurso';
+
+type ICursoAPI = {
+  id: string;
+  name: string;
+  active: boolean;
+  ppc_ativo: string;
+  ppcs: [
+    {
+      id: string;
+      curso_id: string;
+      anoVoto: number;
+      dataInicio: string;
+      dataFim: string;
+      horaCredito: number;
+      quantSemestres: number;
+      ppc_ativo: boolean;
+    },
+  ];
+};
 
 type Curso = {
   id: string;
@@ -23,6 +43,7 @@ type IUpdatePpcModal = {
   open: boolean;
   onClose: () => void;
   ppc_id: string;
+  curso_id?: string;
   reloadList?: () => void;
 };
 
@@ -50,11 +71,13 @@ const validateForm = yup.object().shape({
   horaCredito: yup.number().required('Quantidade de Créditos Obrigatório'),
 });
 
-export function UpdatePpcModal({ open, onClose, ppc_id, reloadList }: IUpdatePpcModal) {
+export function UpdatePpcModal({ open, onClose, ppc_id, reloadList, curso_id }: IUpdatePpcModal) {
   const { startLoading, stopLoading } = useLoading();
   const { message } = useToast();
+  const { instituicao } = useInstitution();
 
   const [data, setData] = useState<Ppc | null>(null);
+  const [curso, setCurso] = useState<ICursoAPI | null>(null);
 
   const [cursos, setCursos] = useState<Curso[]>([]);
 
@@ -71,7 +94,9 @@ export function UpdatePpcModal({ open, onClose, ppc_id, reloadList }: IUpdatePpc
     async function getCursos() {
       startLoading();
       try {
-        const response = await api.get('/cursos');
+        const response = await api.get('/cursos', {
+          params: { instituicao_id: instituicao?.id },
+        });
         setCursos(response.data);
       } catch (error: any) {
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
@@ -81,7 +106,22 @@ export function UpdatePpcModal({ open, onClose, ppc_id, reloadList }: IUpdatePpc
     }
 
     getCursos();
-  }, [message, startLoading, stopLoading]);
+  }, [instituicao?.id, message, startLoading, stopLoading]);
+
+  useEffect(() => {
+    async function getCurso() {
+      startLoading();
+      try {
+        const response = await api.get(`/curso/${curso_id}`);
+        setCurso(response.data);
+      } catch (error: any) {
+        message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+      } finally {
+        stopLoading();
+      }
+    }
+    getCurso();
+  }, [curso_id, message, ppc_id, startLoading, stopLoading]);
 
   useEffect(() => {
     async function getPpc() {
@@ -102,6 +142,7 @@ export function UpdatePpcModal({ open, onClose, ppc_id, reloadList }: IUpdatePpc
     async (form: IForm) => {
       try {
         await api.put(`/ppcs/${ppc_id}`, {
+          instituicao_id: instituicao?.id,
           curso_id: form.curso.id,
           anoVoto: form.anoVoto,
           dataInicio: form.dataInicio,
@@ -124,7 +165,7 @@ export function UpdatePpcModal({ open, onClose, ppc_id, reloadList }: IUpdatePpc
         message({ mensagem: error.response?.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [ppc_id, reloadList, message, reset, onClose],
+    [ppc_id, instituicao?.id, reloadList, message, reset, onClose],
   );
 
   return (
@@ -147,7 +188,7 @@ export function UpdatePpcModal({ open, onClose, ppc_id, reloadList }: IUpdatePpc
         </IconButton>
       </Box>
       <Box sx={{ marginTop: '1rem', padding: '1rem' }}>
-        {data && (
+        {data && curso && (
           <form onSubmit={handleSubmit(handleUpdate)} noValidate>
             <Grid container spacing={2}>
               <Grid item xs={6}>
@@ -211,17 +252,17 @@ export function UpdatePpcModal({ open, onClose, ppc_id, reloadList }: IUpdatePpc
               </Grid>
               <Grid item xs={6}>
                 <FormCheckbox
-                  name="active"
+                  name="ppc_ativo"
                   control={control}
-                  defaultValue={data.active}
+                  defaultValue={data.ppc_ativo}
                   label="PPC Ativo"
                 />
               </Grid>
               <Grid item xs={6}>
                 <FormCheckbox
-                  name="ppc_ativo"
+                  name="active"
                   control={control}
-                  defaultValue={data.ppc_ativo}
+                  defaultValue={curso.ppc_ativo === data.id}
                   label="PPC Atual"
                 />
               </Grid>

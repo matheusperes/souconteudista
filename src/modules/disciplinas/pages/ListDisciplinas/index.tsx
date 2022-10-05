@@ -1,4 +1,4 @@
-import { ArrowForward } from '@mui/icons-material';
+import { ArrowForward, FileDownloadOutlined } from '@mui/icons-material';
 import {
   Box,
   Breadcrumbs,
@@ -8,11 +8,14 @@ import {
   TextField,
   ButtonGroup,
   IconButton,
+  Tooltip,
 } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CSVLink } from 'react-csv';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { Col, StyledTable } from '#shared/components/StyledTable';
+import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
 import { useToast } from '#shared/hooks/toast';
@@ -35,6 +38,7 @@ export function ListDisciplinas() {
   const navigate = useNavigate();
   const { message } = useToast();
   const { startLoading, stopLoading } = useLoading();
+  const { instituicao } = useInstitution();
 
   const [openCreate, setOpenCreate] = useState(false);
   const [openUpdate, setOpenUpdate] = useState<string | null>(null);
@@ -49,14 +53,16 @@ export function ListDisciplinas() {
   const getDisciplinas = useCallback(async () => {
     startLoading();
     try {
-      const response = await api.get('/disciplinas');
+      const response = await api.get('/disciplinas', {
+        params: { instituicao_id: instituicao?.id },
+      });
       setDisciplinas(response.data);
     } catch (error: any) {
       message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
     } finally {
       stopLoading();
     }
-  }, [message, startLoading, stopLoading]);
+  }, [instituicao?.id, message, startLoading, stopLoading]);
 
   useEffect(() => {
     getDisciplinas();
@@ -105,6 +111,24 @@ export function ListDisciplinas() {
     ];
   }, []);
 
+  const headers = [
+    { label: 'id', key: 'id' },
+    { label: 'Nome da Disciplina', key: 'disciplina' },
+    { label: 'Sigla', key: 'sigla' },
+    { label: 'Area id', key: 'area_id' },
+    { label: 'Nome da Area', key: 'area_name' },
+    { label: 'Descricao da Area', key: 'area_description' },
+  ];
+
+  const data = disciplinas.map((disciplina) => ({
+    id: disciplina.id,
+    disciplina: disciplina.name,
+    sigla: disciplina.sigla,
+    area_id: disciplina.area_id,
+    area_name: disciplina.area.name,
+    area_description: disciplina.area.description,
+  }));
+
   return (
     <>
       <CreateDisciplinaModal
@@ -147,6 +171,12 @@ export function ListDisciplinas() {
             }}
           >
             <Stack direction="row" spacing={8}>
+              <Button
+                sx={{ color: '#000', fontWeight: 'bold' }}
+                onClick={() => navigate('/instituicoes')}
+              >
+                Instituições
+              </Button>
               <Button sx={{ color: '#000', fontWeight: 'bold' }} onClick={() => navigate('/areas')}>
                 Áreas do Conhecimento
               </Button>
@@ -180,7 +210,14 @@ export function ListDisciplinas() {
               </Button>
             </Stack>
           </Box>
-          <Box sx={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'space-between' }}>
+          <Box
+            sx={{
+              marginTop: '1.5rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
             <Box>
               <Button
                 variant="contained"
@@ -203,6 +240,23 @@ export function ListDisciplinas() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </Box>
+          </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              mt: '0.5rem',
+            }}
+          >
+            <Box />
+            <CSVLink data={data} headers={headers} filename="disciplinas.csv">
+              <Tooltip title="Export CSV" placement="left">
+                <IconButton>
+                  <FileDownloadOutlined />
+                </IconButton>
+              </Tooltip>
+            </CSVLink>
           </Box>
           <Box sx={{ marginTop: '1rem' }}>
             <StyledTable

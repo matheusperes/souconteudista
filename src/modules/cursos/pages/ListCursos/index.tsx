@@ -1,8 +1,19 @@
-import { ArrowForward } from '@mui/icons-material';
-import { Box, Grid, Typography, Button, TextField, Breadcrumbs } from '@mui/material';
+import { ArrowForward, FileDownloadOutlined } from '@mui/icons-material';
+import {
+  Box,
+  Grid,
+  Typography,
+  Button,
+  TextField,
+  Breadcrumbs,
+  IconButton,
+  Tooltip,
+} from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CSVLink } from 'react-csv';
 import { Link } from 'react-router-dom';
 
+import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
 import { useToast } from '#shared/hooks/toast';
@@ -25,6 +36,7 @@ export function ListCursos() {
   const { startLoading, stopLoading } = useLoading();
   const { setTitle } = useTitle();
   const { message } = useToast();
+  const { instituicao } = useInstitution();
 
   const [openCreate, setOpenCreate] = useState(false);
   const [cursos, setCursos] = useState<ICurso[]>([]);
@@ -39,7 +51,9 @@ export function ListCursos() {
   const getCursos = useCallback(async () => {
     startLoading();
     try {
-      const response = await api.get('/cursos');
+      const response = await api.get('/cursos', {
+        params: { instituicao_id: instituicao?.id },
+      });
 
       setCursos(response.data);
     } catch (error: any) {
@@ -47,7 +61,7 @@ export function ListCursos() {
     } finally {
       stopLoading();
     }
-  }, [message, startLoading, stopLoading]);
+  }, [instituicao?.id, message, startLoading, stopLoading]);
 
   useEffect(() => {
     getCursos();
@@ -58,6 +72,16 @@ export function ListCursos() {
       return curso.name.toLowerCase().includes(search.toLowerCase());
     });
   }, [cursos, search]);
+
+  const headers = [
+    { label: 'Curso', key: 'curso' },
+    { label: 'Ativo', key: 'ativo' },
+  ];
+
+  const data = cursos.map((curso1) => ({
+    curso: curso1.name,
+    ativo: curso1.active ? 'Sim' : 'Não',
+  }));
 
   return (
     <>
@@ -109,7 +133,15 @@ export function ListCursos() {
             </Box>
           </Box>
 
-          <Box sx={{ mb: '1rem' }}>
+          <Box
+            sx={{
+              mb: '1rem',
+              mt: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
             <Button
               variant="contained"
               sx={{ background: '#020560', '&:hover': { background: '#020560' } }}
@@ -120,6 +152,14 @@ export function ListCursos() {
             >
               Adicionar
             </Button>
+
+            <CSVLink data={data} headers={headers} filename="cursos.csv">
+              <Tooltip title="Export CSV" placement="left">
+                <IconButton>
+                  <FileDownloadOutlined />
+                </IconButton>
+              </Tooltip>
+            </CSVLink>
           </Box>
           <Grid container spacing={4}>
             {filteredCursos.map((curso, index) => (

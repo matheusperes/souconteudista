@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 
 import { MyTextField } from '#shared/components/Form/TextField';
+import { useInstitution } from '#shared/hooks/institution';
 import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
 
@@ -34,6 +35,7 @@ export function CreateCompetenciaModalPPC({
   ppc_id,
 }: ICreateCompetenciaModalPPC) {
   const { message } = useToast();
+  const { instituicao } = useInstitution();
 
   const {
     handleSubmit,
@@ -48,6 +50,7 @@ export function CreateCompetenciaModalPPC({
     async (form: IForm) => {
       try {
         await api.post('/competencias', {
+          instituicao_id: instituicao?.id,
           competencia: form.competencia,
           competenciaNumero: form.competenciaNumero,
           ppc_id,
@@ -63,7 +66,7 @@ export function CreateCompetenciaModalPPC({
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [ppc_id, reloadList, message, reset, onClose],
+    [instituicao?.id, ppc_id, reloadList, message, reset, onClose],
   );
 
   return (

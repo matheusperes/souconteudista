@@ -13,7 +13,10 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { Col, StyledTable } from '#shared/components/StyledTable';
+import { useInstitution } from '#shared/hooks/institution';
+import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
+import { useToast } from '#shared/hooks/toast';
 import Delete from '#shared/images/Delete.svg';
 import Edit from '#shared/images/Edit.svg';
 import { api } from '#shared/services/axios';
@@ -26,16 +29,13 @@ export type IObras = {
   id: string;
   item_tipo: string;
   obra_nome: string;
-  capitulo_nome: string;
   serie_nome: string;
   colecao_nome: string;
-  organizador_editor_nome: string;
-  funcao: string;
   cidade: string;
   editora: string;
-  ano: string;
-  mes: string;
   dia: string;
+  mes: string;
+  ano: number;
   volume: string;
   edicao: string;
   resumo: string;
@@ -46,11 +46,9 @@ export type IObras = {
   idioma: string;
   doi: string;
   isbn: string;
-  issn: string;
+  issn: string | null;
   url: string;
   acesso_em: string;
-  contido_em: string | null;
-  obraParent: IObras;
 };
 
 export type IObrasAutor = {
@@ -62,6 +60,9 @@ export type IObrasAutor = {
 export function ListObras() {
   const { setTitle } = useTitle();
   const navigate = useNavigate();
+  const { instituicao } = useInstitution();
+  const { startLoading, stopLoading } = useLoading();
+  const { message } = useToast();
 
   const [openCreate, setOpenCreate] = useState(false);
   const [openCreateObraAutor, setOpenCreateObraAutor] = useState(false);
@@ -76,20 +77,34 @@ export function ListObras() {
   }, [setTitle]);
 
   const getObras = useCallback(async () => {
-    const response = await api.get('/obras');
-
-    setObras(response.data);
-  }, []);
+    startLoading();
+    try {
+      const response = await api.get('/obras', {
+        params: { instituicao_id: instituicao?.id },
+      });
+      setObras(response.data);
+    } catch (error: any) {
+      message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+    } finally {
+      stopLoading();
+    }
+  }, [instituicao?.id, message, startLoading, stopLoading]);
 
   useEffect(() => {
     getObras();
   }, [getObras]);
 
   const getObrasAutores = useCallback(async () => {
-    const response = await api.get('/obra_autor');
-
-    setObrasAutor(response.data);
-  }, []);
+    startLoading();
+    try {
+      const response = await api.get('/obra_autor');
+      setObrasAutor(response.data);
+    } catch (error: any) {
+      message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+    } finally {
+      stopLoading();
+    }
+  }, [message, startLoading, stopLoading]);
 
   useEffect(() => {
     getObrasAutores();
@@ -104,8 +119,8 @@ export function ListObras() {
   const colunas = useMemo<Col<IObras>[]>(() => {
     return [
       { name: 'Obra', propriedadeName: 'obra_nome' },
-      { name: 'Autor', propriedadeName: 'capitulo_nome' },
-      { name: 'Categoria', propriedadeName: 'item_tipo' },
+      { name: 'Tipo', propriedadeName: 'item_tipo' },
+      { name: 'Ano', propriedadeName: 'ano' },
       {
         name: 'Ações',
         personalizarCol: (item) => {
@@ -182,6 +197,12 @@ export function ListObras() {
             }}
           >
             <Stack direction="row" spacing={8}>
+              <Button
+                sx={{ color: '#000', fontWeight: 'bold' }}
+                onClick={() => navigate('/instituicoes')}
+              >
+                Instituições
+              </Button>
               <Button sx={{ color: '#000', fontWeight: 'bold' }} onClick={() => navigate('/areas')}>
                 Áreas do Conhecimento
               </Button>

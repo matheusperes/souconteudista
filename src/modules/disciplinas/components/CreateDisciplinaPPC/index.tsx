@@ -15,6 +15,7 @@ import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 
 import { FormSelect } from '#shared/components/Form/FormSelect';
+import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
@@ -73,15 +74,6 @@ type IForm = {
   versao: { id: string; label: string };
 };
 
-type IFormApi = {
-  ppc_id: string;
-  disciplina_versao_id: string;
-  modulo: number;
-  semestre: number;
-  perfis_id: string[];
-  competencias_id: string[];
-};
-
 export function CreateDisciplinaPPC({
   open,
   onClose,
@@ -92,6 +84,7 @@ export function CreateDisciplinaPPC({
 }: ICreateDisciplinaPPC) {
   const { startLoading, stopLoading } = useLoading();
   const { message } = useToast();
+  const { instituicao } = useInstitution();
 
   const { handleSubmit, control, reset } = useForm<IForm>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -143,7 +136,9 @@ export function CreateDisciplinaPPC({
     async function getDisciplinas() {
       startLoading();
       try {
-        const response = await api.get('/disciplinas');
+        const response = await api.get('/disciplinas', {
+          params: { instituicao_id: instituicao?.id },
+        });
 
         setDisciplinas(response.data);
       } catch (error: any) {
@@ -154,7 +149,7 @@ export function CreateDisciplinaPPC({
     }
 
     getDisciplinas();
-  }, [message, startLoading, stopLoading]);
+  }, [instituicao?.id, message, startLoading, stopLoading]);
 
   const DisciplinaOption = useMemo(() => {
     return disciplinas.map((disciplina_1) => {
@@ -171,7 +166,7 @@ export function CreateDisciplinaPPC({
       try {
         if (disciplinaId !== null) {
           const response = await api.get('/versoes', {
-            params: { disciplina_id: disciplinaId.id },
+            params: { disciplina_id: disciplinaId.id, instituicao_id: instituicao?.id },
           });
 
           setVersao(response.data);
@@ -184,7 +179,7 @@ export function CreateDisciplinaPPC({
     }
 
     getVersao();
-  }, [disciplinaId, disciplinaId?.id, message, startLoading, stopLoading]);
+  }, [disciplinaId, disciplinaId?.id, instituicao?.id, message, startLoading, stopLoading]);
 
   const VersaoOption = useMemo(() => {
     return versao.map((versao_1) => {
@@ -224,7 +219,8 @@ export function CreateDisciplinaPPC({
         return perfil.id;
       });
       try {
-        await api.post<any, any, IFormApi>('/ppc_disciplina_versao', {
+        await api.post('/ppc_disciplina_versao', {
+          instituicao_id: instituicao?.id,
           ppc_id,
           modulo,
           semestre,
@@ -244,7 +240,7 @@ export function CreateDisciplinaPPC({
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [ppc_id, modulo, semestre, reloadList, message, onClose, reset],
+    [instituicao?.id, ppc_id, modulo, semestre, reloadList, message, onClose, reset],
   );
 
   return (
@@ -377,7 +373,7 @@ export function CreateDisciplinaPPC({
               <FormSelect
                 control={control}
                 name="competencias"
-                label="Competncias"
+                label="Competencias"
                 options={CompetenciaOption}
                 optionLabel="label"
                 optionValue="id"

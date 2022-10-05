@@ -1,4 +1,4 @@
-import { ArrowForward } from '@mui/icons-material';
+import { ArrowForward, FileDownloadOutlined } from '@mui/icons-material';
 import {
   Box,
   Breadcrumbs,
@@ -8,8 +8,10 @@ import {
   TextField,
   ButtonGroup,
   IconButton,
+  Tooltip,
 } from '@mui/material';
 import { useState, useCallback, useEffect, useMemo } from 'react';
+import { CSVLink } from 'react-csv';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { Col, StyledTable } from '#shared/components/StyledTable';
@@ -101,6 +103,24 @@ export function ListAutores() {
     ];
   }, []);
 
+  const headers = [
+    { label: 'id', key: 'id' },
+    { label: 'Primeiro Nome', key: 'primeiro_nome' },
+    { label: 'Nome do Meio', key: 'nome_meio' },
+    { label: 'Ultimo Nome', key: 'ultimo_nome' },
+    { label: 'Citacao', key: 'citacao' },
+    { label: 'Nacionalidade', key: 'nacionalidade' },
+  ];
+
+  const data = autores.map((autor) => ({
+    id: autor.id,
+    primeiro_nome: autor.first_name,
+    nome_meio: autor.middle_name,
+    ultimo_nome: autor.last_name,
+    citacao: autor.quote,
+    nacionalidade: autor.nationality,
+  }));
+
   return (
     <>
       <CreateAutoresModal
@@ -141,6 +161,12 @@ export function ListAutores() {
             }}
           >
             <Stack direction="row" spacing={8}>
+              <Button
+                sx={{ color: '#000', fontWeight: 'bold' }}
+                onClick={() => navigate('/instituicoes')}
+              >
+                Instituições
+              </Button>
               <Button sx={{ color: '#000', fontWeight: 'bold' }} onClick={() => navigate('/areas')}>
                 Áreas do Conhecimento
               </Button>
@@ -197,6 +223,23 @@ export function ListAutores() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </Box>
+          </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              mt: '0.5rem',
+            }}
+          >
+            <Box />
+            <CSVLink data={data} headers={headers} filename="autores.csv">
+              <Tooltip title="Export CSV" placement="left">
+                <IconButton>
+                  <FileDownloadOutlined />
+                </IconButton>
+              </Tooltip>
+            </CSVLink>
           </Box>
           <Box sx={{ marginTop: '1rem' }}>
             <StyledTable

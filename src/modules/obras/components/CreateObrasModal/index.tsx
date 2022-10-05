@@ -1,16 +1,13 @@
+import { yupResolver } from '@hookform/resolvers/yup';
 import CloseIcon from '@mui/icons-material/Close';
-import {
-  Dialog,
-  Box,
-  DialogTitle,
-  IconButton,
-  Grid,
-  TextField,
-  Button,
-  Autocomplete,
-} from '@mui/material';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Dialog, Box, DialogTitle, IconButton, Grid, Button } from '@mui/material';
+import { useCallback } from 'react';
+import { useForm } from 'react-hook-form';
+import * as yup from 'yup';
 
+import { MyTextField } from '#shared/components/Form/TextField';
+import { useInstitution } from '#shared/hooks/institution';
+import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
 
 import { IObras } from '#modules/obras/pages/ListObras';
@@ -21,149 +18,106 @@ type ICreateObrasModal = {
   onClose: () => void;
 };
 
-export type ObraOption = {
-  id: string;
-  label: string;
+type IForm = {
+  item_tipo: string;
+  obra_nome: string;
+  serie_nome: string;
+  colecao_nome: string;
+  cidade: string;
+  editora: string;
+  dia: string;
+  mes: string;
+  ano: number;
+  volume: string;
+  edicao: string;
+  resumo: string;
+  periodico_nome: string;
+  periodico_abreviacao: string;
+  numero: string;
+  paginas: string;
+  idioma: string;
+  doi: string;
+  isbn: string | null;
+  issn: string | null;
+  url: string;
+  acesso_em: string;
 };
 
+const validateForm = yup.object().shape({
+  item_tipo: yup.string().required('Obra precisa ter um tipo'),
+  obra_nome: yup.string().required('Obra precisa ter um nome'),
+  serie_nome: yup.string().required('Obra precisa ter uma série'),
+  colecao_nome: yup.string().required('Obra precisa ter uma coleção'),
+  cidade: yup.string().required('Obra precisa ter uma cidade'),
+  editora: yup.string().required('Obra precisa ter uma editora'),
+  dia: yup.string().required('Obra precisa ter um dia'),
+  mes: yup.string().required('Obra precisa ter um mês'),
+  ano: yup.number().required('Obra precisa ter um ano'),
+  volume: yup.string().required('Obra precisa ter um volume'),
+  edicao: yup.string().required('Obra precisa ter uma edição'),
+  resumo: yup.string().required('Obra precisa ter um resumo'),
+  periodico_nome: yup.string().required('Obra precisa ter um periodico'),
+  periodico_abreviacao: yup.string().required('periodico precisa ter uma abreviação'),
+  numero: yup.string().required('Obra precisa ter um número'),
+  paginas: yup.string().required('Obra precisa ter páginas'),
+  idioma: yup.string().required('Obra precisa ter um idioma'),
+  doi: yup.string().required('Obra precisa ter um doi'),
+  url: yup.string().required('Obra precisa ter uma url'),
+  acesso_em: yup.string().required('Obra precisa ter uma data de acesso'),
+});
+
 export function CreateObrasModal({ updateListObras, open, onClose }: ICreateObrasModal) {
-  const [tipo, setTipo] = useState('');
-  const [obraName, setObraName] = useState('');
-  const [capituloName, setCapituloName] = useState('');
-  const [serieName, setSerieName] = useState('');
-  const [colecaoName, setColecaoName] = useState('');
-  const [organizadorName, setOrganizadorName] = useState('');
-  const [funcao, setFuncao] = useState('');
-  const [cidade, setCidade] = useState('');
-  const [editora, setEditora] = useState('');
-  const [ano, setAno] = useState('');
-  const [mes, setMes] = useState('');
-  const [dia, setDia] = useState('');
-  const [volume, setVolume] = useState('');
-  const [edicao, setEdicao] = useState('');
-  const [resumo, setResumo] = useState('');
-  const [periodicoNome, setPeriodicoNome] = useState('');
-  const [periodicoAbrev, setPeriodicoAbrev] = useState('');
-  const [numero, setNumero] = useState('');
-  const [paginas, setPaginas] = useState('');
-  const [idioma, setIdioma] = useState('');
-  const [doi, setDoi] = useState('');
-  const [isbn, setIsbn] = useState('');
-  const [issn, setIssn] = useState('');
-  const [url, SetUrl] = useState('');
-  const [acesso, setAcesso] = useState('');
-  const [obras, setObras] = useState<IObras[]>([]);
-  const [obraId, setObraId] = useState<ObraOption | null>(null);
+  const { message } = useToast();
+  const { instituicao } = useInstitution();
 
-  useEffect(() => {
-    async function getObras() {
-      const response = await api.get('/obras');
+  const {
+    handleSubmit,
+    formState: { errors },
+    control,
+    reset,
+  } = useForm<IForm>({
+    resolver: yupResolver(validateForm),
+  });
 
-      setObras(response.data);
-    }
+  const handleCreate = useCallback(
+    async (form: IForm) => {
+      try {
+        const response = await api.post('/obras', {
+          instituicao_id: instituicao?.id,
+          item_tipo: form.item_tipo,
+          obra_nome: form.obra_nome,
+          serie_nome: form.serie_nome,
+          colecao_nome: form.colecao_nome,
+          cidade: form.cidade,
+          editora: form.editora,
+          dia: form.dia,
+          mes: form.mes,
+          ano: form.ano,
+          volume: form.volume,
+          edicao: form.edicao,
+          resumo: form.resumo,
+          periodico_nome: form.periodico_nome,
+          periodico_abreviacao: form.periodico_abreviacao,
+          numero: form.numero,
+          paginas: form.paginas,
+          idioma: form.idioma,
+          doi: form.doi,
+          isbn: form.isbn,
+          issn: form.issn,
+          url: form.url,
+          acesso_em: form.acesso_em,
+        });
 
-    getObras();
-  }, []);
-
-  const obraOptions = useMemo(() => {
-    return obras.map((obra) => {
-      return {
-        id: obra.id,
-        label: obra.obra_nome,
-      };
-    });
-  }, [obras]);
-
-  const handleCreate = useCallback(async () => {
-    if (obraId !== null) {
-      const response = await api.post('/obras', {
-        item_tipo: tipo,
-        obra_nome: obraName,
-        capitulo_nome: capituloName,
-        serie_nome: serieName,
-        colecao_nome: colecaoName,
-        organizador_editor_nome: organizadorName,
-        funcao,
-        cidade,
-        editora,
-        ano,
-        mes,
-        dia,
-        volume,
-        edicao,
-        resumo,
-        periodico_nome: periodicoNome,
-        periodico_abreviacao: periodicoAbrev,
-        numero,
-        paginas,
-        idioma,
-        doi,
-        isbn,
-        issn,
-        url,
-        acesso_em: acesso,
-        contido_em: obraId.id,
-      });
-
-      updateListObras(response.data);
-      setTipo('');
-      setObraName('');
-      setCapituloName('');
-      setSerieName('');
-      setColecaoName('');
-      setOrganizadorName('');
-      setFuncao('');
-      setCidade('');
-      setEditora('');
-      setAno('');
-      setMes('');
-      setDia('');
-      setVolume('');
-      setEdicao('');
-      setResumo('');
-      setPeriodicoNome('');
-      setPeriodicoAbrev('');
-      setNumero('');
-      setPaginas('');
-      setIdioma('');
-      setDoi('');
-      setIsbn('');
-      setIssn('');
-      SetUrl('');
-      setAcesso('');
-      setObraId(null);
-      onClose();
-    }
-  }, [
-    obraId,
-    tipo,
-    obraName,
-    capituloName,
-    serieName,
-    colecaoName,
-    organizadorName,
-    funcao,
-    cidade,
-    editora,
-    ano,
-    mes,
-    dia,
-    volume,
-    edicao,
-    resumo,
-    periodicoNome,
-    periodicoAbrev,
-    numero,
-    paginas,
-    idioma,
-    doi,
-    isbn,
-    issn,
-    url,
-    acesso,
-    updateListObras,
-    onClose,
-  ]);
+        updateListObras(response.data);
+        message({ mensagem: 'Obra Cadastrada', tipo: 'success' });
+        reset();
+        onClose();
+      } catch (error: any) {
+        message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+      }
+    },
+    [instituicao?.id, updateListObras, message, reset, onClose],
+  );
 
   return (
     <Dialog onClose={onClose} open={open}>
@@ -174,307 +128,147 @@ export function CreateObrasModal({ updateListObras, open, onClose }: ICreateObra
         </IconButton>
       </Box>
       <Box sx={{ padding: '1rem' }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Nome do Organizador"
-                variant="outlined"
-                value={organizadorName}
-                onChange={(event) => setOrganizadorName(event.target.value)}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={12}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Função"
-                variant="outlined"
-                value={funcao}
-                onChange={(event) => setFuncao(event.target.value)}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={4}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
+        <form onSubmit={handleSubmit(handleCreate)} noValidate>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <MyTextField
+                name="item_tipo"
+                control={control}
+                errors={errors.item_tipo}
                 label="Tipo da Obra"
-                variant="outlined"
-                value={tipo}
-                onChange={(event) => setTipo(event.target.value)}
               />
-            </Box>
-          </Grid>
-          <Grid item xs={4}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField
+                name="obra_nome"
+                control={control}
+                errors={errors.obra_nome}
                 label="Nome da Obra"
-                variant="outlined"
-                value={obraName}
-                onChange={(event) => setObraName(event.target.value)}
               />
-            </Box>
-          </Grid>
-          <Grid item xs={4}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Nome do Capitulo"
-                variant="outlined"
-                value={capituloName}
-                onChange={(event) => setCapituloName(event.target.value)}
-              />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField
+                name="serie_nome"
+                control={control}
+                errors={errors.serie_nome}
                 label="Nome da Série"
-                variant="outlined"
-                value={serieName}
-                onChange={(event) => setSerieName(event.target.value)}
               />
-            </Box>
-          </Grid>
-          <Grid item xs={6}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField
+                name="colecao_nome"
+                control={control}
+                errors={errors.colecao_nome}
                 label="Nome da Coleção"
-                variant="outlined"
-                value={colecaoName}
-                onChange={(event) => setColecaoName(event.target.value)}
               />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Cidade"
-                variant="outlined"
-                value={cidade}
-                onChange={(event) => setCidade(event.target.value)}
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField
+                name="cidade"
+                control={control}
+                errors={errors.cidade}
+                label="Nome da Cidade"
               />
-            </Box>
-          </Grid>
-          <Grid item xs={6}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Editora"
-                variant="outlined"
-                value={editora}
-                onChange={(event) => setEditora(event.target.value)}
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField
+                name="editora"
+                control={control}
+                errors={errors.editora}
+                label="Nome da Editora"
               />
-            </Box>
-          </Grid>
-          <Grid item xs={4}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField name="dia" control={control} errors={errors.dia} label="Dia" />
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField name="mes" control={control} errors={errors.mes} label="Mes" />
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField
+                name="ano"
+                control={control}
+                errors={errors.ano}
                 label="Ano"
-                variant="outlined"
-                value={ano}
-                onChange={(event) => setAno(event.target.value)}
+                inputProps={{ inputMode: 'numeric' }}
               />
-            </Box>
-          </Grid>
-          <Grid item xs={4}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Mês"
-                variant="outlined"
-                value={mes}
-                onChange={(event) => setMes(event.target.value)}
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField name="volume" control={control} errors={errors.volume} label="Volume" />
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField name="edicao" control={control} errors={errors.edicao} label="Edição" />
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField name="resumo" control={control} errors={errors.resumo} label="Resumo" />
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField
+                name="periodico_nome"
+                control={control}
+                errors={errors.periodico_nome}
+                label="Nome do Periodico"
               />
-            </Box>
-          </Grid>
-          <Grid item xs={4}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Dia"
-                variant="outlined"
-                value={dia}
-                onChange={(event) => setDia(event.target.value)}
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField
+                name="periodico_abreviacao"
+                control={control}
+                errors={errors.periodico_abreviacao}
+                label="Abreviação do Periodico"
               />
-            </Box>
-          </Grid>
-          <Grid item xs={6}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Volume"
-                variant="outlined"
-                value={volume}
-                onChange={(event) => setVolume(event.target.value)}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={6}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Edição"
-                variant="outlined"
-                value={edicao}
-                onChange={(event) => setEdicao(event.target.value)}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={12}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Resumo"
-                variant="outlined"
-                value={resumo}
-                onChange={(event) => setResumo(event.target.value)}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={6}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Nome do Periódico"
-                variant="outlined"
-                value={periodicoNome}
-                onChange={(event) => setPeriodicoNome(event.target.value)}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={6}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Abreviação do Periódico"
-                variant="outlined"
-                value={periodicoAbrev}
-                onChange={(event) => setPeriodicoAbrev(event.target.value)}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={4}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Número"
-                variant="outlined"
-                value={numero}
-                onChange={(event) => setNumero(event.target.value)}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={4}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField name="numero" control={control} errors={errors.numero} label="Número" />
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField
+                name="paginas"
+                control={control}
+                errors={errors.paginas}
                 label="Páginas"
-                variant="outlined"
-                value={paginas}
-                onChange={(event) => setPaginas(event.target.value)}
               />
-            </Box>
-          </Grid>
-          <Grid item xs={4}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Idioma"
-                variant="outlined"
-                value={idioma}
-                onChange={(event) => setIdioma(event.target.value)}
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField name="idioma" control={control} errors={errors.idioma} label="Idioma" />
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField name="doi" control={control} errors={errors.doi} label="Doi" />
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField name="isbn" control={control} label="ISBN" />
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField name="issn" control={control} label="ISSN" />
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField name="url" control={control} errors={errors.url} label="URL" />
+            </Grid>
+            <Grid item xs={12}>
+              <MyTextField
+                name="acesso_em"
+                control={control}
+                errors={errors.acesso_em}
+                label="Acesso em"
               />
-            </Box>
-          </Grid>
-          <Grid item xs={4}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Doi"
-                variant="outlined"
-                value={doi}
-                onChange={(event) => setDoi(event.target.value)}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={4}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="ISBN"
-                variant="outlined"
-                value={isbn}
-                onChange={(event) => setIsbn(event.target.value)}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={4}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="ISSN"
-                variant="outlined"
-                value={issn}
-                onChange={(event) => setIssn(event.target.value)}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={12}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="URL"
-                variant="outlined"
-                value={url}
-                onChange={(event) => SetUrl(event.target.value)}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={12}>
-            <Box display="flex" alignItems="center">
-              <TextField
-                fullWidth
-                label="Acessado em"
-                variant="outlined"
-                value={acesso}
-                onChange={(event) => setAcesso(event.target.value)}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={12}>
-            <Box>
-              <Autocomplete
-                value={obraId}
-                onChange={(event: any, newValue) => {
-                  setObraId(newValue);
-                }}
-                disablePortal
-                id="combo-box-demo"
-                options={obraOptions}
-                renderInput={(params) => <TextField {...params} label="Contido em" fullWidth />}
-              />
-            </Box>
-          </Grid>
+            </Grid>
 
-          <Grid item xs={12}>
-            <Box display="flex" alignItems="center" marginBottom="1rem">
-              <Button fullWidth variant="contained" onClick={handleCreate}>
+            <Grid item xs={12} sx={{ marginBottom: '1rem' }}>
+              <Button
+                sx={{
+                  background: '#0b0f79',
+                  color: '#E5E5E5',
+                  '&:hover': { background: '#020560' },
+                }}
+                fullWidth
+                variant="contained"
+                type="submit"
+              >
                 Inserir
               </Button>
-            </Box>
+            </Grid>
           </Grid>
-        </Grid>
+        </form>
       </Box>
     </Dialog>
   );

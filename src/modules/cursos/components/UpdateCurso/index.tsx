@@ -7,6 +7,7 @@ import * as yup from 'yup';
 
 import { FormCheckbox } from '#shared/components/Form/CheckBox';
 import { MyTextField } from '#shared/components/Form/TextField';
+import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
@@ -36,6 +37,7 @@ const validateForm = yup.object().shape({
 export function UpdateCursoModal({ open, onClose, curso_id, reloadList }: UpdateCursoModal) {
   const { startLoading, stopLoading } = useLoading();
   const { message } = useToast();
+  const { instituicao } = useInstitution();
 
   const [data, setData] = useState<ICursoApi | null>(null);
 
@@ -68,7 +70,11 @@ export function UpdateCursoModal({ open, onClose, curso_id, reloadList }: Update
   const handleUpdate = useCallback(
     async (form: IForm) => {
       try {
-        await api.put(`/cursos/${curso_id}`, { name: form.name, active: form.active });
+        await api.put(`/cursos/${curso_id}`, {
+          instituicao_id: instituicao?.id,
+          name: form.name,
+          active: form.active,
+        });
 
         if (reloadList) {
           reloadList();
@@ -82,7 +88,7 @@ export function UpdateCursoModal({ open, onClose, curso_id, reloadList }: Update
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [curso_id, reloadList, message, reset, onClose],
+    [curso_id, instituicao?.id, reloadList, message, reset, onClose],
   );
 
   return (

@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 
 import { MyTextField } from '#shared/components/Form/TextField';
+import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
@@ -37,6 +38,7 @@ const validateForm = yup.object().shape({
 export function UpdatePerfilModal({ reloadList, open, onClose, perfil_id }: IUpdatePerfilModal) {
   const { startLoading, stopLoading } = useLoading();
   const { message } = useToast();
+  const { instituicao } = useInstitution();
 
   const [data, setData] = useState<Perfil | null>(null);
 
@@ -69,6 +71,7 @@ export function UpdatePerfilModal({ reloadList, open, onClose, perfil_id }: IUpd
     async (form: IForm) => {
       try {
         await api.put(`/perfis/${perfil_id}`, {
+          instituicao_id: instituicao?.id,
           perfil: form.perfil,
           perfilNumero: form.perfilNumero,
         });
@@ -83,7 +86,7 @@ export function UpdatePerfilModal({ reloadList, open, onClose, perfil_id }: IUpd
         message({ mensagem: error.response?.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [perfil_id, reloadList, message, reset, onClose],
+    [perfil_id, instituicao?.id, reloadList, message, reset, onClose],
   );
 
   return (

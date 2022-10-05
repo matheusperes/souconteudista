@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 
 import { MyTextField } from '#shared/components/Form/TextField';
+import { useInstitution } from '#shared/hooks/institution';
 import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
 
@@ -33,6 +34,7 @@ type ICreateAreaModal = {
 
 export function CreateAreaModal({ updateListArea, open, onClose }: ICreateAreaModal) {
   const { message } = useToast();
+  const { instituicao } = useInstitution();
 
   const {
     handleSubmit,
@@ -47,6 +49,7 @@ export function CreateAreaModal({ updateListArea, open, onClose }: ICreateAreaMo
     async (form: IForm) => {
       try {
         const response = await api.post('/areas', {
+          instituicao_id: instituicao?.id,
           name: form.name,
           description: form.description,
         });
@@ -58,7 +61,7 @@ export function CreateAreaModal({ updateListArea, open, onClose }: ICreateAreaMo
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [updateListArea, message, reset, onClose],
+    [instituicao?.id, updateListArea, message, reset, onClose],
   );
 
   return (

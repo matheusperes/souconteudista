@@ -15,7 +15,7 @@ export function TitleProvider({ children }: TitleProviderProps) {
   const [title, setTitle] = useState('');
 
   const updateTitle = useCallback((newTitle: string) => {
-    document.title = `Sou Conteudista ${newTitle}`;
+    document.title = `MyComparator ${newTitle}`;
     setTitle(newTitle);
   }, []);
 

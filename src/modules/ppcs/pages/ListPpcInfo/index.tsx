@@ -21,11 +21,13 @@ import {
   IconButton,
   InputAdornment,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
+import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
 import { useToast } from '#shared/hooks/toast';
@@ -135,7 +137,7 @@ type CursoOption = {
 
 type PPCOption = {
   id: string;
-  label: number;
+  label: string;
 };
 
 export function InfoPpcs() {
@@ -144,6 +146,7 @@ export function InfoPpcs() {
   const navigate = useNavigate();
   const { message } = useToast();
   const { startLoading, stopLoading } = useLoading();
+  const { instituicao } = useInstitution();
 
   const [searchPerfil, setSearchPerfil] = useState('');
   const [searchPerfil2, setSearchPerfil2] = useState('');
@@ -216,13 +219,15 @@ export function InfoPpcs() {
 
   useEffect(() => {
     async function getCursos() {
-      const response = await api.get('/cursos');
+      const response = await api.get('/cursos', {
+        params: { instituicao_id: instituicao?.id },
+      });
 
       setCursos(response.data);
     }
 
     getCursos();
-  }, []);
+  }, [instituicao?.id]);
 
   useEffect(() => {
     async function getPPCs() {
@@ -230,7 +235,7 @@ export function InfoPpcs() {
         startLoading();
         try {
           const response = await api.get('/ppcs', {
-            params: { curso_id: cursosId.id },
+            params: { curso_id: cursosId.id, instituicao_id: instituicao?.id },
           });
           setppcs(response.data);
         } catch (error: any) {
@@ -242,7 +247,7 @@ export function InfoPpcs() {
     }
 
     getPPCs();
-  }, [cursosId, message, ppc?.curso.id, startLoading, stopLoading]);
+  }, [cursosId, instituicao?.id, message, ppc?.curso.id, startLoading, stopLoading]);
 
   const CursoOption1 = useMemo(() => {
     return cursos.map((curso) => {
@@ -257,7 +262,7 @@ export function InfoPpcs() {
     return ppcs.map((ppc1) => {
       return {
         id: ppc1.id,
-        label: ppc1.anoVoto,
+        label: String(ppc1.anoVoto),
       };
     });
   }, [ppcs]);
@@ -478,21 +483,37 @@ export function InfoPpcs() {
           </Box>
           {ppc && (
             <>
-              <Box sx={{ marginTop: '1rem' }}>
+              <Box
+                sx={{
+                  marginTop: '1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
                 <Typography sx={{ fontWeight: 'bold', fontSize: '2rem' }}>
                   {ppc.curso.name}
                 </Typography>
               </Box>
-              <Box sx={{ marginTop: '0.375rem', display: 'flex', justifyContent: 'space-between' }}>
+              <Box
+                sx={{
+                  marginTop: '0.375rem',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
                 <Typography sx={{ fontSize: '1rem' }}>{`PPC ${ppc?.anoVoto}`}</Typography>
-                <Icon
-                  sx={{ height: '33px', cursor: 'pointer' }}
-                  onClick={() => {
-                    setComparadorCollapse(!comparadorCollapse);
-                  }}
-                >
-                  <img src={image10} alt="comparador" />
-                </Icon>
+                <Tooltip title="Comparador" placement="left">
+                  <Icon
+                    sx={{ height: '33px', cursor: 'pointer' }}
+                    onClick={() => {
+                      setComparadorCollapse(!comparadorCollapse);
+                    }}
+                  >
+                    <img src={image10} alt="comparador" />
+                  </Icon>
+                </Tooltip>
               </Box>
               <Box
                 sx={{
@@ -567,7 +588,7 @@ export function InfoPpcs() {
                         />
                       </Box>
                       {filteredPerfil?.map((perfil) => (
-                        <Box sx={{ marginTop: '0.5rem' }}>
+                        <Box sx={{ marginTop: '0.5rem' }} key={perfil.id}>
                           <Card
                             sx={{ display: 'flex', cursor: 'pointer' }}
                             onClick={() =>
@@ -694,7 +715,7 @@ export function InfoPpcs() {
                         placeholder="Pesquisar"
                       />
                       {filteredCompetencia?.map((competencia) => (
-                        <Box sx={{ marginTop: '0.5rem' }}>
+                        <Box sx={{ marginTop: '0.5rem' }} key={competencia.id}>
                           <Card
                             sx={{ display: 'flex', cursor: 'pointer' }}
                             onClick={() =>
@@ -817,7 +838,7 @@ export function InfoPpcs() {
                             <Divider sx={{ background: 'rgba(145, 147, 185, 0.34)' }} />
                             <Box>
                               {semestre.modulos.map((modulo) => (
-                                <Box>
+                                <Box key={modulo.modulo}>
                                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                     <BoxStyled>
                                       <Typography
@@ -861,6 +882,7 @@ export function InfoPpcs() {
                                         display="flex"
                                         alignItems="center"
                                         justifyContent="space-between"
+                                        key={disciplina.id}
                                       >
                                         <Typography>{disciplina.name}</Typography>
                                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -981,7 +1003,10 @@ export function InfoPpcs() {
                     <IconButton
                       color="primary"
                       sx={{ color: '#020560' }}
-                      onClick={() => setComparadorCollapse(false)}
+                      onClick={() => {
+                        handleSelectPPC('');
+                        setComparadorCollapse(false);
+                      }}
                     >
                       <Close />
                     </IconButton>
@@ -1075,7 +1100,7 @@ export function InfoPpcs() {
                             />
                           </Box>
                           {filteredPerfilRender?.map((perfil) => (
-                            <Box sx={{ marginTop: '0.5rem' }}>
+                            <Box sx={{ marginTop: '0.5rem' }} key={perfil.id}>
                               <Card
                                 sx={{ display: 'flex', cursor: 'pointer' }}
                                 onClick={() =>
@@ -1209,7 +1234,7 @@ export function InfoPpcs() {
                             placeholder="Pesquisar"
                           />
                           {filteredCompetenciaRender?.map((competencia) => (
-                            <Box sx={{ marginTop: '0.5rem' }}>
+                            <Box sx={{ marginTop: '0.5rem' }} key={competencia.id}>
                               <Card
                                 sx={{ display: 'flex', cursor: 'pointer' }}
                                 onClick={() =>
@@ -1336,7 +1361,7 @@ export function InfoPpcs() {
                                 <Divider sx={{ background: 'rgba(145, 147, 185, 0.34)' }} />
                                 <Box>
                                   {semestre.modulos.map((modulo) => (
-                                    <Box>
+                                    <Box key={modulo.modulo}>
                                       <Box
                                         sx={{ display: 'flex', justifyContent: 'space-between' }}
                                       >
@@ -1382,6 +1407,7 @@ export function InfoPpcs() {
                                             display="flex"
                                             alignItems="center"
                                             justifyContent="space-between"
+                                            key={disciplina.id}
                                           >
                                             <Typography>{disciplina.name}</Typography>
                                             <Box sx={{ display: 'flex', alignItems: 'center' }}>

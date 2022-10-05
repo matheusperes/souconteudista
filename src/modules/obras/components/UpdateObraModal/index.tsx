@@ -14,7 +14,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { api } from '#shared/services/axios';
 
 import { IObras } from '../../pages/ListObras';
-import { ObraOption } from '../CreateObrasModal';
+import { ObraOption } from '../CreateObraAutorModal';
 
 type IUpdateObraModal = {
   open: boolean;

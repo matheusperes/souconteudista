@@ -8,6 +8,7 @@ import * as yup from 'yup';
 
 import { FormCheckbox } from '#shared/components/Form/CheckBox';
 import { MyTextField } from '#shared/components/Form/TextField';
+import { useInstitution } from '#shared/hooks/institution';
 import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
 
@@ -51,6 +52,7 @@ export function CreateFilteredVersaoModal({
 }: CreateFilteredVersaoModal) {
   const params = useParams();
   const { message } = useToast();
+  const { instituicao } = useInstitution();
 
   const {
     handleSubmit,
@@ -65,6 +67,7 @@ export function CreateFilteredVersaoModal({
     async (form: IForm) => {
       try {
         const response = await api.post('/versoes', {
+          instituicao_id: instituicao?.id,
           disciplina_id: params.id,
           codigo: form.codigo,
           credito_quantidade: form.credito,
@@ -81,7 +84,7 @@ export function CreateFilteredVersaoModal({
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [message, onClose, params.id, reset, updateListVersoes],
+    [instituicao?.id, message, onClose, params.id, reset, updateListVersoes],
   );
 
   return (
