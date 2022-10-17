@@ -1,0 +1,256 @@
+Date : 2022-10-17 12:46:04
+Directory : /home/matheus/Desenvolvimento/souconteudista/src
+Total : 115 files,  12879 codes, 285 comments, 1151 blanks, all 14315 lines
+
+Languages
++------------------+------------+------------+------------+------------+------------+
+| language         | files      | code       | comment    | blank      | total      |
++------------------+------------+------------+------------+------------+------------+
+| TypeScript React |         81 |     12,439 |        278 |      1,085 |     13,802 |
+| TypeScript       |         10 |        259 |          7 |         42 |        308 |
+| XML              |         24 |        181 |          0 |         24 |        205 |
++------------------+------------+------------+------------+------------+------------+
+
+Directories
++----------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                                 | files      | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                    |        115 |     12,879 |        285 |      1,151 |     14,315 |
+| modules                                                                                                              |         71 |     11,747 |        211 |        955 |     12,913 |
+| modules/areas                                                                                                        |          6 |        792 |          1 |         71 |        864 |
+| modules/areas/components                                                                                             |          3 |        308 |          1 |         32 |        341 |
+| modules/areas/components/CreateArea                                                                                  |          1 |        115 |          0 |         10 |        125 |
+| modules/areas/components/DeleteArea                                                                                  |          1 |         56 |          1 |          8 |         65 |
+| modules/areas/components/UpdateArea                                                                                  |          1 |        137 |          0 |         14 |        151 |
+| modules/areas/pages                                                                                                  |          2 |        473 |          0 |         36 |        509 |
+| modules/areas/pages/FilteredDisciplinas                                                                              |          1 |        235 |          0 |         20 |        255 |
+| modules/areas/pages/ListAreas                                                                                        |          1 |        238 |          0 |         16 |        254 |
+| modules/areas/routes                                                                                                 |          1 |         11 |          0 |          3 |         14 |
+| modules/arquetipos                                                                                                   |          2 |        270 |          0 |         16 |        286 |
+| modules/arquetipos/pages                                                                                             |          1 |        261 |          0 |         13 |        274 |
+| modules/arquetipos/pages/ListArquetipos                                                                              |          1 |        261 |          0 |         13 |        274 |
+| modules/arquetipos/routes                                                                                            |          1 |          9 |          0 |          3 |         12 |
+| modules/autores                                                                                                      |          5 |        607 |          2 |         55 |        664 |
+| modules/autores/components                                                                                           |          3 |        367 |          1 |         34 |        402 |
+| modules/autores/components/CreateAutoresModal                                                                        |          1 |        136 |          0 |         11 |        147 |
+| modules/autores/components/DeleteAutor                                                                               |          1 |         56 |          1 |          8 |         65 |
+| modules/autores/components/UpdateAutoresModal                                                                        |          1 |        175 |          0 |         15 |        190 |
+| modules/autores/pages                                                                                                |          1 |        231 |          1 |         18 |        250 |
+| modules/autores/pages/ListAutores                                                                                    |          1 |        231 |          1 |         18 |        250 |
+| modules/autores/routes                                                                                               |          1 |          9 |          0 |          3 |         12 |
+| modules/competencias                                                                                                 |          4 |        526 |          1 |         51 |        578 |
+| modules/competencias/components                                                                                      |          3 |        330 |          1 |         31 |        362 |
+| modules/competencias/components/CreateCompetenciaModalPPC                                                            |          1 |        123 |          0 |         10 |        133 |
+| modules/competencias/components/DeleteCompetencia                                                                    |          1 |         56 |          1 |          8 |         65 |
+| modules/competencias/components/UpdateCompetenciaModal                                                               |          1 |        151 |          0 |         13 |        164 |
+| modules/competencias/pages                                                                                           |          1 |        196 |          0 |         20 |        216 |
+| modules/competencias/pages/FilteredCompetencia                                                                       |          1 |        196 |          0 |         20 |        216 |
+| modules/cursos                                                                                                       |          7 |        573 |          4 |         82 |        659 |
+| modules/cursos/components                                                                                            |          5 |        387 |          3 |         59 |        449 |
+| modules/cursos/components/CreateCurso                                                                                |          1 |        103 |          0 |         15 |        118 |
+| modules/cursos/components/CursoCard                                                                                  |          2 |         86 |          2 |         19 |        107 |
+| modules/cursos/components/DeleteCurso                                                                                |          1 |         56 |          1 |          8 |         65 |
+| modules/cursos/components/UpdateCurso                                                                                |          1 |        142 |          0 |         17 |        159 |
+| modules/cursos/pages                                                                                                 |          1 |        169 |          1 |         19 |        189 |
+| modules/cursos/pages/ListCursos                                                                                      |          1 |        169 |          1 |         19 |        189 |
+| modules/cursos/routes                                                                                                |          1 |         17 |          0 |          4 |         21 |
+| modules/disciplinas                                                                                                  |         10 |      1,833 |         59 |        165 |      2,057 |
+| modules/disciplinas/components                                                                                       |          7 |      1,308 |         59 |        121 |      1,488 |
+| modules/disciplinas/components/CreateDisciplina                                                                      |          1 |        147 |          0 |         12 |        159 |
+| modules/disciplinas/components/CreateDisciplinaFiltered                                                              |          1 |        119 |          0 |         10 |        129 |
+| modules/disciplinas/components/CreateDisciplinaPPC                                                                   |          1 |        375 |         57 |         28 |        460 |
+| modules/disciplinas/components/DeleteDisciplina                                                                      |          1 |         56 |          1 |          8 |         65 |
+| modules/disciplinas/components/DeleteDisciplinaPPC                                                                   |          1 |         61 |          1 |          8 |         70 |
+| modules/disciplinas/components/UpdateDisciplina                                                                      |          1 |        183 |          0 |         17 |        200 |
+| modules/disciplinas/components/UpdateDisciplinaPPC                                                                   |          1 |        367 |          0 |         38 |        405 |
+| modules/disciplinas/pages                                                                                            |          2 |        512 |          0 |         40 |        552 |
+| modules/disciplinas/pages/FilteredVersoes                                                                            |          1 |        263 |          0 |         22 |        285 |
+| modules/disciplinas/pages/ListDisciplinas                                                                            |          1 |        249 |          0 |         18 |        267 |
+| modules/disciplinas/routes                                                                                           |          1 |         13 |          0 |          4 |         17 |
+| modules/home                                                                                                         |          3 |        248 |          1 |         15 |        264 |
+| modules/home/pages                                                                                                   |          2 |        239 |          1 |         12 |        252 |
+| modules/home/pages/Home                                                                                              |          2 |        239 |          1 |         12 |        252 |
+| modules/home/routes                                                                                                  |          1 |          9 |          0 |          3 |         12 |
+| modules/instituicoes                                                                                                 |          5 |        573 |          1 |         50 |        624 |
+| modules/instituicoes/components                                                                                      |          3 |        367 |          1 |         31 |        399 |
+| modules/instituicoes/components/CreateInstituicoes                                                                   |          1 |        132 |          0 |         10 |        142 |
+| modules/instituicoes/components/DeleteInstituicao                                                                    |          1 |         61 |          1 |          8 |         70 |
+| modules/instituicoes/components/UpdateInstituicoes                                                                   |          1 |        174 |          0 |         13 |        187 |
+| modules/instituicoes/pages                                                                                           |          1 |        197 |          0 |         16 |        213 |
+| modules/instituicoes/pages/ListInstituicoes                                                                          |          1 |        197 |          0 |         16 |        213 |
+| modules/instituicoes/routes                                                                                          |          1 |          9 |          0 |          3 |         12 |
+| modules/obras                                                                                                        |          6 |      1,314 |         10 |         99 |      1,423 |
+| modules/obras/components                                                                                             |          4 |      1,050 |          9 |         75 |      1,134 |
+| modules/obras/components/CreateObraAutorModal                                                                        |          1 |        146 |          0 |         18 |        164 |
+| modules/obras/components/CreateObrasModal                                                                            |          1 |        439 |          8 |         30 |        477 |
+| modules/obras/components/DeleteObra                                                                                  |          1 |         56 |          1 |          8 |         65 |
+| modules/obras/components/UpdateObraModal                                                                             |          1 |        409 |          0 |         19 |        428 |
+| modules/obras/pages                                                                                                  |          1 |        255 |          1 |         21 |        277 |
+| modules/obras/pages/ListObras                                                                                        |          1 |        255 |          1 |         21 |        277 |
+| modules/obras/routes                                                                                                 |          1 |          9 |          0 |          3 |         12 |
+| modules/perfis                                                                                                       |          4 |        516 |          1 |         52 |        569 |
+| modules/perfis/components                                                                                            |          3 |        320 |          1 |         32 |        353 |
+| modules/perfis/components/CreatePerfilModalPPC                                                                       |          1 |        116 |          0 |         10 |        126 |
+| modules/perfis/components/DeletePerfilModal                                                                          |          1 |         56 |          1 |          8 |         65 |
+| modules/perfis/components/UpdatePerfilModal                                                                          |          1 |        148 |          0 |         14 |        162 |
+| modules/perfis/pages                                                                                                 |          1 |        196 |          0 |         20 |        216 |
+| modules/perfis/pages/FilteredPerfil                                                                                  |          1 |        196 |          0 |         20 |        216 |
+| modules/ppcs                                                                                                         |          9 |      2,460 |         17 |        154 |      2,631 |
+| modules/ppcs/components                                                                                              |          3 |        495 |          1 |         40 |        536 |
+| modules/ppcs/components/CreatePPC                                                                                    |          1 |        165 |          0 |         11 |        176 |
+| modules/ppcs/components/DeletePPC                                                                                    |          1 |         56 |          1 |          8 |         65 |
+| modules/ppcs/components/UpdatePPC                                                                                    |          1 |        274 |          0 |         21 |        295 |
+| modules/ppcs/pages                                                                                                   |          5 |      1,954 |         16 |        111 |      2,081 |
+| modules/ppcs/pages/ListPpcInfo                                                                                       |          4 |      1,590 |         15 |         85 |      1,690 |
+| modules/ppcs/pages/ListPpcsCurso                                                                                     |          1 |        364 |          1 |         26 |        391 |
+| modules/ppcs/routes                                                                                                  |          1 |         11 |          0 |          3 |         14 |
+| modules/versoes                                                                                                      |         10 |      2,035 |        114 |        145 |      2,294 |
+| modules/versoes/components                                                                                           |          6 |        850 |          6 |         69 |        925 |
+| modules/versoes/components/CraeteFilteredVersaoModal                                                                 |          1 |        145 |          0 |         11 |        156 |
+| modules/versoes/components/CreateVersaoModal                                                                         |          1 |        174 |          0 |         15 |        189 |
+| modules/versoes/components/DeleteEspecificVersao                                                                     |          1 |         55 |          1 |          8 |         64 |
+| modules/versoes/components/DeleteVersao                                                                              |          1 |         56 |          1 |          8 |         65 |
+| modules/versoes/components/PPCRow                                                                                    |          1 |        200 |          4 |         10 |        214 |
+| modules/versoes/components/UpdateVersaoModal                                                                         |          1 |        220 |          0 |         17 |        237 |
+| modules/versoes/pages                                                                                                |          3 |      1,176 |        108 |         73 |      1,357 |
+| modules/versoes/pages/FilteredVersao                                                                                 |          2 |        927 |        108 |         57 |      1,092 |
+| modules/versoes/pages/ListVersoes                                                                                    |          1 |        249 |          0 |         16 |        265 |
+| modules/versoes/routes                                                                                               |          1 |          9 |          0 |          3 |         12 |
+| shared                                                                                                               |         41 |      1,106 |         73 |        188 |      1,367 |
+| shared/components                                                                                                    |         10 |        696 |         61 |        105 |        862 |
+| shared/components/Form                                                                                               |          4 |        158 |         15 |         21 |        194 |
+| shared/components/Form/CheckBox                                                                                      |          1 |         32 |         14 |          7 |         53 |
+| shared/components/Form/FormSelect                                                                                    |          2 |        100 |          1 |         11 |        112 |
+| shared/components/Form/TextField                                                                                     |          1 |         26 |          0 |          3 |         29 |
+| shared/components/Header                                                                                             |          1 |        221 |          3 |         24 |        248 |
+| shared/components/Modal                                                                                              |          1 |        112 |          0 |         15 |        127 |
+| shared/components/Modal/InstituicaoModal                                                                             |          1 |        112 |          0 |         15 |        127 |
+| shared/components/SortableContainer                                                                                  |          2 |        117 |          9 |         31 |        157 |
+| shared/components/StyledTable                                                                                        |          2 |         88 |         34 |         14 |        136 |
+| shared/hooks                                                                                                         |          5 |        211 |          0 |         55 |        266 |
+| shared/images                                                                                                        |         24 |        181 |          0 |         24 |        205 |
+| shared/routes                                                                                                        |          1 |         14 |         12 |          2 |         28 |
+| shared/services                                                                                                      |          1 |          4 |          0 |          2 |          6 |
++----------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++----------------------------------------------------------------------------------------------------------------------+------------------+------------+------------+------------+------------+
+| filename                                                                                                             | language         | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------------------------------------------------+------------------+------------+------------+------------+------------+
+| /home/matheus/Desenvolvimento/souconteudista/src/App.tsx                                                             | TypeScript React |         17 |          0 |          4 |         21 |
+| /home/matheus/Desenvolvimento/souconteudista/src/index.tsx                                                           | TypeScript React |          9 |          0 |          3 |         12 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/areas/components/CreateArea/index.tsx                       | TypeScript React |        115 |          0 |         10 |        125 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/areas/components/DeleteArea/index.tsx                       | TypeScript React |         56 |          1 |          8 |         65 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/areas/components/UpdateArea/index.tsx                       | TypeScript React |        137 |          0 |         14 |        151 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/areas/pages/FilteredDisciplinas/index.tsx                   | TypeScript React |        235 |          0 |         20 |        255 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/areas/pages/ListAreas/index.tsx                             | TypeScript React |        238 |          0 |         16 |        254 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/areas/routes/index.tsx                                      | TypeScript React |         11 |          0 |          3 |         14 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/arquetipos/pages/ListArquetipos/index.tsx                   | TypeScript React |        261 |          0 |         13 |        274 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/arquetipos/routes/index.tsx                                 | TypeScript React |          9 |          0 |          3 |         12 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/autores/components/CreateAutoresModal/index.tsx             | TypeScript React |        136 |          0 |         11 |        147 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/autores/components/DeleteAutor/index.tsx                    | TypeScript React |         56 |          1 |          8 |         65 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/autores/components/UpdateAutoresModal/index.tsx             | TypeScript React |        175 |          0 |         15 |        190 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/autores/pages/ListAutores/index.tsx                         | TypeScript React |        231 |          1 |         18 |        250 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/autores/routes/index.tsx                                    | TypeScript React |          9 |          0 |          3 |         12 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/competencias/components/CreateCompetenciaModalPPC/index.tsx | TypeScript React |        123 |          0 |         10 |        133 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/competencias/components/DeleteCompetencia/index.tsx         | TypeScript React |         56 |          1 |          8 |         65 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/competencias/components/UpdateCompetenciaModal/index.tsx    | TypeScript React |        151 |          0 |         13 |        164 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/competencias/pages/FilteredCompetencia/index.tsx            | TypeScript React |        196 |          0 |         20 |        216 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/cursos/components/CreateCurso/index.tsx                     | TypeScript React |        103 |          0 |         15 |        118 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/cursos/components/CursoCard/index.tsx                       | TypeScript React |         49 |          0 |         10 |         59 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/cursos/components/CursoCard/styles.ts                       | TypeScript       |         37 |          2 |          9 |         48 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/cursos/components/DeleteCurso/index.tsx                     | TypeScript React |         56 |          1 |          8 |         65 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/cursos/components/UpdateCurso/index.tsx                     | TypeScript React |        142 |          0 |         17 |        159 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/cursos/pages/ListCursos/index.tsx                           | TypeScript React |        169 |          1 |         19 |        189 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/cursos/routes/index.tsx                                     | TypeScript React |         17 |          0 |          4 |         21 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/disciplinas/components/CreateDisciplina/index.tsx           | TypeScript React |        147 |          0 |         12 |        159 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/disciplinas/components/CreateDisciplinaFiltered/index.tsx   | TypeScript React |        119 |          0 |         10 |        129 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/disciplinas/components/CreateDisciplinaPPC/index.tsx        | TypeScript React |        375 |         57 |         28 |        460 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/disciplinas/components/DeleteDisciplina/index.tsx           | TypeScript React |         56 |          1 |          8 |         65 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/disciplinas/components/DeleteDisciplinaPPC/index.tsx        | TypeScript React |         61 |          1 |          8 |         70 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/disciplinas/components/UpdateDisciplina/index.tsx           | TypeScript React |        183 |          0 |         17 |        200 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/disciplinas/components/UpdateDisciplinaPPC/index.tsx        | TypeScript React |        367 |          0 |         38 |        405 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/disciplinas/pages/FilteredVersoes/index.tsx                 | TypeScript React |        263 |          0 |         22 |        285 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/disciplinas/pages/ListDisciplinas/index.tsx                 | TypeScript React |        249 |          0 |         18 |        267 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/disciplinas/routes/index.tsx                                | TypeScript React |         13 |          0 |          4 |         17 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/home/pages/Home/data.ts                                     | TypeScript       |         41 |          0 |          2 |         43 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/home/pages/Home/index.tsx                                   | TypeScript React |        198 |          1 |         10 |        209 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/home/routes/index.tsx                                       | TypeScript React |          9 |          0 |          3 |         12 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/instituicoes/components/CreateInstituicoes/index.tsx        | TypeScript React |        132 |          0 |         10 |        142 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/instituicoes/components/DeleteInstituicao/index.tsx         | TypeScript React |         61 |          1 |          8 |         70 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/instituicoes/components/UpdateInstituicoes/index.tsx        | TypeScript React |        174 |          0 |         13 |        187 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/instituicoes/pages/ListInstituicoes/index.tsx               | TypeScript React |        197 |          0 |         16 |        213 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/instituicoes/routes/index.tsx                               | TypeScript React |          9 |          0 |          3 |         12 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/obras/components/CreateObraAutorModal/index.tsx             | TypeScript React |        146 |          0 |         18 |        164 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/obras/components/CreateObrasModal/index.tsx                 | TypeScript React |        439 |          8 |         30 |        477 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/obras/components/DeleteObra/index.tsx                       | TypeScript React |         56 |          1 |          8 |         65 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/obras/components/UpdateObraModal/index.tsx                  | TypeScript React |        409 |          0 |         19 |        428 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/obras/pages/ListObras/index.tsx                             | TypeScript React |        255 |          1 |         21 |        277 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/obras/routes/index.tsx                                      | TypeScript React |          9 |          0 |          3 |         12 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/perfis/components/CreatePerfilModalPPC/index.tsx            | TypeScript React |        116 |          0 |         10 |        126 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/perfis/components/DeletePerfilModal/index.tsx               | TypeScript React |         56 |          1 |          8 |         65 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/perfis/components/UpdatePerfilModal/index.tsx               | TypeScript React |        148 |          0 |         14 |        162 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/perfis/pages/FilteredPerfil/index.tsx                       | TypeScript React |        196 |          0 |         20 |        216 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/ppcs/components/CreatePPC/index.tsx                         | TypeScript React |        165 |          0 |         11 |        176 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/ppcs/components/DeletePPC/index.tsx                         | TypeScript React |         56 |          1 |          8 |         65 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/ppcs/components/UpdatePPC/index.tsx                         | TypeScript React |        274 |          0 |         21 |        295 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/ppcs/pages/ListPpcInfo/index.tsx                            | TypeScript React |      1,485 |         12 |         72 |      1,569 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/ppcs/pages/ListPpcInfo/roman.ts                             | TypeScript       |         50 |          3 |          1 |         54 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/ppcs/pages/ListPpcInfo/styles.ts                            | TypeScript       |         12 |          0 |          4 |         16 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/ppcs/pages/ListPpcInfo/utils.ts                             | TypeScript       |         43 |          0 |          8 |         51 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/ppcs/pages/ListPpcsCurso/index.tsx                          | TypeScript React |        364 |          1 |         26 |        391 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/ppcs/routes/index.tsx                                       | TypeScript React |         11 |          0 |          3 |         14 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/versoes/components/CraeteFilteredVersaoModal/index.tsx      | TypeScript React |        145 |          0 |         11 |        156 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/versoes/components/CreateVersaoModal/index.tsx              | TypeScript React |        174 |          0 |         15 |        189 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/versoes/components/DeleteEspecificVersao/index.tsx          | TypeScript React |         55 |          1 |          8 |         64 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/versoes/components/DeleteVersao/index.tsx                   | TypeScript React |         56 |          1 |          8 |         65 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/versoes/components/PPCRow/index.tsx                         | TypeScript React |        200 |          4 |         10 |        214 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/versoes/components/UpdateVersaoModal/index.tsx              | TypeScript React |        220 |          0 |         17 |        237 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/versoes/pages/FilteredVersao/index.tsx                      | TypeScript React |        898 |        107 |         51 |      1,056 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/versoes/pages/FilteredVersao/styles.ts                      | TypeScript       |         29 |          1 |          6 |         36 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/versoes/pages/ListVersoes/index.tsx                         | TypeScript React |        249 |          0 |         16 |        265 |
+| /home/matheus/Desenvolvimento/souconteudista/src/modules/versoes/routes/index.tsx                                    | TypeScript React |          9 |          0 |          3 |         12 |
+| /home/matheus/Desenvolvimento/souconteudista/src/react-app-env.d.ts                                                  | TypeScript       |          0 |          1 |          1 |          2 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/components/Form/CheckBox/index.tsx                           | TypeScript React |         32 |         14 |          7 |         53 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/components/Form/FormSelect/index.tsx                         | TypeScript React |         94 |          1 |          9 |        104 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/components/Form/FormSelect/styles.ts                         | TypeScript       |          6 |          0 |          2 |          8 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/components/Form/TextField/index.tsx                          | TypeScript React |         26 |          0 |          3 |         29 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/components/Header/index.tsx                                  | TypeScript React |        221 |          3 |         24 |        248 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/components/Modal/InstituicaoModal/index.tsx                  | TypeScript React |        112 |          0 |         15 |        127 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/components/SortableContainer/SortableItem.tsx                | TypeScript React |         71 |          9 |         20 |        100 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/components/SortableContainer/index.tsx                       | TypeScript React |         46 |          0 |         11 |         57 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/components/StyledTable/index.tsx                             | TypeScript React |         51 |         34 |          7 |         92 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/components/StyledTable/styles.ts                             | TypeScript       |         37 |          0 |          7 |         44 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/hooks/index.tsx                                              | TypeScript React |         19 |          0 |          4 |         23 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/hooks/institution.tsx                                        | TypeScript React |         80 |          0 |         17 |         97 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/hooks/loading.tsx                                            | TypeScript React |         37 |          0 |         12 |         49 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/hooks/title.tsx                                              | TypeScript React |         27 |          0 |         10 |         37 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/hooks/toast.tsx                                              | TypeScript React |         48 |          0 |         12 |         60 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/Brightplanning.svg                                    | XML              |         12 |          0 |          1 |         13 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/Business.svg                                          | XML              |         13 |          0 |          1 |         14 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/Delete.svg                                            | XML              |          3 |          0 |          1 |          4 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/Edit.svg                                              | XML              |          3 |          0 |          1 |          4 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/GenerateLead.svg                                      | XML              |         32 |          0 |          1 |         33 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/Group690.svg                                          | XML              |          8 |          0 |          1 |          9 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/Home.svg                                              | XML              |          3 |          0 |          1 |          4 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/IconDisciplina.svg                                    | XML              |         17 |          0 |          1 |         18 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/Layer.svg                                             | XML              |          5 |          0 |          1 |          6 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/Librarybooks.svg                                      | XML              |         10 |          0 |          1 |         11 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/Paper.svg                                             | XML              |          3 |          0 |          1 |          4 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/Pedido1.svg                                           | XML              |          3 |          0 |          1 |          4 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/SOUCONTEUDISTA.svg                                    | XML              |         30 |          0 |          1 |         31 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/Vector.svg                                            | XML              |          3 |          0 |          1 |          4 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/Vector1.svg                                           | XML              |          3 |          0 |          1 |          4 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/Vector2.svg                                           | XML              |          3 |          0 |          1 |          4 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/Vector3.svg                                           | XML              |          3 |          0 |          1 |          4 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/file-add.svg                                          | XML              |          4 |          0 |          1 |          5 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/image1.svg                                            | XML              |          3 |          0 |          1 |          4 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/image10.svg                                           | XML              |          3 |          0 |          1 |          4 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/image2.svg                                            | XML              |          3 |          0 |          1 |          4 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/image3.svg                                            | XML              |          3 |          0 |          1 |          4 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/people.svg                                            | XML              |          7 |          0 |          1 |          8 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/images/service.svg                                           | XML              |          4 |          0 |          1 |          5 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/routes/index.tsx                                             | TypeScript React |         14 |         12 |          2 |         28 |
+| /home/matheus/Desenvolvimento/souconteudista/src/shared/services/axios.ts                                            | TypeScript       |          4 |          0 |          2 |          6 |
+| Total                                                                                                                |                  |     12,879 |        285 |      1,151 |     14,315 |
++----------------------------------------------------------------------------------------------------------------------+------------------+------------+------------+------------+------------+

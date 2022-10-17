@@ -1,0 +1,53 @@
+"filename", "language", "TypeScript React", "XML", "TypeScript", "comment", "blank", "total"
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/areas/components/CreateArea/index.tsx", "TypeScript React", 3, 0, 0, 0, 0, 3
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/areas/components/UpdateArea/index.tsx", "TypeScript React", 8, 0, 0, 0, 1, 9
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/areas/pages/FilteredDisciplinas/index.tsx", "TypeScript React", 39, 0, 0, 0, 2, 41
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/areas/pages/ListAreas/index.tsx", "TypeScript React", 33, 0, 0, 0, 2, 35
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/autores/pages/ListAutores/index.tsx", "TypeScript React", 35, 0, 0, 0, 2, 37
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/competencias/components/CreateCompetenciaModalPPC/index.tsx", "TypeScript React", 3, 0, 0, 0, 0, 3
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/competencias/components/UpdateCompetenciaModal/index.tsx", "TypeScript React", 5, 0, 0, 0, 0, 5
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/competencias/pages/FilteredCompetencia/index.tsx", "TypeScript React", 52, 0, 0, 0, 3, 55
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/cursos/components/CreateCurso/index.tsx", "TypeScript React", 6, 0, 0, 0, 0, 6
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/cursos/components/UpdateCurso/index.tsx", "TypeScript React", 8, 0, 0, 0, 0, 8
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/cursos/pages/ListCursos/index.tsx", "TypeScript React", 37, 0, 0, 0, 3, 40
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/disciplinas/components/CreateDisciplina/index.tsx", "TypeScript React", 5, 0, 0, 0, 0, 5
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/disciplinas/components/CreateDisciplinaFiltered/index.tsx", "TypeScript React", 3, 0, 0, 0, 0, 3
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/disciplinas/components/CreateDisciplinaPPC/index.tsx", "TypeScript React", 0, 0, 0, 1, -1, 0
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/disciplinas/components/UpdateDisciplina/index.tsx", "TypeScript React", 7, 0, 0, 0, 0, 7
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/disciplinas/components/UpdateDisciplinaPPC/index.tsx", "TypeScript React", 367, 0, 0, 0, 38, 405
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/disciplinas/pages/FilteredVersoes/index.tsx", "TypeScript React", 45, 0, 0, 0, 2, 47
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/disciplinas/pages/ListDisciplinas/index.tsx", "TypeScript React", 46, 0, 0, 0, 2, 48
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/home/pages/Home/data.ts", "TypeScript", 0, 0, 41, 0, 2, 43
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/home/pages/Home/index.tsx", "TypeScript React", 182, 0, 0, 1, 5, 188
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/instituicoes/components/CreateInstituicoes/index.tsx", "TypeScript React", 132, 0, 0, 0, 10, 142
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/instituicoes/components/DeleteInstituicao/index.tsx", "TypeScript React", 61, 0, 0, 1, 8, 70
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/instituicoes/components/UpdateInstituicoes/index.tsx", "TypeScript React", 174, 0, 0, 0, 13, 187
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/instituicoes/pages/ListInstituicoes/index.tsx", "TypeScript React", 197, 0, 0, 0, 16, 213
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/instituicoes/routes/index.tsx", "TypeScript React", 9, 0, 0, 0, 3, 12
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/obras/components/CreateObraAutorModal/index.tsx", "TypeScript React", 3, 0, 0, 0, 1, 4
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/obras/components/CreateObrasModal/index.tsx", "TypeScript React", -27, 0, 0, 8, 14, -5
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/obras/components/DeleteObra/index.tsx", "TypeScript React", 56, 0, 0, 1, 8, 65
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/obras/components/UpdateObraModal/index.tsx", "TypeScript React", -66, 0, 0, 0, 3, -63
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/obras/pages/ListObras/index.tsx", "TypeScript React", 20, 0, 0, 0, -1, 19
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/perfis/components/CreatePerfilModalPPC/index.tsx", "TypeScript React", 8, 0, 0, 0, 0, 8
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/perfis/components/UpdatePerfilModal/index.tsx", "TypeScript React", 10, 0, 0, 0, 0, 10
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/perfis/pages/FilteredPerfil/index.tsx", "TypeScript React", 92, 0, 0, 0, 4, 96
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/ppcs/components/CreatePPC/index.tsx", "TypeScript React", 3, 0, 0, 0, 0, 3
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/ppcs/components/UpdatePPC/index.tsx", "TypeScript React", 43, 0, 0, 0, 2, 45
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/ppcs/pages/ListPpcInfo/index.tsx", "TypeScript React", 139, 0, 0, 0, 6, 145
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/ppcs/pages/ListPpcsCurso/index.tsx", "TypeScript React", 50, 0, 0, 0, 3, 53
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/versoes/components/CraeteFilteredVersaoModal/index.tsx", "TypeScript React", 3, 0, 0, 0, 0, 3
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/versoes/components/CreateVersaoModal/index.tsx", "TypeScript React", 5, 0, 0, 0, 0, 5
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/versoes/components/PPCRow/index.tsx", "TypeScript React", 200, 0, 0, 4, 10, 214
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/versoes/components/UpdateVersaoModal/index.tsx", "TypeScript React", 7, 0, 0, 0, 0, 7
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/versoes/pages/FilteredVersao/index.tsx", "TypeScript React", 244, 0, 0, 4, 11, 259
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/versoes/pages/FilteredVersao/styles.ts", "TypeScript", 0, 0, 29, 1, 6, 36
+"/home/matheus/Desenvolvimento/souconteudista/src/modules/versoes/pages/ListVersoes/index.tsx", "TypeScript React", 45, 0, 0, 0, 2, 47
+"/home/matheus/Desenvolvimento/souconteudista/src/shared/components/Header/index.tsx", "TypeScript React", 42, 0, 0, 0, 11, 53
+"/home/matheus/Desenvolvimento/souconteudista/src/shared/components/Modal/InstituicaoModal/index.tsx", "TypeScript React", 112, 0, 0, 0, 15, 127
+"/home/matheus/Desenvolvimento/souconteudista/src/shared/hooks/index.tsx", "TypeScript React", 3, 0, 0, 0, 0, 3
+"/home/matheus/Desenvolvimento/souconteudista/src/shared/hooks/institution.tsx", "TypeScript React", 80, 0, 0, 0, 17, 97
+"/home/matheus/Desenvolvimento/souconteudista/src/shared/images/GenerateLead.svg", "XML", 0, 32, 0, 0, 1, 33
+"/home/matheus/Desenvolvimento/souconteudista/src/shared/images/Home.svg", "XML", 0, 3, 0, 0, 1, 4
+"/home/matheus/Desenvolvimento/souconteudista/src/shared/routes/index.tsx", "TypeScript React", 1, 0, 0, 1, 0, 2
+"Total", "-", 2530, 35, 70, 22, 225, 2882

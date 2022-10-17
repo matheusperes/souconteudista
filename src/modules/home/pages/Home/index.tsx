@@ -1,17 +1,33 @@
 import { Box, Button, Grid, Paper, Typography } from '@mui/material';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import React from 'react';
 import Carousel from 'react-grid-carousel';
 import { useNavigate } from 'react-router-dom';
 
 import { useTitle } from '#shared/hooks/title';
+import Lupa3 from '#shared/images/arcticons_voteinfo.svg';
 import Lupa from '#shared/images/GenerateLead.svg';
+import Lupa2 from '#shared/images/Group1043.svg';
+import Lupa6 from '#shared/images/KnowledgeIdea.svg';
+import Lupa5 from '#shared/images/Papers.svg';
+import Lupa4 from '#shared/images/pasta.svg';
 
 import { itensNav } from './data';
+
+const graphics = {
+  primeiro: <Typography>Seja Bem-Vindo</Typography>,
+  segundo: <Typography>Minhas Sugestões</Typography>,
+  terceiro: <Typography>Votações</Typography>,
+  quarto: <Typography>A Fazer</Typography>,
+  quinto: <Typography>PPC</Typography>,
+  sexto: <Typography>Área do Conhecimento</Typography>,
+};
 
 export function Home() {
   const { setTitle } = useTitle();
   const navigate = useNavigate();
+
+  const [storageGrap, setStorageGrap] = useState('primeiro');
 
   useEffect(() => {
     setTitle('Home');
@@ -19,7 +35,7 @@ export function Home() {
 
   return (
     <Box className="Pagina">
-      <Box sx={{ mt: '1rem', padding: '1.5rem', width: '100%' }}>
+      <Box sx={{ padding: '1.5rem', width: '100%' }}>
         <Box sx={{ marginTop: '0.25rem' }}>
           <Typography sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
             Principais Serviços
@@ -56,11 +72,16 @@ export function Home() {
                     fullWidth
                     variant="contained"
                     sx={{
+                      boxShadow: 'none',
                       background: '#ECECEC',
                       borderRadius: '0px 0px 10px 10px',
                       color: '#020560',
                       fontWeight: 'bold',
-                      '&:hover': { background: 'rgba(2, 5, 96, 0.8)', color: 'white' },
+                      '&:hover': {
+                        background: 'rgba(2, 5, 96, 0.8)',
+                        color: 'white',
+                        boxShadow: 'none',
+                      },
                     }}
                     onClick={() => navigate(item.link)}
                   >
@@ -78,7 +99,7 @@ export function Home() {
           </Typography>
         </Box>
 
-        <Grid container spacing={2}>
+        <Grid container spacing={2} sx={{ mt: '1rem' }}>
           <Grid item xs={6}>
             <Paper
               elevation={3}
@@ -87,8 +108,11 @@ export function Home() {
                 height: '450px',
                 background: '#E5E5E5',
                 border: '1px solid #31337C',
+                padding: '1rem',
               }}
-            />
+            >
+              {graphics[storageGrap]}
+            </Paper>
           </Grid>
           <Grid item xs={6} sx={{ marginTop: '3rem' }}>
             <Grid container spacing={2}>
@@ -99,10 +123,17 @@ export function Home() {
                     padding: '1rem',
                     alignItems: 'center',
                     textAlign: 'center',
+                    cursor: 'pointer',
+                    transition: 'transform .2s',
+                    '&:hover': {
+                      transform: 'scale(1.05)',
+                      opacity: 0.8,
+                    },
                   }}
+                  onClick={() => setStorageGrap('primeiro')}
                 >
                   <Box>
-                    <img src={Lupa} alt="lupa" />
+                    <img src={Lupa} alt="lupa" width={80} />
                   </Box>
                   <Typography sx={{ color: '#020560', fontWeight: 'bold' }}>
                     Meus Cenários
@@ -116,13 +147,20 @@ export function Home() {
                     padding: '1rem',
                     alignItems: 'center',
                     textAlign: 'center',
+                    cursor: 'pointer',
+                    transition: 'transform .2s',
+                    '&:hover': {
+                      transform: 'scale(1.05)',
+                      opacity: 0.8,
+                    },
                   }}
+                  onClick={() => setStorageGrap('segundo')}
                 >
                   <Box>
-                    <img src={Lupa} alt="lupa" />
+                    <img src={Lupa2} alt="lupa" width={80} />
                   </Box>
                   <Typography sx={{ color: '#020560', fontWeight: 'bold' }}>
-                    Meus Cenários
+                    Minhas Sugestões
                   </Typography>
                 </Box>
               </Grid>
@@ -133,14 +171,19 @@ export function Home() {
                     padding: '1rem',
                     alignItems: 'center',
                     textAlign: 'center',
+                    cursor: 'pointer',
+                    transition: 'transform .2s',
+                    '&:hover': {
+                      transform: 'scale(1.05)',
+                      opacity: 0.8,
+                    },
                   }}
+                  onClick={() => setStorageGrap('terceiro')}
                 >
                   <Box>
-                    <img src={Lupa} alt="lupa" />
+                    <img src={Lupa3} alt="lupa" />
                   </Box>
-                  <Typography sx={{ color: '#020560', fontWeight: 'bold' }}>
-                    Meus Cenários
-                  </Typography>
+                  <Typography sx={{ color: '#020560', fontWeight: 'bold' }}>Votações</Typography>
                 </Box>
               </Grid>
               <Grid item xs={4}>
@@ -150,14 +193,19 @@ export function Home() {
                     padding: '1rem',
                     alignItems: 'center',
                     textAlign: 'center',
+                    cursor: 'pointer',
+                    transition: 'transform .2s',
+                    '&:hover': {
+                      transform: 'scale(1.05)',
+                      opacity: 0.8,
+                    },
                   }}
+                  onClick={() => setStorageGrap('quarto')}
                 >
                   <Box>
-                    <img src={Lupa} alt="lupa" />
+                    <img src={Lupa4} alt="lupa" width={47} />
                   </Box>
-                  <Typography sx={{ color: '#020560', fontWeight: 'bold' }}>
-                    Meus Cenários
-                  </Typography>
+                  <Typography sx={{ color: '#020560', fontWeight: 'bold' }}>A Fazer</Typography>
                 </Box>
               </Grid>
               <Grid item xs={4}>
@@ -167,14 +215,19 @@ export function Home() {
                     padding: '1rem',
                     alignItems: 'center',
                     textAlign: 'center',
+                    cursor: 'pointer',
+                    transition: 'transform .2s',
+                    '&:hover': {
+                      transform: 'scale(1.05)',
+                      opacity: 0.8,
+                    },
                   }}
+                  onClick={() => setStorageGrap('quinto')}
                 >
                   <Box>
-                    <img src={Lupa} alt="lupa" />
+                    <img src={Lupa5} alt="lupa" width={68} />
                   </Box>
-                  <Typography sx={{ color: '#020560', fontWeight: 'bold' }}>
-                    Meus Cenários
-                  </Typography>
+                  <Typography sx={{ color: '#020560', fontWeight: 'bold' }}>PPC</Typography>
                 </Box>
               </Grid>
               <Grid item xs={4}>
@@ -184,20 +237,22 @@ export function Home() {
                     padding: '1rem',
                     alignItems: 'center',
                     textAlign: 'center',
+                    cursor: 'pointer',
+                    transition: 'transform .2s',
+                    '&:hover': {
+                      transform: 'scale(1.05)',
+                      opacity: 0.8,
+                    },
                   }}
+                  onClick={() => setStorageGrap('sexto')}
                 >
                   <Box>
-                    <img src={Lupa} alt="lupa" />
+                    <img src={Lupa6} alt="lupa" />
                   </Box>
                   <Typography sx={{ color: '#020560', fontWeight: 'bold' }}>
-                    Meus Cenários
+                    Área do Conhecimento
                   </Typography>
                 </Box>
-              </Grid>
-              <Grid item xs={12} sx={{ mt: '1rem' }}>
-                <Button fullWidth variant="outlined">
-                  Acessar
-                </Button>
               </Grid>
             </Grid>
           </Grid>

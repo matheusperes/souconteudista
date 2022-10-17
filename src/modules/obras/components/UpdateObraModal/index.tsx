@@ -132,11 +132,15 @@ export function UpdateObraModal({ open, onClose, obra_id, reloadList }: IUpdateO
   }, [obras]);
 
   const ApiVar = useMemo(() => {
+    if (!data?.obraParent) {
+      return null;
+    }
+
     return {
       id: data?.obraParent.id,
       label: data?.obraParent.obra_nome,
     };
-  }, [data?.obraParent.id, data?.obraParent.obra_nome]);
+  }, [data?.obraParent]);
 
   const handleUpdate = useCallback(
     async (form: IForm) => {
@@ -164,7 +168,7 @@ export function UpdateObraModal({ open, onClose, obra_id, reloadList }: IUpdateO
           issn: form.issn,
           url: form.url,
           acesso_em: form.acesso_em,
-          contido_em: form.contido_em.id,
+          contido_em: form.contido_em?.id,
         });
         if (reloadList) {
           reloadList();
