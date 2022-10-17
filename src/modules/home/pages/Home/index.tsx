@@ -1,8 +1,13 @@
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, Grid, Paper, Typography } from '@mui/material';
 import { useEffect } from 'react';
+import React from 'react';
+import Carousel from 'react-grid-carousel';
 import { useNavigate } from 'react-router-dom';
 
 import { useTitle } from '#shared/hooks/title';
+import Lupa from '#shared/images/GenerateLead.svg';
+
+import { itensNav } from './data';
 
 export function Home() {
   const { setTitle } = useTitle();
@@ -20,280 +25,183 @@ export function Home() {
             Principais Serviços
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', flexWrap: 'no-wrap' }}>
-          <Box
-            sx={{
-              borderRadius: '10px',
-              background: '#F4F4F4',
-              mt: '1rem',
-              width: '300px',
-              mr: '1rem',
-            }}
-          >
-            <Box sx={{ padding: '1rem' }}>
-              <Box sx={{ mt: '0.5rem' }}>
-                <Typography
-                  sx={{ color: 'rgba(2, 5, 96, 0.85)', fontSize: '18px', fontWeight: 'bold' }}
-                >
-                  Cursos
-                </Typography>
-              </Box>
-              <Box sx={{ mt: '0.5rem', marginRight: '0.5rem' }}>
-                <Typography sx={{ color: '#9697B9', fontSize: '12px', textAlign: 'justify' }}>
-                  Possibilita o cadastramento e acesso os cursos ativos e inativos da instituição de
-                  ensino, além da relação e comparação dos PPCs que as representam.
-                </Typography>
-              </Box>
-            </Box>
 
-            <Box>
-              <Button
-                fullWidth
-                variant="contained"
+        <Carousel cols={4} rows={1} gap={40} loop>
+          {itensNav.map((item) => (
+            <Carousel.Item>
+              <Box
                 sx={{
-                  background: '#ECECEC',
-                  borderRadius: '0px 0px 10px 10px',
-                  color: '#020560',
-                  fontWeight: 'bold',
-                  '&:hover': { background: 'rgba(2, 5, 96, 0.8)', color: 'white' },
+                  borderRadius: '10px',
+                  background: '#F4F4F4',
+                  mt: '1.5rem',
                 }}
-                onClick={() => navigate('/cursos')}
               >
-                Acessar
-              </Button>
-            </Box>
-          </Box>
-          <Box
-            sx={{
-              borderRadius: '10px',
-              background: '#F4F4F4',
-              mt: '1rem',
-              width: '300px',
-              mr: '1rem',
-            }}
-          >
-            <Box sx={{ padding: '1rem' }}>
-              <Box sx={{ mt: '0.5rem' }}>
-                <Typography
-                  sx={{
-                    color: 'rgba(2, 5, 96, 0.85)',
-                    fontSize: '18px',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  Área do Conhecimento
-                </Typography>
-              </Box>
-              <Box sx={{ mt: '0.5rem', marginRight: '0.5rem' }}>
-                <Typography sx={{ color: '#9697B9', fontSize: '12px', textAlign: 'justify' }}>
-                  Apresenta o campo de cadastramento e acesso as áreas de conhecimento da
-                  instituição de ensino, além da relação de disciplinas e versões ligadas a ela.
-                </Typography>
-              </Box>
-            </Box>
+                <Box sx={{ padding: '1rem' }}>
+                  <Box sx={{ mt: '0.5rem' }}>
+                    <Typography
+                      sx={{ color: 'rgba(2, 5, 96, 0.85)', fontSize: '18px', fontWeight: 'bold' }}
+                    >
+                      {item.titulo}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ mt: '0.5rem', marginRight: '0.5rem' }}>
+                    <Typography sx={{ color: '#9697B9', fontSize: '12px', textAlign: 'justify' }}>
+                      {item.descricao}
+                    </Typography>
+                  </Box>
+                </Box>
 
-            <Box>
-              <Button
-                fullWidth
-                variant="contained"
-                sx={{
-                  background: '#ECECEC',
-                  borderRadius: '0px 0px 10px 10px',
-                  color: '#020560',
-                  fontWeight: 'bold',
-                  '&:hover': { background: 'rgba(2, 5, 96, 0.8)', color: 'white' },
-                }}
-                onClick={() => navigate('/areas')}
-              >
-                Acessar
-              </Button>
-            </Box>
-          </Box>
-          <Box
-            sx={{
-              borderRadius: '10px',
-              background: '#F4F4F4',
-              mt: '1rem',
-              width: '300px',
-              mr: '1rem',
-            }}
-          >
-            <Box sx={{ padding: '1rem' }}>
-              <Box sx={{ mt: '0.5rem' }}>
-                <Typography
-                  sx={{
-                    color: 'rgba(2, 5, 96, 0.85)',
-                    fontSize: '18px',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  Disciplina
-                </Typography>
+                <Box>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    sx={{
+                      background: '#ECECEC',
+                      borderRadius: '0px 0px 10px 10px',
+                      color: '#020560',
+                      fontWeight: 'bold',
+                      '&:hover': { background: 'rgba(2, 5, 96, 0.8)', color: 'white' },
+                    }}
+                    onClick={() => navigate(item.link)}
+                  >
+                    Acessar
+                  </Button>
+                </Box>
               </Box>
-              <Box sx={{ mt: '0.5rem', marginRight: '0.5rem' }}>
-                <Typography sx={{ color: '#9697B9', fontSize: '12px', textAlign: 'justify' }}>
-                  Possibilita o cadastramento e acesso as Disciplinas com suas respectivas versões,
-                  além do detalhamento do PPC em que a versão está inserida.
-                </Typography>
-              </Box>
-            </Box>
+            </Carousel.Item>
+          ))}
+        </Carousel>
 
-            <Box>
-              <Button
-                fullWidth
-                variant="contained"
-                sx={{
-                  background: '#ECECEC',
-                  borderRadius: '0px 0px 10px 10px',
-                  color: '#020560',
-                  fontWeight: 'bold',
-                  '&:hover': { background: 'rgba(2, 5, 96, 0.8)', color: 'white' },
-                }}
-                onClick={() => navigate('/disciplinas')}
-              >
-                Acessar
-              </Button>
-            </Box>
-          </Box>
-          <Box
-            sx={{
-              borderRadius: '10px',
-              background: '#F4F4F4',
-              mt: '1rem',
-              width: '300px',
-              mr: '1rem',
-            }}
-          >
-            <Box sx={{ padding: '1rem' }}>
-              <Box sx={{ mt: '0.5rem' }}>
-                <Typography
-                  sx={{
-                    color: 'rgba(2, 5, 96, 0.85)',
-                    fontSize: '18px',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  Versão da Disciplina
-                </Typography>
-              </Box>
-              <Box sx={{ mt: '0.5rem', marginRight: '0.5rem' }}>
-                <Typography sx={{ color: '#9697B9', fontSize: '12px', textAlign: 'justify' }}>
-                  Encontramos nesse campo a possiblidade de cadastramento e acesso a todas as
-                  versões de todas as diciplinas da instituição de ensino, além de compara-las entre
-                  si.
-                </Typography>
-              </Box>
-            </Box>
-
-            <Box>
-              <Button
-                fullWidth
-                variant="contained"
-                sx={{
-                  background: '#ECECEC',
-                  borderRadius: '0px 0px 10px 10px',
-                  color: '#020560',
-                  fontWeight: 'bold',
-                  '&:hover': { background: 'rgba(2, 5, 96, 0.8)', color: 'white' },
-                }}
-                onClick={() => navigate('/versoes')}
-              >
-                Acessar
-              </Button>
-            </Box>
-          </Box>
-          <Box
-            sx={{
-              borderRadius: '10px',
-              background: '#F4F4F4',
-              mt: '1rem',
-              width: '300px',
-              mr: '1rem',
-            }}
-          >
-            <Box sx={{ padding: '1rem' }}>
-              <Box sx={{ mt: '0.5rem' }}>
-                <Typography
-                  sx={{
-                    color: 'rgba(2, 5, 96, 0.85)',
-                    fontSize: '20px',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  Autores
-                </Typography>
-              </Box>
-              <Box sx={{ mt: '0.5rem', marginRight: '0.5rem' }}>
-                <Typography sx={{ color: '#9697B9', fontSize: '15.4px', textAlign: 'justify' }}>
-                  Aqui encontramos a possibilidade de cadastramento e acesso de autores que contém
-                  obras nos PPCS.
-                </Typography>
-              </Box>
-            </Box>
-
-            <Box>
-              <Button
-                fullWidth
-                variant="contained"
-                sx={{
-                  background: '#ECECEC',
-                  borderRadius: '0px 0px 10px 10px',
-                  color: '#020560',
-                  fontWeight: 'bold',
-                  '&:hover': { background: 'rgba(2, 5, 96, 0.8)', color: 'white' },
-                }}
-                onClick={() => navigate('/autores')}
-              >
-                Acessar
-              </Button>
-            </Box>
-          </Box>
-          <Box
-            sx={{
-              borderRadius: '10px',
-              background: '#F4F4F4',
-              mt: '1rem',
-              width: '300px',
-              mr: '1rem',
-            }}
-          >
-            <Box sx={{ padding: '1rem' }}>
-              <Box sx={{ mt: '0.5rem' }}>
-                <Typography
-                  sx={{
-                    color: 'rgba(2, 5, 96, 0.85)',
-                    fontSize: '20px',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  Obras
-                </Typography>
-              </Box>
-              <Box sx={{ mt: '0.5rem', marginRight: '0.5rem' }}>
-                <Typography sx={{ color: '#9697B9', fontSize: '15.4px', textAlign: 'justify' }}>
-                  Apresenta o cadastramaneto e acesso as obras relacionadas ao curso e disciplina
-                </Typography>
-              </Box>
-            </Box>
-
-            <Box>
-              <Button
-                fullWidth
-                variant="contained"
-                sx={{
-                  background: '#ECECEC',
-                  borderRadius: '0px 0px 10px 10px',
-                  color: '#020560',
-                  fontWeight: 'bold',
-                  '&:hover': { background: 'rgba(2, 5, 96, 0.8)', color: 'white' },
-                }}
-                onClick={() => navigate('/obras')}
-              >
-                Acessar
-              </Button>
-            </Box>
-          </Box>
+        <Box sx={{ marginTop: '1.5rem' }}>
+          <Typography sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
+            Principais Serviços
+          </Typography>
         </Box>
+
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
+            <Paper
+              elevation={3}
+              // sx={{ width: '70%' }}
+              sx={{
+                height: '450px',
+                background: '#E5E5E5',
+                border: '1px solid #31337C',
+              }}
+            />
+          </Grid>
+          <Grid item xs={6} sx={{ marginTop: '3rem' }}>
+            <Grid container spacing={2}>
+              <Grid item xs={4}>
+                <Box
+                  sx={{
+                    background: '#f4f4f47f',
+                    padding: '1rem',
+                    alignItems: 'center',
+                    textAlign: 'center',
+                  }}
+                >
+                  <Box>
+                    <img src={Lupa} alt="lupa" />
+                  </Box>
+                  <Typography sx={{ color: '#020560', fontWeight: 'bold' }}>
+                    Meus Cenários
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={4}>
+                <Box
+                  sx={{
+                    background: '#F4F4F4',
+                    padding: '1rem',
+                    alignItems: 'center',
+                    textAlign: 'center',
+                  }}
+                >
+                  <Box>
+                    <img src={Lupa} alt="lupa" />
+                  </Box>
+                  <Typography sx={{ color: '#020560', fontWeight: 'bold' }}>
+                    Meus Cenários
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={4}>
+                <Box
+                  sx={{
+                    background: '#f4f4f47f',
+                    padding: '1rem',
+                    alignItems: 'center',
+                    textAlign: 'center',
+                  }}
+                >
+                  <Box>
+                    <img src={Lupa} alt="lupa" />
+                  </Box>
+                  <Typography sx={{ color: '#020560', fontWeight: 'bold' }}>
+                    Meus Cenários
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={4}>
+                <Box
+                  sx={{
+                    background: '#F4F4F4',
+                    padding: '1rem',
+                    alignItems: 'center',
+                    textAlign: 'center',
+                  }}
+                >
+                  <Box>
+                    <img src={Lupa} alt="lupa" />
+                  </Box>
+                  <Typography sx={{ color: '#020560', fontWeight: 'bold' }}>
+                    Meus Cenários
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={4}>
+                <Box
+                  sx={{
+                    background: '#f4f4f47f',
+                    padding: '1rem',
+                    alignItems: 'center',
+                    textAlign: 'center',
+                  }}
+                >
+                  <Box>
+                    <img src={Lupa} alt="lupa" />
+                  </Box>
+                  <Typography sx={{ color: '#020560', fontWeight: 'bold' }}>
+                    Meus Cenários
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={4}>
+                <Box
+                  sx={{
+                    background: '#F4F4F4',
+                    padding: '1rem',
+                    alignItems: 'center',
+                    textAlign: 'center',
+                  }}
+                >
+                  <Box>
+                    <img src={Lupa} alt="lupa" />
+                  </Box>
+                  <Typography sx={{ color: '#020560', fontWeight: 'bold' }}>
+                    Meus Cenários
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={12} sx={{ mt: '1rem' }}>
+                <Button fullWidth variant="outlined">
+                  Acessar
+                </Button>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Grid>
       </Box>
     </Box>
   );
