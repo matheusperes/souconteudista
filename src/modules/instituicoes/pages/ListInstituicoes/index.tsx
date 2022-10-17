@@ -2,7 +2,6 @@ import { ArrowForward, FileDownloadOutlined } from '@mui/icons-material';
 import {
   Box,
   Typography,
-  Stack,
   Button,
   Breadcrumbs,
   TextField,
@@ -12,7 +11,7 @@ import {
 } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CSVLink } from 'react-csv';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import { Col, StyledTable } from '#shared/components/StyledTable';
 import { useInstitution } from '#shared/hooks/institution';
@@ -39,7 +38,6 @@ export type IInstituicoes = {
 export function ListInstituicoes() {
   const { setTitle } = useTitle();
   const { message } = useToast();
-  const navigate = useNavigate();
   const { startLoading, stopLoading } = useLoading();
   const { instituicao } = useInstitution();
 
@@ -162,54 +160,6 @@ export function ListInstituicoes() {
               <Link to="/">Home</Link>
               <Typography>Instituições</Typography>
             </Breadcrumbs>
-          </Box>
-          <Box
-            sx={{
-              marginTop: '1rem',
-              alignItems: 'center',
-              justifyContent: 'center',
-              display: 'flex',
-            }}
-          >
-            <Stack direction="row" spacing={8}>
-              <Button
-                sx={{
-                  color: '#020560',
-                  fontWeight: 'bold',
-                  textDecoration: 'underline 2px',
-                  textUnderlineOffset: '10px',
-                  borderRadius: '50px',
-                  '&:hover': { textDecoration: 'underline 2px', background: '#E5E5E5' },
-                }}
-                onClick={() => navigate('/instituicoes')}
-              >
-                Instituições
-              </Button>
-              <Button sx={{ color: '#000', fontWeight: 'bold' }} onClick={() => navigate('/areas')}>
-                Áreas do Conhecimento
-              </Button>
-              <Button
-                sx={{ color: '#000', fontWeight: 'bold' }}
-                onClick={() => navigate('/disciplinas')}
-              >
-                Disciplinas
-              </Button>
-              <Button
-                sx={{ color: '#000', fontWeight: 'bold' }}
-                onClick={() => navigate('/versoes')}
-              >
-                Versões de Disciplinas
-              </Button>
-              <Button onClick={() => navigate('/obras')} sx={{ color: '#000', fontWeight: 'bold' }}>
-                Obras
-              </Button>
-              <Button
-                sx={{ color: '#000', fontWeight: 'bold' }}
-                onClick={() => navigate('/autores')}
-              >
-                Autores
-              </Button>
-            </Stack>
           </Box>
           <Box sx={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'space-between' }}>
             <Box>

@@ -3,6 +3,7 @@ import { Box, Breadcrumbs, Grid, IconButton, Typography } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
+import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
 import { useToast } from '#shared/hooks/toast';
@@ -18,7 +19,7 @@ type DisciplinaCompetencia = {
   disciplina_versao_id: string;
   modulo: number;
   semestre: number;
-  versoes: {
+  versao: {
     id: string;
     disciplina_id: string;
     disciplina_versao_nome: string;
@@ -83,6 +84,7 @@ export function FilteredCompetencia() {
   const { setTitle } = useTitle();
   const { message } = useToast();
   const { startLoading, stopLoading } = useLoading();
+  const { instituicao } = useInstitution();
 
   const [competencia, setCompetencia] = useState<ICompetencia>();
   const [disciplinaCompetencia, setDisciplinaCompetencia] = useState<DisciplinaCompetencia[]>([]);
@@ -95,14 +97,16 @@ export function FilteredCompetencia() {
   const getCompetencia = useCallback(async () => {
     startLoading();
     try {
-      const response = await api.get(`/competencia/${params?.id}`);
+      const response = await api.get(`/competencia/${params?.id}`, {
+        params: { instituicao_id: instituicao?.id },
+      });
       setCompetencia(response.data);
     } catch (error: any) {
       message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
     } finally {
       stopLoading();
     }
-  }, [message, params?.id, startLoading, stopLoading]);
+  }, [instituicao?.id, message, params?.id, startLoading, stopLoading]);
 
   useEffect(() => {
     getCompetencia();
@@ -111,14 +115,16 @@ export function FilteredCompetencia() {
   const getDisciplinaCompetencia = useCallback(async () => {
     startLoading();
     try {
-      const response = await api.get(`/ppc_disciplina_versao/competencia/${params?.id}`);
+      const response = await api.get(`/ppc_disciplina_versao/competencia/${params?.id}`, {
+        params: { instituicao_id: instituicao?.id },
+      });
       setDisciplinaCompetencia(response.data);
     } catch (error: any) {
       message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
     } finally {
       stopLoading();
     }
-  }, [message, params?.id, startLoading, stopLoading]);
+  }, [instituicao?.id, message, params?.id, startLoading, stopLoading]);
 
   useEffect(() => {
     getDisciplinaCompetencia();
@@ -127,14 +133,16 @@ export function FilteredCompetencia() {
   const getPpc = useCallback(async () => {
     startLoading();
     try {
-      const response = await api.get(`/ppc/${params?.ppc_id}`);
+      const response = await api.get(`/ppc/${params?.ppc_id}`, {
+        params: { instituicao_id: instituicao?.id },
+      });
       setPpc(response.data);
     } catch (error: any) {
       message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
     } finally {
       stopLoading();
     }
-  }, [message, params?.ppc_id, startLoading, stopLoading]);
+  }, [instituicao?.id, message, params?.ppc_id, startLoading, stopLoading]);
 
   useEffect(() => {
     getPpc();
@@ -174,7 +182,7 @@ export function FilteredCompetencia() {
                     key={versao.id}
                     onClick={() =>
                       navigate(
-                        `/disciplinas/${versao.versoes.disciplina_id}/versao/${versao.versoes.id}`,
+                        `/disciplinas/${versao.versao.disciplina_id}/versao/${versao.versao.id}`,
                       )
                     }
                   >
@@ -193,7 +201,7 @@ export function FilteredCompetencia() {
                       >
                         <img src={DisciplinaIcon} alt="Icon" />
                       </IconButton>
-                      <Typography>{versao.versoes.disciplina.name}</Typography>
+                      <Typography>{versao.versao.disciplina.name}</Typography>
                     </Box>
                   </Grid>
                 ))}

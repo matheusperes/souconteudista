@@ -174,12 +174,6 @@ export function ListVersoes() {
             }}
           >
             <Stack direction="row" spacing={8}>
-              <Button
-                sx={{ color: '#000', fontWeight: 'bold' }}
-                onClick={() => navigate('/instituicoes')}
-              >
-                Instituições
-              </Button>
               <Button sx={{ color: '#000', fontWeight: 'bold' }} onClick={() => navigate('/areas')}>
                 Áreas do Conhecimento
               </Button>

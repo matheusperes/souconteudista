@@ -33,6 +33,8 @@ import image10 from '#shared/images/image10.svg';
 import { api } from '#shared/services/axios';
 
 import { Area } from '#modules/areas/pages/FilteredDisciplinas';
+import { IInstituicoes } from '#modules/instituicoes/pages/ListInstituicoes';
+import { PPCRow } from '#modules/versoes/components/PPCRow';
 
 import { StyledTableContainer2 } from './styles';
 // import { DeleteEspecificVersão } from '#modules/versoes/components/DeleteEspecificVersao';
@@ -47,8 +49,6 @@ type Disciplinas = {
   sigla: string;
   area: Area;
 };
-
-type Bibliografias = {};
 
 type Competencia = {
   id: string;
@@ -97,7 +97,6 @@ export type Versoes = {
   ementa: string;
   observacao: string;
   disciplina: Disciplinas;
-  bibliografias: Bibliografias[];
   ppcDisciplinaVersoes: PPCDisciplinaVersoes[];
 };
 
@@ -107,6 +106,11 @@ type DisciplinaOption = {
 };
 
 type VersaoOption = {
+  id: string;
+  label: string;
+};
+
+type InstituicaoOption = {
   id: string;
   label: string;
 };
@@ -178,6 +182,8 @@ export function FilteredVersao() {
   const [DisciplinasId, setDisciplinasId] = useState<DisciplinaOption | null>(null);
   const [versoes, setVersoes] = useState<Versoes[]>([]);
   const [versoesId, setVersoesId] = useState<VersaoOption | null>(null);
+  const [instituicoes, setInstituicoes] = useState<IInstituicoes[]>([]);
+  const [instituicoesId, setInstituicoesId] = useState<InstituicaoOption | null>(null);
   const [versaoRender, setVersaoRender] = useState<Versoes | null>(null);
   const [versaoRenderDisciplina, setVersaoRenderDisciplina] = useState<Disciplinas | null>(null);
 
@@ -188,14 +194,16 @@ export function FilteredVersao() {
   const getVersao = useCallback(async () => {
     startLoading();
     try {
-      const response = await api.get(`versao/${params?.id}`);
+      const response = await api.get(`versao/${params?.id}`, {
+        params: { instituicao_id: instituicao?.id },
+      });
       setVersao(response.data);
     } catch (error: any) {
       message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
     } finally {
       stopLoading();
     }
-  }, [message, params?.id, startLoading, stopLoading]);
+  }, [instituicao?.id, message, params?.id, startLoading, stopLoading]);
 
   useEffect(() => {
     getVersao();
@@ -206,7 +214,7 @@ export function FilteredVersao() {
       startLoading();
       try {
         const response = await api.get('/versoes', {
-          params: { disciplina_id: DisciplinasId.id, instituicao_id: instituicao?.id },
+          params: { disciplina_id: DisciplinasId.id, instituicao_id: instituicoesId?.id },
         });
         setVersoes(response.data);
       } catch (error: any) {
@@ -215,7 +223,7 @@ export function FilteredVersao() {
         stopLoading();
       }
     }
-  }, [DisciplinasId, instituicao?.id, message, startLoading, stopLoading]);
+  }, [DisciplinasId, instituicoesId?.id, message, startLoading, stopLoading]);
 
   useEffect(() => {
     getVersoes();
@@ -224,14 +232,16 @@ export function FilteredVersao() {
   const getDisciplina = useCallback(async () => {
     startLoading();
     try {
-      const response = await api.get(`/disciplina/${params.disciplina_id}`);
+      const response = await api.get(`/disciplina/${params.disciplina_id}`, {
+        params: { instituicao_id: instituicao?.id },
+      });
       setDisciplina(response.data);
     } catch (error: any) {
       message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
     } finally {
       stopLoading();
     }
-  }, [message, params.disciplina_id, startLoading, stopLoading]);
+  }, [instituicao?.id, message, params.disciplina_id, startLoading, stopLoading]);
 
   useEffect(() => {
     getDisciplina();
@@ -241,7 +251,7 @@ export function FilteredVersao() {
     startLoading();
     try {
       const response = await api.get('/disciplinas', {
-        params: { instituicao_id: instituicao?.id },
+        params: { instituicao_id: instituicoesId?.id },
       });
       setDisciplinas(response.data);
     } catch (error: any) {
@@ -249,11 +259,30 @@ export function FilteredVersao() {
     } finally {
       stopLoading();
     }
-  }, [instituicao?.id, message, startLoading, stopLoading]);
+  }, [instituicoesId?.id, message, startLoading, stopLoading]);
 
   useEffect(() => {
     getDisciplinas();
   }, [getDisciplinas]);
+
+  useEffect(() => {
+    async function getInstituicoes() {
+      const response = await api.get('/instituicoes');
+
+      setInstituicoes(response.data);
+    }
+
+    getInstituicoes();
+  }, [instituicao?.id]);
+
+  const InstituicoesOption = useMemo(() => {
+    return instituicoes.map((inst) => {
+      return {
+        id: inst.id,
+        label: `${inst.name} - ${inst.sigla}`,
+      };
+    });
+  }, [instituicoes]);
 
   const DisciplinaOption1 = useMemo(() => {
     return disciplinas.map((disciplina1) => {
@@ -273,25 +302,38 @@ export function FilteredVersao() {
     });
   }, [versoes]);
 
-  const handleSelectVersao = useCallback(async (newVersaoId?: string) => {
-    if (newVersaoId) {
-      const response = await api.get(`/versao/${newVersaoId}`);
+  const handleSelectVersao = useCallback(
+    async (newVersaoId?: string) => {
+      if (newVersaoId) {
+        const response = await api.get(`/versao/${newVersaoId}`, {
+          params: { instituicao_id: instituicoesId?.id },
+        });
 
-      setVersaoRender(response.data);
-    } else {
-      setVersaoRender(null);
-    }
-  }, []);
+        setVersaoRender(response.data);
+        setInstituicoesId(null);
+        setDisciplinasId(null);
+        setVersoesId(null);
+      } else {
+        setVersaoRender(null);
+      }
+    },
+    [instituicoesId?.id],
+  );
 
-  const handleSelectDisciplina = useCallback(async (newVersaoId?: string) => {
-    if (newVersaoId) {
-      const response = await api.get(`/disciplina/${newVersaoId}`);
+  const handleSelectDisciplina = useCallback(
+    async (newVersaoId?: string) => {
+      if (newVersaoId) {
+        const response = await api.get(`/disciplina/${newVersaoId}`, {
+          params: { instituicao_id: instituicoesId?.id },
+        });
 
-      setVersaoRenderDisciplina(response.data);
-    } else {
-      setVersaoRenderDisciplina(null);
-    }
-  }, []);
+        setVersaoRenderDisciplina(response.data);
+      } else {
+        setVersaoRenderDisciplina(null);
+      }
+    },
+    [instituicoesId?.id],
+  );
 
   return (
     <>
@@ -386,7 +428,7 @@ export function FilteredVersao() {
                         <TableCell align="center">Disciplina</TableCell>
                         <TableCell align="center">Creditos</TableCell>
                         <TableCell align="center">Oferta</TableCell>
-                        <TableCell align="center">Produzido</TableCell>
+                        {/* <TableCell align="center">Produzido</TableCell> */}
                         {/* <TableCell align="center">Ações</TableCell> */}
                       </TableRow>
                     </TableHead>
@@ -406,7 +448,7 @@ export function FilteredVersao() {
                           <TableCell align="center">{versao?.disciplina.name}</TableCell>
                           <TableCell align="center">{versao?.credito_quantidade}</TableCell>
                           <TableCell align="center">{versao?.em_oferta ? 'Sim' : 'Não'}</TableCell>
-                          <TableCell align="center">{versao?.produzido ? 'Sim' : 'Não'}</TableCell>
+                          {/* <TableCell align="center">{versao?.produzido ? 'Sim' : 'Não'}</TableCell> */}
                           {/* <TableCell align="center">
                             <ButtonGroup
                               variant="outlined"
@@ -591,41 +633,11 @@ export function FilteredVersao() {
                                           </TableHead>
                                           <TableBody sx={{ background: '#fff' }}>
                                             {versao.ppcDisciplinaVersoes.map((ppcDisciplina) => (
-                                              <TableRow
-                                                key={ppcDisciplina.ppc.id}
-                                                sx={{
-                                                  background: '#fff',
-                                                  ...(ppcDisciplina.ppc.ppc_ativo && {
-                                                    borderRadius: '10px',
-                                                    boxShadow: '0px 5px rgba(237, 229, 41, 0.25)',
-                                                  }),
-                                                  ...(!ppcDisciplina.ppc.ppc_ativo === false && {
-                                                    borderRadius: '10px',
-                                                    boxShadow: '0px 5px rgba(216, 68, 68, 0.25)',
-                                                  }),
-                                                  // ...(ppcDisciplina.ppc.curso.ppc_ativo === ppcDisciplina.ppc.id && {
-                                                  //   borderRadius: '10px',
-                                                  //   boxShadow: '0px 5px rgba(67, 200, 104, 0.25)',
-                                                  // }),
-                                                }}
-                                              >
-                                                <TableCell>{disciplina?.area.name}</TableCell>
-                                                <TableCell align="center">
-                                                  {ppcDisciplina.ppc.anoVoto}
-                                                </TableCell>
-                                                <TableCell align="center">
-                                                  {ppcDisciplina.ppc.dataInicio}
-                                                </TableCell>
-                                                <TableCell align="center">
-                                                  {ppcDisciplina.ppc.dataFim}
-                                                </TableCell>
-                                                <TableCell align="center">
-                                                  {ppcDisciplina.ppc.horaCredito}
-                                                </TableCell>
-                                                <TableCell align="center">
-                                                  {ppcDisciplina.ppc.quantSemestres}
-                                                </TableCell>
-                                              </TableRow>
+                                              <PPCRow
+                                                key={ppcDisciplina.id}
+                                                ppcDisciplina={ppcDisciplina}
+                                                disciplina={disciplina}
+                                              />
                                             ))}
                                           </TableBody>
                                         </Table>
@@ -671,7 +683,10 @@ export function FilteredVersao() {
                     <IconButton
                       color="primary"
                       sx={{ color: '#020560' }}
-                      onClick={() => setComparadorCollapse(false)}
+                      onClick={() => {
+                        handleSelectDisciplina('');
+                        setComparadorCollapse(false);
+                      }}
                     >
                       <Close />
                     </IconButton>
@@ -682,6 +697,22 @@ export function FilteredVersao() {
                   </Typography>
                   <Box sx={{ marginTop: '1rem' }}>
                     <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        <Autocomplete
+                          value={instituicoesId}
+                          onChange={(event: any, newValue) => {
+                            setInstituicoesId(newValue);
+
+                            handleSelectDisciplina(newValue?.id);
+                          }}
+                          disablePortal
+                          id="combo-box-demo"
+                          options={InstituicoesOption}
+                          renderInput={(params1) => (
+                            <TextField {...params1} label="Instituição" fullWidth />
+                          )}
+                        />
+                      </Grid>
                       <Grid item xs={12}>
                         <Autocomplete
                           value={DisciplinasId}
@@ -767,7 +798,7 @@ export function FilteredVersao() {
                             <TableCell align="center">Disciplina</TableCell>
                             <TableCell align="center">Creditos</TableCell>
                             <TableCell align="center">Oferta</TableCell>
-                            <TableCell align="center">Produzido</TableCell>
+                            {/* <TableCell align="center">Produzido</TableCell> */}
                             {/* <TableCell align="center">Ações</TableCell> */}
                           </TableRow>
                         </TableHead>
@@ -794,7 +825,7 @@ export function FilteredVersao() {
                                 {versaoRender?.em_oferta ? 'Sim' : 'Não'}
                               </TableCell>
                               <TableCell align="center">
-                                {versaoRender?.produzido ? 'Sim' : 'Não'}
+                                {/* {versaoRender?.produzido ? 'Sim' : 'Não'} */}
                               </TableCell>
                               {/* <TableCell align="center">
                                 <ButtonGroup
@@ -918,10 +949,89 @@ export function FilteredVersao() {
                                     </Box>
                                     <Collapse in={ppcsCollapse2}>
                                       <Box>
+                                        <Box
+                                          sx={{ display: 'flex', justifyContent: 'space-between' }}
+                                        >
+                                          <Box />
+                                          <Box sx={{ display: 'flex' }}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                              <Box
+                                                sx={{
+                                                  borderRadius: '50%',
+                                                  background: '#8CC59A',
+                                                  width: '15px',
+                                                  height: '15px',
+                                                  marginRight: '3px',
+                                                }}
+                                              />
+                                              <Typography>Atual</Typography>
+                                            </Box>
+                                            <Box
+                                              sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                marginLeft: '1.25rem',
+                                              }}
+                                            >
+                                              <Box
+                                                sx={{
+                                                  borderRadius: '50%',
+                                                  background: '#FFF174',
+                                                  width: '15px',
+                                                  height: '15px',
+                                                  marginRight: '3px',
+                                                }}
+                                              />
+                                              <Typography>Ativo</Typography>
+                                            </Box>
+                                            <Box
+                                              sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                marginLeft: '1.25rem',
+                                              }}
+                                            >
+                                              <Box
+                                                sx={{
+                                                  borderRadius: '50%',
+                                                  background: '#E05959',
+                                                  width: '15px',
+                                                  height: '15px',
+                                                  marginRight: '3px',
+                                                }}
+                                              />
+                                              <Typography>Inativo</Typography>
+                                            </Box>
+                                          </Box>
+                                        </Box>
                                         <Box>
-                                          <Typography whiteSpace="pre-wrap">
-                                            Alguma coisa deve aparecer aqui tambem
-                                          </Typography>
+                                          <StyledTableContainer2>
+                                            <Table sx={{ background: '#fff' }}>
+                                              <TableHead sx={{ background: '#fff' }}>
+                                                <TableRow sx={{ background: '#fff' }}>
+                                                  <TableCell>Curso</TableCell>
+                                                  <TableCell align="center">Ano Voto</TableCell>
+                                                  <TableCell align="center">Data Inicio</TableCell>
+                                                  <TableCell align="center">Data Fim</TableCell>
+                                                  <TableCell align="center">
+                                                    Horas/Creditos
+                                                  </TableCell>
+                                                  <TableCell align="center">Semestres</TableCell>
+                                                </TableRow>
+                                              </TableHead>
+                                              <TableBody sx={{ background: '#fff' }}>
+                                                {versaoRender.ppcDisciplinaVersoes.map(
+                                                  (ppcDisciplina1) => (
+                                                    <PPCRow
+                                                      key={ppcDisciplina1.id}
+                                                      ppcDisciplina={ppcDisciplina1}
+                                                      disciplina={versaoRenderDisciplina}
+                                                    />
+                                                  ),
+                                                )}
+                                              </TableBody>
+                                            </Table>
+                                          </StyledTableContainer2>
                                         </Box>
                                       </Box>
                                     </Collapse>

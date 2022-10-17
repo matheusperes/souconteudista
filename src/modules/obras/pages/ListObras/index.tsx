@@ -1,4 +1,4 @@
-import { ArrowForward, Add } from '@mui/icons-material';
+import { ArrowForward } from '@mui/icons-material';
 import {
   Box,
   Breadcrumbs,
@@ -13,7 +13,6 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { Col, StyledTable } from '#shared/components/StyledTable';
-import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
 import { useToast } from '#shared/hooks/toast';
@@ -23,7 +22,14 @@ import { api } from '#shared/services/axios';
 
 import { CreateObraAutorModal } from '#modules/obras/components/CreateObraAutorModal';
 import { CreateObrasModal } from '#modules/obras/components/CreateObrasModal';
+import { DeleteObra } from '#modules/obras/components/DeleteObra';
 import { UpdateObraModal } from '#modules/obras/components/UpdateObraModal';
+
+export type IObrasAutor = {
+  autor_id: string;
+  obra_id: string;
+  funcao: string;
+};
 
 export type IObras = {
   id: string;
@@ -33,7 +39,7 @@ export type IObras = {
   colecao_nome: string;
   cidade: string;
   editora: string;
-  dia: string;
+  dia: number;
   mes: string;
   ano: number;
   volume: string;
@@ -49,24 +55,21 @@ export type IObras = {
   issn: string | null;
   url: string;
   acesso_em: string;
-};
-
-export type IObrasAutor = {
-  autor_id: string;
-  obra_id: string;
-  funcao: string;
+  contido_em: string;
+  obraParent: IObras;
+  autores: IObrasAutor;
 };
 
 export function ListObras() {
   const { setTitle } = useTitle();
   const navigate = useNavigate();
-  const { instituicao } = useInstitution();
   const { startLoading, stopLoading } = useLoading();
   const { message } = useToast();
 
   const [openCreate, setOpenCreate] = useState(false);
   const [openCreateObraAutor, setOpenCreateObraAutor] = useState(false);
   const [openUpdate, setOpenUpdate] = useState<string | null>(null);
+  const [openDelete, setOpenDelete] = useState<any>(null);
 
   const [obras, setObras] = useState<IObras[]>([]);
   const [obrasAutor, setObrasAutor] = useState<IObrasAutor[]>([]);
@@ -79,16 +82,14 @@ export function ListObras() {
   const getObras = useCallback(async () => {
     startLoading();
     try {
-      const response = await api.get('/obras', {
-        params: { instituicao_id: instituicao?.id },
-      });
+      const response = await api.get('/obras');
       setObras(response.data);
     } catch (error: any) {
       message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
     } finally {
       stopLoading();
     }
-  }, [instituicao?.id, message, startLoading, stopLoading]);
+  }, [message, startLoading, stopLoading]);
 
   useEffect(() => {
     getObras();
@@ -130,13 +131,8 @@ export function ListObras() {
                 color="primary"
                 onClick={async (e) => {
                   e.stopPropagation();
-                  try {
-                    await api.delete(`/obras/${item.id}`);
 
-                    setObras(obras.filter((obra2) => item.id !== obra2.id));
-                  } catch {
-                    alert('Você não pode excluir essa obra');
-                  }
+                  setOpenDelete(item.id);
                 }}
               >
                 <img src={Delete} alt="Delete" />
@@ -156,7 +152,7 @@ export function ListObras() {
         },
       },
     ];
-  }, [obras]);
+  }, []);
 
   return (
     <>
@@ -180,6 +176,15 @@ export function ListObras() {
           reloadList={() => getObras()}
         />
       )}
+
+      {!!openDelete && (
+        <DeleteObra
+          open={!!openDelete}
+          onClose={() => setOpenDelete(null)}
+          obra_id={openDelete}
+          reloadList={() => getObras()}
+        />
+      )}
       <Box className="Pagina">
         <Box sx={{ mt: '1rem', padding: '1.5rem', width: '100%' }}>
           <Box>
@@ -197,12 +202,6 @@ export function ListObras() {
             }}
           >
             <Stack direction="row" spacing={8}>
-              <Button
-                sx={{ color: '#000', fontWeight: 'bold' }}
-                onClick={() => navigate('/instituicoes')}
-              >
-                Instituições
-              </Button>
               <Button sx={{ color: '#000', fontWeight: 'bold' }} onClick={() => navigate('/areas')}>
                 Áreas do Conhecimento
               </Button>
@@ -242,9 +241,8 @@ export function ListObras() {
           <Box sx={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'space-between' }}>
             <Box>
               <Button
-                variant="text"
-                endIcon={<Add />}
-                sx={{ color: '#000' }}
+                variant="contained"
+                sx={{ background: '#020560', '&:hover': { background: '#020560' } }}
                 onClick={() => {
                   setOpenCreate(true);
                 }}

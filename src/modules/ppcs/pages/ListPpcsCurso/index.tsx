@@ -135,7 +135,9 @@ export function PPC() {
   const getCurso = useCallback(async () => {
     startLoading();
     try {
-      const response = await api.get(`/curso/${params?.curso_id}`);
+      const response = await api.get(`/curso/${params?.curso_id}`, {
+        params: { instituicao_id: instituicao?.id },
+      });
 
       setCurso(response.data);
     } catch (error: any) {
@@ -143,7 +145,7 @@ export function PPC() {
     } finally {
       stopLoading();
     }
-  }, [message, params?.curso_id, startLoading, stopLoading]);
+  }, [instituicao?.id, message, params?.curso_id, startLoading, stopLoading]);
 
   useEffect(() => {
     getCurso();

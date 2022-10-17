@@ -6,7 +6,6 @@ import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 
 import { MyTextField } from '#shared/components/Form/TextField';
-import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
@@ -16,6 +15,7 @@ type IUpdateCompetenciaModal = {
   open: boolean;
   onClose: () => void;
   competencia_id: string;
+  instituicao_Id: string | undefined;
 };
 
 type Competencia = {
@@ -40,10 +40,10 @@ export function UpdateCompetenciaModal({
   open,
   onClose,
   competencia_id,
+  instituicao_Id,
 }: IUpdateCompetenciaModal) {
   const { startLoading, stopLoading } = useLoading();
   const { message } = useToast();
-  const { instituicao } = useInstitution();
 
   const [data, setData] = useState<Competencia | null>(null);
 
@@ -60,7 +60,9 @@ export function UpdateCompetenciaModal({
     async function getCompetencia() {
       startLoading();
       try {
-        const response = await api.get(`/competencia/${competencia_id}`);
+        const response = await api.get(`/competencia/${competencia_id}`, {
+          params: { instituicao_id: instituicao_Id },
+        });
         setData(response.data);
       } catch (error: any) {
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
@@ -69,13 +71,13 @@ export function UpdateCompetenciaModal({
       }
     }
     getCompetencia();
-  }, [competencia_id, message, startLoading, stopLoading]);
+  }, [competencia_id, instituicao_Id, message, startLoading, stopLoading]);
 
   const handleUpdate = useCallback(
     async (form: IForm) => {
       try {
         await api.put(`/competencias/${competencia_id}`, {
-          instituicao_id: instituicao?.id,
+          instituicao_id: instituicao_Id,
           competencia: form.competencia,
           competenciaNumero: form.competenciaNumero,
         });
@@ -90,7 +92,7 @@ export function UpdateCompetenciaModal({
         message({ mensagem: error.response?.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [competencia_id, instituicao?.id, reloadList, message, reset, onClose],
+    [competencia_id, instituicao_Id, reloadList, message, reset, onClose],
   );
 
   return (

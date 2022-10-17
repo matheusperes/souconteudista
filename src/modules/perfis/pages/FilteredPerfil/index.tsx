@@ -3,6 +3,7 @@ import { Box, Breadcrumbs, Grid, IconButton, Typography } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
+import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
 import { useToast } from '#shared/hooks/toast';
@@ -18,7 +19,7 @@ type DisciplinaPerfil = {
   disciplina_versao_id: string;
   modulo: number;
   semestre: number;
-  versoes: {
+  versao: {
     id: string;
     disciplina_id: string;
     disciplina_versao_nome: string;
@@ -83,6 +84,7 @@ export function FilteredPerfil() {
   const { setTitle } = useTitle();
   const { message } = useToast();
   const { startLoading, stopLoading } = useLoading();
+  const { instituicao } = useInstitution();
 
   const [perfil, setPerfil] = useState<IPerfil>();
   const [disciplinaPerfil, setDisciplinaPerfil] = useState<DisciplinaPerfil[]>([]);
@@ -95,14 +97,16 @@ export function FilteredPerfil() {
   const getPerfil = useCallback(async () => {
     startLoading();
     try {
-      const response = await api.get(`/perfil/${params?.id}`);
+      const response = await api.get(`/perfil/${params?.id}`, {
+        params: { instituicao_id: instituicao?.id },
+      });
       setPerfil(response.data);
     } catch (error: any) {
       message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
     } finally {
       stopLoading();
     }
-  }, [message, params?.id, startLoading, stopLoading]);
+  }, [instituicao?.id, message, params?.id, startLoading, stopLoading]);
 
   useEffect(() => {
     getPerfil();
@@ -111,14 +115,16 @@ export function FilteredPerfil() {
   const getDisciplinaPerfil = useCallback(async () => {
     startLoading();
     try {
-      const response = await api.get(`/ppc_disciplina_versao/perfil/${params?.id}`);
+      const response = await api.get(`/ppc_disciplina_versao/perfil/${params?.id}`, {
+        params: { instituicao_id: instituicao?.id },
+      });
       setDisciplinaPerfil(response.data);
     } catch (error: any) {
       message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
     } finally {
       stopLoading();
     }
-  }, [message, params?.id, startLoading, stopLoading]);
+  }, [instituicao?.id, message, params?.id, startLoading, stopLoading]);
 
   useEffect(() => {
     getDisciplinaPerfil();
@@ -127,14 +133,16 @@ export function FilteredPerfil() {
   const getPpc = useCallback(async () => {
     startLoading();
     try {
-      const response = await api.get(`/ppc/${params?.ppc_id}`);
+      const response = await api.get(`/ppc/${params?.ppc_id}`, {
+        params: { instituicao_id: instituicao?.id },
+      });
       setPpc(response.data);
     } catch (error: any) {
       message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
     } finally {
       stopLoading();
     }
-  }, [message, params?.ppc_id, startLoading, stopLoading]);
+  }, [instituicao?.id, message, params?.ppc_id, startLoading, stopLoading]);
 
   useEffect(() => {
     getPpc();
@@ -174,7 +182,7 @@ export function FilteredPerfil() {
                     key={perfil1.id}
                     onClick={() =>
                       navigate(
-                        `/disciplinas/${perfil1.versoes.disciplina_id}/versao/${perfil1.versoes.id}`,
+                        `/disciplinas/${perfil1.versao.disciplina_id}/versao/${perfil1.versao.id}`,
                       )
                     }
                   >
@@ -193,7 +201,7 @@ export function FilteredPerfil() {
                       >
                         <img src={DisciplinaIcon} alt="Icon" />
                       </IconButton>
-                      <Typography>{perfil1.versoes.disciplina.name}</Typography>
+                      <Typography>{perfil1.versao.disciplina.name}</Typography>
                     </Box>
                   </Grid>
                 ))}

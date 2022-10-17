@@ -15,7 +15,6 @@ import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 
 import { FormSelect } from '#shared/components/Form/FormSelect';
-import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
@@ -27,6 +26,7 @@ type ICreateDisciplinaPPC = {
   ppc_id: string;
   onClose: () => void;
   reloadList?: () => void;
+  instituicao_Id: string | undefined;
 };
 
 type Disciplinas = {
@@ -81,10 +81,10 @@ export function CreateDisciplinaPPC({
   semestre,
   modulo,
   reloadList,
+  instituicao_Id,
 }: ICreateDisciplinaPPC) {
   const { startLoading, stopLoading } = useLoading();
   const { message } = useToast();
-  const { instituicao } = useInstitution();
 
   const { handleSubmit, control, reset } = useForm<IForm>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -101,7 +101,9 @@ export function CreateDisciplinaPPC({
     async function getCompetencia() {
       startLoading();
       try {
-        const response = await api.get(`/ppc/${ppc_id}`);
+        const response = await api.get(`/ppc/${ppc_id}`, {
+          params: { instituicao_id: instituicao_Id },
+        });
         setCompetencias(response.data.competencias);
         setPerfis(response.data.perfis);
       } catch (error: any) {
@@ -112,7 +114,7 @@ export function CreateDisciplinaPPC({
     }
 
     getCompetencia();
-  }, [message, ppc_id, startLoading, stopLoading]);
+  }, [instituicao_Id, message, ppc_id, startLoading, stopLoading]);
 
   const CompetenciaOption = useMemo(() => {
     return competencias?.map((competencia1) => {
@@ -137,7 +139,7 @@ export function CreateDisciplinaPPC({
       startLoading();
       try {
         const response = await api.get('/disciplinas', {
-          params: { instituicao_id: instituicao?.id },
+          params: { instituicao_id: instituicao_Id },
         });
 
         setDisciplinas(response.data);
@@ -149,7 +151,7 @@ export function CreateDisciplinaPPC({
     }
 
     getDisciplinas();
-  }, [instituicao?.id, message, startLoading, stopLoading]);
+  }, [instituicao_Id, message, startLoading, stopLoading]);
 
   const DisciplinaOption = useMemo(() => {
     return disciplinas.map((disciplina_1) => {
@@ -166,7 +168,7 @@ export function CreateDisciplinaPPC({
       try {
         if (disciplinaId !== null) {
           const response = await api.get('/versoes', {
-            params: { disciplina_id: disciplinaId.id, instituicao_id: instituicao?.id },
+            params: { disciplina_id: disciplinaId.id, instituicao_id: instituicao_Id },
           });
 
           setVersao(response.data);
@@ -179,7 +181,7 @@ export function CreateDisciplinaPPC({
     }
 
     getVersao();
-  }, [disciplinaId, disciplinaId?.id, instituicao?.id, message, startLoading, stopLoading]);
+  }, [disciplinaId, disciplinaId?.id, instituicao_Id, message, startLoading, stopLoading]);
 
   const VersaoOption = useMemo(() => {
     return versao.map((versao_1) => {
@@ -195,7 +197,9 @@ export function CreateDisciplinaPPC({
     async (newVersaoId?: string) => {
       if (newVersaoId) {
         try {
-          const response = await api.get(`/versao/${newVersaoId}`);
+          const response = await api.get(`/versao/${newVersaoId}`, {
+            params: { instituicao_id: instituicao_Id },
+          });
 
           setVersaoRender(response.data);
         } catch (error: any) {
@@ -207,7 +211,7 @@ export function CreateDisciplinaPPC({
         setVersaoRender(null);
       }
     },
-    [message, stopLoading],
+    [instituicao_Id, message, stopLoading],
   );
 
   const handleCreate = useCallback(
@@ -220,7 +224,7 @@ export function CreateDisciplinaPPC({
       });
       try {
         await api.post('/ppc_disciplina_versao', {
-          instituicao_id: instituicao?.id,
+          instituicao_id: instituicao_Id,
           ppc_id,
           modulo,
           semestre,
@@ -240,11 +244,11 @@ export function CreateDisciplinaPPC({
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [instituicao?.id, ppc_id, modulo, semestre, reloadList, message, onClose, reset],
+    [instituicao_Id, ppc_id, modulo, semestre, reloadList, message, onClose, reset],
   );
 
   return (
-    <Dialog onClose={onClose} open={open} sx={{ left: '-40%' }}>
+    <Dialog onClose={onClose} open={open} /* sx={{ left: '-40%' }} */>
       <Box
         sx={{
           display: 'flex',
@@ -305,7 +309,7 @@ export function CreateDisciplinaPPC({
               <Dialog
                 onClose={() => setVersaoRender(null)}
                 open={!!versaoRender}
-                sx={{ left: '40%' }}
+                /* sx={{ left: '40%' }} */
               >
                 <Box
                   sx={{
@@ -372,7 +376,7 @@ export function CreateDisciplinaPPC({
             <Grid item xs={12}>
               <FormSelect
                 control={control}
-                name="competencias"
+                name="competencia"
                 label="Competencias"
                 options={CompetenciaOption}
                 optionLabel="label"

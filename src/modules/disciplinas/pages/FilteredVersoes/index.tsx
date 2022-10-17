@@ -95,14 +95,16 @@ export function FilteredVersoes() {
   const getDisciplina = useCallback(async () => {
     startLoading();
     try {
-      const response = await api.get(`/disciplina/${params?.id}`);
+      const response = await api.get(`/disciplina/${params?.id}`, {
+        params: { instituicao_id: instituicao?.id },
+      });
       setDisciplina(response.data);
     } catch (error: any) {
       message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
     } finally {
       stopLoading();
     }
-  }, [message, params?.id, startLoading, stopLoading]);
+  }, [instituicao?.id, message, params?.id, startLoading, stopLoading]);
 
   useEffect(() => {
     getDisciplina();

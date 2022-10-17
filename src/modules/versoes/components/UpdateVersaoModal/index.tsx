@@ -86,7 +86,9 @@ export function UpdateVersaoModal({ open, onClose, versao_id, reloadList }: IUpd
     async function getVersao() {
       startLoading();
       try {
-        const response = await api.get(`/versao/${versao_id}`);
+        const response = await api.get(`/versao/${versao_id}`, {
+          params: { instituicao_id: instituicao?.id },
+        });
         setData(response.data);
       } catch (error: any) {
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
@@ -96,7 +98,7 @@ export function UpdateVersaoModal({ open, onClose, versao_id, reloadList }: IUpd
     }
 
     getVersao();
-  }, [message, startLoading, stopLoading, versao_id]);
+  }, [instituicao?.id, message, startLoading, stopLoading, versao_id]);
 
   const handleUpdate = useCallback(
     async (form: IForm) => {

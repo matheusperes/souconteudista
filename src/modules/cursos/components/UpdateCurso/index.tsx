@@ -54,7 +54,9 @@ export function UpdateCursoModal({ open, onClose, curso_id, reloadList }: Update
     async function getCurso() {
       startLoading();
       try {
-        const response = await api.get(`/curso/${curso_id}`);
+        const response = await api.get(`/curso/${curso_id}`, {
+          params: { instituicao_id: instituicao?.id },
+        });
 
         setData(response.data);
       } catch (error: any) {
@@ -65,7 +67,7 @@ export function UpdateCursoModal({ open, onClose, curso_id, reloadList }: Update
     }
 
     getCurso();
-  }, [curso_id, message, startLoading, stopLoading]);
+  }, [curso_id, instituicao?.id, message, startLoading, stopLoading]);
 
   const handleUpdate = useCallback(
     async (form: IForm) => {

@@ -83,7 +83,9 @@ export function UpdateDisciplinaModal({
     async function getDisciplina() {
       startLoading();
       try {
-        const response = await api.get(`/disciplina/${disciplina_id}`);
+        const response = await api.get(`/disciplina/${disciplina_id}`, {
+          params: { instituicao_id: instituicao?.id },
+        });
         setData(response.data);
       } catch (error: any) {
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
@@ -93,7 +95,7 @@ export function UpdateDisciplinaModal({
     }
 
     getDisciplina();
-  }, [disciplina_id, message, startLoading, stopLoading]);
+  }, [disciplina_id, instituicao?.id, message, startLoading, stopLoading]);
 
   const handleUpdate = useCallback(
     async (form: IForm) => {

@@ -81,14 +81,16 @@ export function FilteredDisciplinas() {
   const getArea = useCallback(async () => {
     startLoading();
     try {
-      const response = await api.get(`/area/${params?.id}`);
+      const response = await api.get(`/area/${params?.id}`, {
+        params: { instituicao_id: instituicao?.id },
+      });
       setArea(response.data);
     } catch (error: any) {
       message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
     } finally {
       stopLoading();
     }
-  }, [message, params?.id, startLoading, stopLoading]);
+  }, [instituicao?.id, message, params?.id, startLoading, stopLoading]);
 
   useEffect(() => {
     getArea();

@@ -6,7 +6,6 @@ import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 
 import { MyTextField } from '#shared/components/Form/TextField';
-import { useInstitution } from '#shared/hooks/institution';
 import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
 
@@ -36,7 +35,6 @@ type ICreateAutoresModal = {
 
 export function CreateAutoresModal({ updateListAutores, open, onClose }: ICreateAutoresModal) {
   const { message } = useToast();
-  const { instituicao } = useInstitution();
 
   const {
     handleSubmit,
@@ -51,7 +49,6 @@ export function CreateAutoresModal({ updateListAutores, open, onClose }: ICreate
     async (form: IForm) => {
       try {
         const response = await api.post('/autores', {
-          instituicao_id: instituicao?.id,
           first_name: form.primeiroNome,
           middle_name: form.nomeMeio,
           last_name: form.ultimoNome,
@@ -66,7 +63,7 @@ export function CreateAutoresModal({ updateListAutores, open, onClose }: ICreate
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [instituicao?.id, updateListAutores, message, reset, onClose],
+    [updateListAutores, message, reset, onClose],
   );
 
   return (

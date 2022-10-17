@@ -6,7 +6,6 @@ import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 
 import { MyTextField } from '#shared/components/Form/TextField';
-import { useInstitution } from '#shared/hooks/institution';
 import { useLoading } from '#shared/hooks/loading';
 import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
@@ -16,6 +15,7 @@ type IUpdatePerfilModal = {
   open: boolean;
   onClose: () => void;
   perfil_id: string;
+  instituicao_Id: string | undefined;
 };
 
 type Perfil = {
@@ -35,10 +35,15 @@ const validateForm = yup.object().shape({
   perfilNumero: yup.number().required('Perfil precisa ter um número'),
 });
 
-export function UpdatePerfilModal({ reloadList, open, onClose, perfil_id }: IUpdatePerfilModal) {
+export function UpdatePerfilModal({
+  reloadList,
+  open,
+  onClose,
+  perfil_id,
+  instituicao_Id,
+}: IUpdatePerfilModal) {
   const { startLoading, stopLoading } = useLoading();
   const { message } = useToast();
-  const { instituicao } = useInstitution();
 
   const [data, setData] = useState<Perfil | null>(null);
 
@@ -55,7 +60,9 @@ export function UpdatePerfilModal({ reloadList, open, onClose, perfil_id }: IUpd
     async function getPerfil() {
       startLoading();
       try {
-        const response = await api.get(`/perfil/${perfil_id}`);
+        const response = await api.get(`/perfil/${perfil_id}`, {
+          params: { instituicao_id: instituicao_Id },
+        });
         setData(response.data);
       } catch (error: any) {
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
@@ -65,13 +72,13 @@ export function UpdatePerfilModal({ reloadList, open, onClose, perfil_id }: IUpd
     }
 
     getPerfil();
-  }, [message, perfil_id, startLoading, stopLoading]);
+  }, [instituicao_Id, message, perfil_id, startLoading, stopLoading]);
 
   const handleUpdate = useCallback(
     async (form: IForm) => {
       try {
         await api.put(`/perfis/${perfil_id}`, {
-          instituicao_id: instituicao?.id,
+          instituicao_id: instituicao_Id,
           perfil: form.perfil,
           perfilNumero: form.perfilNumero,
         });
@@ -86,7 +93,7 @@ export function UpdatePerfilModal({ reloadList, open, onClose, perfil_id }: IUpd
         message({ mensagem: error.response?.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [perfil_id, instituicao?.id, reloadList, message, reset, onClose],
+    [perfil_id, instituicao_Id, reloadList, message, reset, onClose],
   );
 
   return (

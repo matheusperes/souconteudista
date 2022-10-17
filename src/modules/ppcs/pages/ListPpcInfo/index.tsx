@@ -44,6 +44,8 @@ import { DeleteCompetencia } from '#modules/competencias/components/DeleteCompet
 import { UpdateCompetenciaModal } from '#modules/competencias/components/UpdateCompetenciaModal';
 import { CreateDisciplinaPPC } from '#modules/disciplinas/components/CreateDisciplinaPPC';
 import { DeleteDisciplinaPPC } from '#modules/disciplinas/components/DeleteDisciplinaPPC';
+import { UpdateDisciplinaPPC } from '#modules/disciplinas/components/UpdateDisciplinaPPC';
+import { IInstituicoes } from '#modules/instituicoes/pages/ListInstituicoes';
 import { CreatePerfilModalPPC } from '#modules/perfis/components/CreatePerfilModalPPC';
 import { DeletePerfil } from '#modules/perfis/components/DeletePerfilModal';
 import { UpdatePerfilModal } from '#modules/perfis/components/UpdatePerfilModal';
@@ -93,7 +95,7 @@ type DisciplinaAPI = {
   modulo: number;
   semestre: number;
   created_at: string;
-  versoes: Versoes;
+  versao: Versoes;
   disciplinaVersao: DisciplinaVersao;
 };
 
@@ -120,6 +122,14 @@ export type IModalVersao = {
   modulo: number;
   ppc_id: string;
   semestre: number;
+  ppc_disciplina_versao?: string;
+} | null;
+
+export type IModalVersao2 = {
+  modulo: number;
+  ppc_id: string;
+  semestre: number;
+  ppc_disciplina_versao: string;
 } | null;
 
 type ICursoApi = {
@@ -131,6 +141,11 @@ type ICursoApi = {
 };
 
 type CursoOption = {
+  id: string;
+  label: string;
+};
+
+type InstituicaoOption = {
   id: string;
   label: string;
 };
@@ -175,6 +190,9 @@ export function InfoPpcs() {
   const [openCreate, setOpenCreate] = useState<IModalVersao>(null);
   const [openCreate2, setOpenCreate2] = useState<IModalVersao>(null);
 
+  const [openUpdate, setOpenUpdate] = useState<IModalVersao2 | null>(null);
+  const [openUpdate2, setOpenUpdate2] = useState<IModalVersao2 | null>(null);
+
   const [openDelete, setOpenDelete] = useState<any>(null);
   const [openDelete2, setOpenDelete2] = useState<any>(null);
 
@@ -193,6 +211,8 @@ export function InfoPpcs() {
 
   const [cursos, setCursos] = useState<ICursoApi[]>([]);
   const [cursosId, setCursosId] = useState<CursoOption | null>(null);
+  const [instituicoes, setInstituicoes] = useState<IInstituicoes[]>([]);
+  const [instituicoesId, setInstituicoesId] = useState<InstituicaoOption | null>(null);
   const [ppcs, setppcs] = useState<InfoPpcs[]>([]);
   const [ppcsId, setppcsId] = useState<PPCOption | null>(null);
   const [versaoRender, setVersaoRender] = useState<InfoPpcs | null>(null);
@@ -204,14 +224,16 @@ export function InfoPpcs() {
   const getPpc = useCallback(async () => {
     startLoading();
     try {
-      const response = await api.get(`/ppc/${params?.id}`);
+      const response = await api.get(`/ppc/${params?.id}`, {
+        params: { instituicao_id: instituicao?.id },
+      });
       setPpc(response.data);
     } catch (error: any) {
       message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
     } finally {
       stopLoading();
     }
-  }, [message, params?.id, startLoading, stopLoading]);
+  }, [instituicao?.id, message, params?.id, startLoading, stopLoading]);
 
   useEffect(() => {
     getPpc();
@@ -220,13 +242,23 @@ export function InfoPpcs() {
   useEffect(() => {
     async function getCursos() {
       const response = await api.get('/cursos', {
-        params: { instituicao_id: instituicao?.id },
+        params: { instituicao_id: instituicoesId?.id },
       });
 
       setCursos(response.data);
     }
 
     getCursos();
+  }, [instituicoesId?.id]);
+
+  useEffect(() => {
+    async function getInstituicoes() {
+      const response = await api.get('/instituicoes');
+
+      setInstituicoes(response.data);
+    }
+
+    getInstituicoes();
   }, [instituicao?.id]);
 
   useEffect(() => {
@@ -235,7 +267,7 @@ export function InfoPpcs() {
         startLoading();
         try {
           const response = await api.get('/ppcs', {
-            params: { curso_id: cursosId.id, instituicao_id: instituicao?.id },
+            params: { curso_id: cursosId.id, instituicao_id: instituicoesId?.id },
           });
           setppcs(response.data);
         } catch (error: any) {
@@ -247,7 +279,7 @@ export function InfoPpcs() {
     }
 
     getPPCs();
-  }, [cursosId, instituicao?.id, message, ppc?.curso.id, startLoading, stopLoading]);
+  }, [cursosId, instituicoesId?.id, message, ppc?.curso.id, startLoading, stopLoading]);
 
   const CursoOption1 = useMemo(() => {
     return cursos.map((curso) => {
@@ -258,6 +290,15 @@ export function InfoPpcs() {
     });
   }, [cursos]);
 
+  const InstituicoesOption = useMemo(() => {
+    return instituicoes.map((inst) => {
+      return {
+        id: inst.id,
+        label: `${inst.name} - ${inst.sigla}`,
+      };
+    });
+  }, [instituicoes]);
+
   const PPCOption1 = useMemo(() => {
     return ppcs.map((ppc1) => {
       return {
@@ -267,15 +308,22 @@ export function InfoPpcs() {
     });
   }, [ppcs]);
 
-  const handleSelectPPC = useCallback(async (newVersaoId?: string) => {
-    if (newVersaoId) {
-      const response = await api.get(`/ppc/${newVersaoId}`);
-
-      setVersaoRender(response.data);
-    } else {
-      setVersaoRender(null);
-    }
-  }, []);
+  const handleSelectPPC = useCallback(
+    async (newVersaoId?: string) => {
+      if (newVersaoId) {
+        const response = await api.get(`/ppc/${newVersaoId}`, {
+          params: { instituicao_id: instituicoesId?.id },
+        });
+        setVersaoRender(response.data);
+      } else {
+        setVersaoRender(null);
+        setInstituicoesId(null);
+        setCursosId(null);
+        setppcsId(null);
+      }
+    },
+    [instituicoesId?.id],
+  );
 
   const ppcInfo = useMemo(() => {
     if (!ppc) {
@@ -341,6 +389,7 @@ export function InfoPpcs() {
         <CreateDisciplinaPPC
           open={!!openCreate}
           onClose={() => setOpenCreate(null)}
+          instituicao_Id={instituicao?.id}
           ppc_id={openCreate.ppc_id}
           modulo={openCreate.modulo}
           semestre={openCreate.semestre}
@@ -351,9 +400,34 @@ export function InfoPpcs() {
         <CreateDisciplinaPPC
           open={!!openCreate2}
           onClose={() => setOpenCreate2(null)}
+          instituicao_Id={instituicoesId?.id}
           ppc_id={openCreate2.ppc_id}
           modulo={openCreate2.modulo}
           semestre={openCreate2.semestre}
+          reloadList={() => handleSelectPPC(versaoRender?.id)}
+        />
+      )}
+      {!!openUpdate && (
+        <UpdateDisciplinaPPC
+          open={!!openUpdate}
+          onClose={() => setOpenUpdate(null)}
+          instituicao_Id={instituicao?.id}
+          ppc_disciplina_versao={openUpdate.ppc_disciplina_versao}
+          ppc_id={openUpdate.ppc_id}
+          modulo={openUpdate.modulo}
+          semestre={openUpdate.semestre}
+          reloadList={() => getPpc()}
+        />
+      )}
+      {!!openUpdate2 && (
+        <UpdateDisciplinaPPC
+          open={!!openUpdate2}
+          onClose={() => setOpenUpdate2(null)}
+          instituicao_Id={instituicoesId?.id}
+          ppc_disciplina_versao={openUpdate2.ppc_disciplina_versao}
+          ppc_id={openUpdate2.ppc_id}
+          modulo={openUpdate2.modulo}
+          semestre={openUpdate2.semestre}
           reloadList={() => handleSelectPPC(versaoRender?.id)}
         />
       )}
@@ -377,24 +451,28 @@ export function InfoPpcs() {
         open={openCreateCompetencia}
         onClose={() => setOpenCreateCompetencia(false)}
         ppc_id={ppcInfo?.id || ''}
+        instituicao_id={instituicao?.id}
         reloadList={() => getPpc()}
       />
       <CreateCompetenciaModalPPC
         open={openCreateCompetencia2}
         onClose={() => setOpenCreateCompetencia2(false)}
         ppc_id={ppcInfoRender?.id || ''}
+        instituicao_id={instituicoesId?.id}
         reloadList={() => handleSelectPPC(versaoRender?.id)}
       />
       <CreatePerfilModalPPC
         open={openCreatePerfil}
         onClose={() => setOpenCreatePerfil(false)}
         ppc_id={ppcInfo?.id || ''}
+        instituicao_id={instituicao?.id}
         reloadList={() => getPpc()}
       />
       <CreatePerfilModalPPC
         open={openCreatePerfil2}
         onClose={() => setOpenCreatePerfil2(false)}
         ppc_id={ppcInfoRender?.id || ''}
+        instituicao_id={instituicoesId?.id}
         reloadList={() => handleSelectPPC(versaoRender?.id)}
       />
       {!!openUpdateCompetencia && (
@@ -402,6 +480,7 @@ export function InfoPpcs() {
           open={!!openUpdateCompetencia}
           onClose={() => setOpenUpdateCompetencia(null)}
           competencia_id={openUpdateCompetencia}
+          instituicao_Id={instituicao?.id}
           reloadList={() => getPpc()}
         />
       )}
@@ -410,6 +489,7 @@ export function InfoPpcs() {
           open={!!openUpdateCompetencia2}
           onClose={() => setOpenUpdateCompetencia2(null)}
           competencia_id={openUpdateCompetencia2}
+          instituicao_Id={instituicoesId?.id}
           reloadList={() => handleSelectPPC(versaoRender?.id)}
         />
       )}
@@ -418,6 +498,7 @@ export function InfoPpcs() {
           open={!!openUpdatePerfil}
           onClose={() => setOpenUpdatePerfil(null)}
           perfil_id={openUpdatePerfil}
+          instituicao_Id={instituicao?.id}
           reloadList={() => getPpc()}
         />
       )}
@@ -426,6 +507,7 @@ export function InfoPpcs() {
           open={!!openUpdatePerfil2}
           onClose={() => setOpenUpdatePerfil2(null)}
           perfil_id={openUpdatePerfil2}
+          instituicao_Id={instituicoesId?.id}
           reloadList={() => handleSelectPPC(versaoRender?.id)}
         />
       )}
@@ -887,7 +969,17 @@ export function InfoPpcs() {
                                         <Typography>{disciplina.name}</Typography>
                                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                           <Typography>{disciplina.creditos}</Typography>
-                                          <IconButton>
+                                          <IconButton
+                                            onClick={async (e) => {
+                                              e.stopPropagation();
+                                              setOpenUpdate({
+                                                semestre: semestre.semestre,
+                                                modulo: modulo.modulo,
+                                                ppc_id: ppcInfo.id,
+                                                ppc_disciplina_versao: disciplina.id,
+                                              });
+                                            }}
+                                          >
                                             <img src={Edit} alt="Edit" />
                                           </IconButton>
                                           <IconButton
@@ -942,7 +1034,10 @@ export function InfoPpcs() {
                     <IconButton
                       color="primary"
                       sx={{ color: '#020560' }}
-                      onClick={() => setComparadorCollapse(false)}
+                      onClick={() => {
+                        handleSelectPPC('');
+                        setComparadorCollapse(false);
+                      }}
                     >
                       <Close />
                     </IconButton>
@@ -953,6 +1048,20 @@ export function InfoPpcs() {
                   </Typography>
                   <Box sx={{ marginTop: '1rem' }}>
                     <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        <Autocomplete
+                          value={instituicoesId}
+                          onChange={(event: any, newValue) => {
+                            setInstituicoesId(newValue);
+                          }}
+                          disablePortal
+                          id="combo-box-demo"
+                          options={InstituicoesOption}
+                          renderInput={(params1) => (
+                            <TextField {...params1} label="Instituição" fullWidth />
+                          )}
+                        />
+                      </Grid>
                       <Grid item xs={12}>
                         <Autocomplete
                           value={cursosId}
@@ -1412,7 +1521,17 @@ export function InfoPpcs() {
                                             <Typography>{disciplina.name}</Typography>
                                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                               <Typography>{disciplina.creditos}</Typography>
-                                              <IconButton>
+                                              <IconButton
+                                                onClick={async (e) => {
+                                                  e.stopPropagation();
+                                                  setOpenUpdate2({
+                                                    semestre: semestre.semestre,
+                                                    modulo: modulo.modulo,
+                                                    ppc_id: ppcInfoRender.id,
+                                                    ppc_disciplina_versao: disciplina.id,
+                                                  });
+                                                }}
+                                              >
                                                 <img src={Edit} alt="Edit" />
                                               </IconButton>
                                               <IconButton

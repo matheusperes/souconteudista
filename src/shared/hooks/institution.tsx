@@ -42,6 +42,7 @@ export function InstitutionProvider({ children }: InstitutionProviderProps) {
 
       if (response.data) {
         setInstituicao(response.data);
+        localStorage.setItem('@MycomParator:instituicao', JSON.stringify(response.data));
       } else {
         setOpenCreate(true);
       }

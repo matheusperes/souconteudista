@@ -112,7 +112,9 @@ export function UpdatePpcModal({ open, onClose, ppc_id, reloadList, curso_id }: 
     async function getCurso() {
       startLoading();
       try {
-        const response = await api.get(`/curso/${curso_id}`);
+        const response = await api.get(`/curso/${curso_id}`, {
+          params: { instituicao_id: instituicao?.id },
+        });
         setCurso(response.data);
       } catch (error: any) {
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
@@ -121,13 +123,15 @@ export function UpdatePpcModal({ open, onClose, ppc_id, reloadList, curso_id }: 
       }
     }
     getCurso();
-  }, [curso_id, message, ppc_id, startLoading, stopLoading]);
+  }, [curso_id, instituicao?.id, message, ppc_id, startLoading, stopLoading]);
 
   useEffect(() => {
     async function getPpc() {
       startLoading();
       try {
-        const response = await api.get(`/ppc/${ppc_id}`);
+        const response = await api.get(`/ppc/${ppc_id}`, {
+          params: { instituicao_id: instituicao?.id },
+        });
         setData(response.data);
       } catch (error: any) {
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
@@ -136,7 +140,7 @@ export function UpdatePpcModal({ open, onClose, ppc_id, reloadList, curso_id }: 
       }
     }
     getPpc();
-  }, [message, ppc_id, startLoading, stopLoading]);
+  }, [instituicao?.id, message, ppc_id, startLoading, stopLoading]);
 
   const handleUpdate = useCallback(
     async (form: IForm) => {

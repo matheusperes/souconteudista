@@ -6,7 +6,6 @@ import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 
 import { MyTextField } from '#shared/components/Form/TextField';
-import { useInstitution } from '#shared/hooks/institution';
 import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
 
@@ -15,6 +14,7 @@ type ICreatePerfilModalPPC = {
   open: boolean;
   onClose: () => void;
   ppc_id: string;
+  instituicao_id: string | undefined;
 };
 
 type IForm = {
@@ -28,9 +28,14 @@ const validateForm = yup.object().shape({
   perfilNumero: yup.number().required('Perfil precisa ter um número'),
 });
 
-export function CreatePerfilModalPPC({ reloadList, open, onClose, ppc_id }: ICreatePerfilModalPPC) {
+export function CreatePerfilModalPPC({
+  reloadList,
+  open,
+  onClose,
+  ppc_id,
+  instituicao_id,
+}: ICreatePerfilModalPPC) {
   const { message } = useToast();
-  const { instituicao } = useInstitution();
 
   const {
     handleSubmit,
@@ -45,7 +50,7 @@ export function CreatePerfilModalPPC({ reloadList, open, onClose, ppc_id }: ICre
     async (form: IForm) => {
       try {
         await api.post('/perfis', {
-          instituicao_id: instituicao?.id,
+          instituicao_id,
           perfil: form.perfil,
           perfilNumero: form.perfilNumero,
           ppc_id,
@@ -61,7 +66,7 @@ export function CreatePerfilModalPPC({ reloadList, open, onClose, ppc_id }: ICre
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [instituicao?.id, ppc_id, reloadList, message, reset, onClose],
+    [instituicao_id, ppc_id, reloadList, message, reset, onClose],
   );
 
   return (

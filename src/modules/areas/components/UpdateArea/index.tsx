@@ -50,7 +50,9 @@ export function UpdateAreaModal({ open, onClose, area_id, reloadList }: IUpdateA
     async function getArea() {
       startLoading();
       try {
-        const response = await api.get(`/area/${area_id}`);
+        const response = await api.get(`/area/${area_id}`, {
+          params: { instituicao_id: instituicao?.id },
+        });
         setData(response.data);
       } catch (error: any) {
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
@@ -60,7 +62,7 @@ export function UpdateAreaModal({ open, onClose, area_id, reloadList }: IUpdateA
     }
 
     getArea();
-  }, [area_id, message, startLoading, stopLoading]);
+  }, [area_id, instituicao?.id, message, startLoading, stopLoading]);
 
   const handleUpdate = useCallback(
     async (form: IForm) => {

@@ -1,5 +1,6 @@
 // import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 // import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import { AccountBalanceOutlined } from '@mui/icons-material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Icon } from '@mui/material';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
@@ -16,10 +17,17 @@ import ListItemText from '@mui/material/ListItemText';
 import { styled } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Select from 'react-select';
 
+import { useInstitution } from '#shared/hooks/institution';
+import { useLoading } from '#shared/hooks/loading';
+import { useToast } from '#shared/hooks/toast';
 import { Router } from '#shared/routes';
+import { api } from '#shared/services/axios';
+
+import { IInstituicoes } from '#modules/instituicoes/pages/ListInstituicoes';
 
 import { useTitle } from '../../hooks/title';
 import Home from '../../images/Home.svg';
@@ -78,14 +86,59 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'flex-end',
 }));
 
+const SELECT_VALUE_KEY = '@MycomParator:instituicao';
+
+type Option = {
+  id: string;
+  name: string;
+};
+
 export default function PersistentDrawerLeft() {
   const navigate = useNavigate();
   const { title } = useTitle();
   const [open, setOpen] = useState(false);
+  const { message } = useToast();
+  const { startLoading, stopLoading } = useLoading();
+  const { instituicao, updateInstitution } = useInstitution();
+
+  const [selected, setSelected] = useState<Option | null>(null);
+
+  const [instuicoes, setInstituicoes] = useState<IInstituicoes[]>([]);
 
   const handleDrawerChange = useCallback(() => {
     setOpen((oldValue) => !oldValue);
   }, []);
+
+  const getInstituicoes = useCallback(async () => {
+    startLoading();
+    try {
+      const response = await api.get('/instituicoes');
+      setInstituicoes(response.data);
+    } catch (error: any) {
+      message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+    } finally {
+      stopLoading();
+    }
+  }, [message, startLoading, stopLoading]);
+
+  useEffect(() => {
+    getInstituicoes();
+  }, [getInstituicoes]);
+
+  useEffect(() => {
+    setSelected(instituicao);
+  }, [instituicao]);
+
+  const handleChange = (s: any) => {
+    updateInstitution(s);
+    navigate('/');
+  };
+
+  useEffect(() => {
+    const lastSelected = JSON.parse(localStorage.getItem(SELECT_VALUE_KEY) ?? '[]');
+    getInstituicoes();
+    setSelected(lastSelected);
+  }, [getInstituicoes]);
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -99,6 +152,17 @@ export default function PersistentDrawerLeft() {
           <Typography variant="h6" noWrap component="div">
             {title}
           </Typography>
+          <Box sx={{ marginLeft: 'auto', width: '170px' }}>
+            <Select
+              value={selected}
+              onChange={handleChange}
+              options={instuicoes}
+              getOptionLabel={(option) => option.name}
+              getOptionValue={(option) => option.id}
+              menuPlacement="auto"
+              menuPosition="fixed"
+            />
+          </Box>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -140,6 +204,16 @@ export default function PersistentDrawerLeft() {
               <ListItemText primary="Home" />
             </ListItemButton>
           </ListItem>
+          <ListItem onClick={() => navigate('/instituicoes')}>
+            <ListItemButton>
+              <ListItemIcon>
+                <Icon>
+                  <AccountBalanceOutlined fontSize="small" sx={{ color: '#f4f4f49d' }} />
+                </Icon>
+              </ListItemIcon>
+              <ListItemText primary="Instituições" />
+            </ListItemButton>
+          </ListItem>
           <ListItem onClick={() => navigate('/cursos')}>
             <ListItemButton>
               <ListItemIcon>
@@ -150,6 +224,7 @@ export default function PersistentDrawerLeft() {
               <ListItemText primary="Cursos" />
             </ListItemButton>
           </ListItem>
+
           <ListItem onClick={() => navigate('/disciplinas')}>
             <ListItemButton>
               <ListItemIcon>
