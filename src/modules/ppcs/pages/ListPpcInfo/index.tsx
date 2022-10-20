@@ -1211,12 +1211,12 @@ export function InfoPpcs() {
                           {filteredPerfilRender?.map((perfil) => (
                             <Box sx={{ marginTop: '0.5rem' }} key={perfil.id}>
                               <Card
-                                sx={{ display: 'flex', cursor: 'pointer' }}
-                                onClick={() =>
-                                  navigate(
-                                    `/cursos/${versaoRender?.curso_id}/ppcs/${perfil?.ppc_id}/perfil/${perfil.id}`,
-                                  )
-                                }
+                                sx={{ display: 'flex', cursor: 'default' }}
+                                // onClick={() =>
+                                //   navigate(
+                                //     `/cursos/${versaoRender?.curso_id}/ppcs/${perfil?.ppc_id}/perfil/${perfil.id}`,
+                                //   )
+                                // }
                               >
                                 <Box
                                   sx={{
@@ -1345,12 +1345,12 @@ export function InfoPpcs() {
                           {filteredCompetenciaRender?.map((competencia) => (
                             <Box sx={{ marginTop: '0.5rem' }} key={competencia.id}>
                               <Card
-                                sx={{ display: 'flex', cursor: 'pointer' }}
-                                onClick={() =>
-                                  navigate(
-                                    `/cursos/${versaoRender?.curso_id}/ppcs/${competencia?.ppc_id}/competencia/${competencia.id}`,
-                                  )
-                                }
+                                sx={{ display: 'flex', cursor: 'default' }}
+                                // onClick={() =>
+                                //   navigate(
+                                //     `/cursos/${versaoRender?.curso_id}/ppcs/${competencia?.ppc_id}/competencia/${competencia.id}`,
+                                //   )
+                                // }
                               >
                                 <Box
                                   sx={{

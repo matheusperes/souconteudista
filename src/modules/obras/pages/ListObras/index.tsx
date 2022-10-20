@@ -6,26 +6,29 @@ import {
   Stack,
   Button,
   TextField,
-  ButtonGroup,
-  IconButton,
+  Table,
+  TableCell,
+  TableHead,
+  TableRow,
+  TableBody,
 } from '@mui/material';
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { Col, StyledTable } from '#shared/components/StyledTable';
+import { StyledTableContainer } from '#shared/components/StyledTable2/styles';
 import { useLoading } from '#shared/hooks/loading';
 import { useTitle } from '#shared/hooks/title';
 import { useToast } from '#shared/hooks/toast';
-import Delete from '#shared/images/Delete.svg';
-import Edit from '#shared/images/Edit.svg';
 import { api } from '#shared/services/axios';
 
-import { CreateObraAutorModal } from '#modules/obras/components/CreateObraAutorModal';
+import { CreateObraAutorModal, IAutores } from '#modules/obras/components/CreateObraAutorModal';
 import { CreateObrasModal } from '#modules/obras/components/CreateObrasModal';
 import { DeleteObra } from '#modules/obras/components/DeleteObra';
+import { ObrasRow } from '#modules/obras/components/ObrasRow';
 import { UpdateObraModal } from '#modules/obras/components/UpdateObraModal';
 
 export type IObrasAutor = {
+  autor: IAutores;
   autor_id: string;
   obra_id: string;
   funcao: string;
@@ -57,7 +60,7 @@ export type IObras = {
   acesso_em: string;
   contido_em: string;
   obraParent: IObras;
-  autores: IObrasAutor;
+  obraAutores: IObrasAutor[];
 };
 
 export function ListObras() {
@@ -116,43 +119,6 @@ export function ListObras() {
       return obra.obra_nome.toLowerCase().includes(search.toLowerCase());
     });
   }, [obras, search]);
-
-  const colunas = useMemo<Col<IObras>[]>(() => {
-    return [
-      { name: 'Obra', propriedadeName: 'obra_nome' },
-      { name: 'Tipo', propriedadeName: 'item_tipo' },
-      { name: 'Ano', propriedadeName: 'ano' },
-      {
-        name: 'Ações',
-        personalizarCol: (item) => {
-          return (
-            <ButtonGroup variant="outlined" aria-label="outlined primary button group">
-              <IconButton
-                color="primary"
-                onClick={async (e) => {
-                  e.stopPropagation();
-
-                  setOpenDelete(item.id);
-                }}
-              >
-                <img src={Delete} alt="Delete" />
-              </IconButton>
-              <IconButton
-                color="primary"
-                onClick={async (e) => {
-                  e.stopPropagation();
-
-                  setOpenUpdate(item.id);
-                }}
-              >
-                <img src={Edit} alt="Edit" />
-              </IconButton>
-            </ButtonGroup>
-          );
-        },
-      },
-    ];
-  }, []);
 
   return (
     <>
@@ -263,11 +229,23 @@ export function ListObras() {
             </Box>
           </Box>
           <Box sx={{ marginTop: '1rem' }}>
-            <StyledTable
-              colunas={colunas}
-              conteudo={filteredObras}
-              // navegationLine={(id) => navigate(`/disciplinas/${id}`)}
-            />
+            <StyledTableContainer>
+              <Table sx={{ padding: '1rem' }}>
+                <TableHead>
+                  <TableRow>
+                    <TableCell align="center">Obra</TableCell>
+                    <TableCell align="center">Tipo</TableCell>
+                    <TableCell align="center">Ano</TableCell>
+                    <TableCell align="center">Ações</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {filteredObras.map((obra123) => (
+                    <ObrasRow obra123={obra123} key={obra123.id} reloadPage={() => getObras()} />
+                  ))}
+                </TableBody>
+              </Table>
+            </StyledTableContainer>
           </Box>
         </Box>
       </Box>

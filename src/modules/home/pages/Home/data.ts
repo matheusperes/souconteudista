@@ -31,12 +31,14 @@ export const itensNav: ItemProps[] = [
   },
   {
     titulo: 'Autores',
-    descricao: 'Possibilita o cadastramento e acesso de autores que contém obras nos PPCS.',
+    descricao:
+      'Possibilita o cadastramento e acesso de autores que contém obras nos PPCS, além de poder filtrar as aboras por seus respectivos autores. ',
     link: '/autores',
   },
   {
     titulo: 'Obras',
-    descricao: 'Apresenta o cadastramaneto e acesso as obras relacionadas ao curso e disciplina',
+    descricao:
+      'Apresenta o cadastramaneto e acesso as obras relacionadas ao curso e disciplina, assim como a possibilidade de adicionar seus autores.',
     link: '/obras',
   },
 ];

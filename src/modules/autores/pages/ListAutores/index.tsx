@@ -33,6 +33,10 @@ export type IAutores = {
   nationality: string;
 };
 
+type IAutores2 = IAutores & {
+  nomeCompleto: string;
+};
+
 export function ListAutores() {
   const { setTitle } = useTitle();
   const navigate = useNavigate();
@@ -59,16 +63,19 @@ export function ListAutores() {
   }, [getAutores]);
 
   const filteredAutores = useMemo(() => {
-    return autores.filter((autor) => {
-      return autor.quote.toLowerCase().includes(search.toLowerCase());
-    });
+    return autores
+      .map((autor) => ({
+        ...autor,
+        nomeCompleto: `${autor.first_name} ${autor.middle_name} ${autor.last_name}`,
+      }))
+      .filter((autor) => {
+        return autor.nomeCompleto.toLowerCase().includes(search.toLowerCase());
+      });
   }, [autores, search]);
 
-  const colunas = useMemo<Col<IAutores>[]>(() => {
+  const colunas = useMemo<Col<IAutores2>[]>(() => {
     return [
-      { name: 'Primeiro Nome', propriedadeName: 'first_name' },
-      { name: 'Nome do Meio', propriedadeName: 'middle_name' },
-      { name: 'Último Nome', propriedadeName: 'last_name' },
+      { name: 'Primeiro Nome', propriedadeName: 'nomeCompleto' },
       { name: 'Citação', propriedadeName: 'quote' },
       { name: 'Nacionalidade', propriedadeName: 'nationality' },
       {
@@ -239,7 +246,7 @@ export function ListAutores() {
             <StyledTable
               colunas={colunas}
               conteudo={filteredAutores}
-              // navegationLine={(id) => navigate(`/disciplinas/${id}`)}
+              navegationLine={(id) => navigate(`/autores/${id.id}`)}
             />
           </Box>
         </Box>

@@ -1,6 +1,17 @@
 import { yupResolver } from '@hookform/resolvers/yup';
+import { Add, Clear } from '@mui/icons-material';
 import CloseIcon from '@mui/icons-material/Close';
-import { Dialog, Box, DialogTitle, IconButton, Grid, Button } from '@mui/material';
+import {
+  Dialog,
+  Box,
+  DialogTitle,
+  IconButton,
+  Grid,
+  Button,
+  Autocomplete,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
@@ -12,6 +23,7 @@ import { useToast } from '#shared/hooks/toast';
 import { api } from '#shared/services/axios';
 
 import { IObras } from '../../pages/ListObras';
+import { IAutores } from '../CreateObraAutorModal';
 
 type IUpdateObraModal = {
   open: boolean;
@@ -74,6 +86,68 @@ const validateForm = yup.object().shape({
   acesso_em: yup.string().required('Obra precisa ter uma data de acesso'),
 });
 
+type IAutoresMaluco = {
+  id_autor: string;
+  id: string;
+  name: string;
+  funcao: string;
+};
+
+type IAutoresFuncaoMap = {
+  [key: string]: IAutoresMaluco;
+};
+
+type AutorOption1 = {
+  id: string;
+  label: string;
+};
+
+type IAutor = {
+  id: string;
+  first_name: string;
+  middle_name: string;
+  last_name: string;
+  quote: string;
+  nationality: string;
+};
+
+type IObraAutores = {
+  id: string;
+  autor: IAutor;
+  autor_id: string;
+  funcao: string;
+  obra_id: string;
+};
+
+type ObrasApi = {
+  id: string;
+  item_tipo: string;
+  obra_nome: string;
+  serie_nome: string;
+  colecao_nome: string;
+  cidade: string;
+  editora: string;
+  dia: number;
+  mes: string;
+  ano: number;
+  volume: string;
+  edicao: string;
+  resumo: string;
+  periodico_nome: string;
+  periodico_abreviacao: string;
+  numero: string;
+  paginas: string;
+  idioma: string;
+  doi: string;
+  isbn: string;
+  issn: string | null;
+  url: string;
+  acesso_em: string;
+  contido_em: string;
+  obraParent: IObras | null;
+  obraAutores: IObraAutores[];
+};
+
 export function UpdateObraModal({ open, onClose, obra_id, reloadList }: IUpdateObraModal) {
   const { startLoading, stopLoading } = useLoading();
   const { message } = useToast();
@@ -87,8 +161,72 @@ export function UpdateObraModal({ open, onClose, obra_id, reloadList }: IUpdateO
     resolver: yupResolver(validateForm),
   });
 
-  const [data, setData] = useState<IObras | null>(null);
+  const [data, setData] = useState<ObrasApi | null>(null);
   const [obras, setObras] = useState<IObras[]>([]);
+
+  const [autores, setAutores] = useState<IAutores[]>([]);
+  const [autoresId, setAutoresId] = useState<AutorOption1 | null>(null);
+  const [funcao, setFuncao] = useState('');
+  const [autorFuncao, setAutorFuncao] = useState<IAutoresFuncaoMap>({});
+
+  const handleCreateAutorFuncao = useCallback(() => {
+    if (!autoresId || !funcao) {
+      return;
+    }
+
+    const id = `${autoresId?.id}_${funcao}`;
+    const Name = `${autoresId?.label}`;
+
+    setAutoresId(null);
+    setFuncao('');
+
+    setAutorFuncao((old) => ({
+      ...old,
+      [id]: {
+        ...autorFuncao,
+        id,
+        id_autor: autoresId.id,
+        name: Name,
+        funcao,
+      },
+    }));
+  }, [autorFuncao, autoresId, funcao]);
+
+  const removeAutorFuncao = useCallback((id: string) => {
+    setAutorFuncao((old) => {
+      const newData = { ...old };
+
+      delete newData[id];
+
+      return newData;
+    });
+  }, []);
+
+  useEffect(() => {
+    async function getAutores() {
+      startLoading();
+      try {
+        const response = await api.get('/autores');
+
+        setAutores(response.data);
+      } catch (error: any) {
+        message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
+      } finally {
+        stopLoading();
+      }
+    }
+
+    getAutores();
+  }, [message, startLoading, stopLoading]);
+
+  const AutorOption = useMemo(() => {
+    return autores.map((autor1) => {
+      return {
+        id: autor1.id,
+        label: `${autor1.first_name} ${autor1.middle_name} ${autor1.last_name}`,
+      };
+    });
+  }, [autores]);
 
   useEffect(() => {
     async function getObras() {
@@ -110,8 +248,25 @@ export function UpdateObraModal({ open, onClose, obra_id, reloadList }: IUpdateO
     async function getObra() {
       startLoading();
       try {
-        const response = await api.get(`/obra/${obra_id}`);
+        const response = await api.get<ObrasApi>(`/obra/${obra_id}`);
         setData(response.data);
+
+        const dadosAutor: IAutoresFuncaoMap = {};
+
+        response.data.obraAutores.forEach((oa) => {
+          const id = `${oa.autor_id}_${oa.funcao}`;
+
+          const name = `${oa.autor.first_name} ${oa.autor.middle_name} ${oa.autor.last_name}`;
+
+          dadosAutor[id] = {
+            id,
+            id_autor: oa.autor_id,
+            name,
+            funcao: oa.funcao,
+          };
+        });
+
+        setAutorFuncao(dadosAutor);
       } catch (error: any) {
         message({ mensagem: error.response.data || 'Erro interno do servidor', tipo: 'error' });
       } finally {
@@ -169,6 +324,12 @@ export function UpdateObraModal({ open, onClose, obra_id, reloadList }: IUpdateO
           url: form.url,
           acesso_em: form.acesso_em,
           contido_em: form.contido_em?.id,
+          obraAutores: Object.values(autorFuncao).map((autoresMaluco) => {
+            return {
+              autor_id: autoresMaluco.id_autor,
+              funcao: autoresMaluco.funcao,
+            };
+          }),
         });
         if (reloadList) {
           reloadList();
@@ -180,7 +341,7 @@ export function UpdateObraModal({ open, onClose, obra_id, reloadList }: IUpdateO
         message({ mensagem: error.response?.data || 'Erro interno do servidor', tipo: 'error' });
       }
     },
-    [obra_id, reloadList, message, reset, onClose],
+    [obra_id, autorFuncao, reloadList, message, reset, onClose],
   );
 
   return (
@@ -407,11 +568,92 @@ export function UpdateObraModal({ open, onClose, obra_id, reloadList }: IUpdateO
                   optionValue="id"
                 />
               </Grid>
+              <Grid item xs={12}>
+                <Button
+                  sx={{
+                    background: '#020560',
+                    color: '#E5E5E5',
+                    '&:hover': { background: '#020560', cursor: 'default' },
+                  }}
+                  fullWidth
+                  variant="contained"
+                >
+                  Adicionar Autores
+                </Button>
+              </Grid>
+              <Grid item xs={6}>
+                <Autocomplete
+                  value={autoresId}
+                  onChange={(event: any, newValue) => {
+                    setAutoresId(newValue);
+                  }}
+                  disablePortal
+                  id="combo-box-demo"
+                  options={AutorOption}
+                  renderInput={(params) => <TextField {...params} label="Autores" fullWidth />}
+                />
+                {/* <FormSelect
+                control={control}
+                name="autores"
+                label="Autores"
+                options={AutorOption}
+                optionLabel="label"
+                optionValue="id"
+              /> */}
+              </Grid>
+              <Grid item xs={6}>
+                <Box display="flex">
+                  <TextField
+                    fullWidth
+                    label="Função"
+                    variant="outlined"
+                    value={funcao}
+                    onChange={(event) => setFuncao(event.target.value)}
+                  />
+                  <IconButton
+                    sx={{ width: '50px', marginLeft: '1rem' }}
+                    onClick={handleCreateAutorFuncao}
+                  >
+                    <Add fontSize="small" />
+                  </IconButton>
+                </Box>
+              </Grid>
+
+              <Grid item xs={12}>
+                <Grid container spacing={1}>
+                  {Object.values(autorFuncao).map((autfunc) => (
+                    <Grid item xs={6} sm={6} key={autfunc.id}>
+                      <Box
+                        sx={{ background: '#f4f4f4f4', padding: '0.75rem', borderRadius: '1rem' }}
+                      >
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                          }}
+                        >
+                          <Typography sx={{ padding: '0.1rem' }}>{autfunc.name}</Typography>
+                          <IconButton
+                            color="primary"
+                            onClick={() => removeAutorFuncao(autfunc.id)}
+                            sx={{ marginRight: '5px' }}
+                          >
+                            <Clear fontSize="small" sx={{ color: '#020560' }} />
+                          </IconButton>
+                        </Box>
+
+                        <Typography sx={{ padding: '0.1rem' }}>{autfunc.funcao}</Typography>
+                      </Box>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Grid>
 
               <Grid item xs={12}>
                 <Button
                   sx={{
-                    background: '#0b0f79',
+                    background: '#020560',
                     color: '#E5E5E5',
                     '&:hover': { background: '#020560' },
                   }}

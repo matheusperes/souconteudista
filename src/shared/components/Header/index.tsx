@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 // import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 // import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { AccountBalanceOutlined } from '@mui/icons-material';
@@ -30,9 +31,9 @@ import { api } from '#shared/services/axios';
 import { IInstituicoes } from '#modules/instituicoes/pages/ListInstituicoes';
 
 import { useTitle } from '../../hooks/title';
+import Logo2 from '../../images/Group1151.png';
 import Home from '../../images/Home.svg';
 import Vector from '../../images/Librarybooks.svg';
-import Logo2 from '../../images/logo_sistema2.png';
 import Vector4 from '../../images/Paper.svg';
 
 const drawerWidth = 270;
@@ -197,13 +198,12 @@ export default function PersistentDrawerLeft() {
           <ListItem onClick={() => navigate('/')}>
             <ListItemButton>
               <ListItemIcon>
-                <Icon>
-                  <img src={Home} alt="Home" />
-                </Icon>
+                <img src={Home} alt="Home" />
               </ListItemIcon>
               <ListItemText primary="Home" />
             </ListItemButton>
           </ListItem>
+
           <ListItem onClick={() => navigate('/instituicoes')}>
             <ListItemButton>
               <ListItemIcon>
@@ -217,9 +217,7 @@ export default function PersistentDrawerLeft() {
           <ListItem onClick={() => navigate('/cursos')}>
             <ListItemButton>
               <ListItemIcon>
-                <Icon>
-                  <img src={Vector4} alt="Cursos" />
-                </Icon>
+                <img src={Vector4} alt="Cursos" />
               </ListItemIcon>
               <ListItemText primary="Cursos" />
             </ListItemButton>
@@ -228,9 +226,7 @@ export default function PersistentDrawerLeft() {
           <ListItem onClick={() => navigate('/disciplinas')}>
             <ListItemButton>
               <ListItemIcon>
-                <Icon>
-                  <img src={Vector} alt="Disciplinas" />
-                </Icon>
+                <img src={Vector} alt="Disciplinas" />
               </ListItemIcon>
               <ListItemText primary="Disciplinas" />
             </ListItemButton>
@@ -242,6 +238,79 @@ export default function PersistentDrawerLeft() {
 
         <Router />
       </Main>
+
+      {/* <Drawer
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+            background: '#020560',
+            color: 'white',
+          },
+        }}
+        variant="persistent"
+        anchor="left"
+        open={open}
+      >
+        <DrawerHeader
+          sx={{
+            background: '#020560',
+            height: '15rem',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Box onClick={() => navigate('/')} sx={{ cursor: 'pointer' }}>
+            <img width="218px" src={Logo2} alt="Sou Conteudista" />
+          </Box>
+        </DrawerHeader>
+        <Divider sx={{ background: '#9193b95d', height: '0.25rem' }} />
+        <List sx={{ background: '#020560', color: 'white', marginTop: '3.43rem' }}>
+          <ListItem onClick={() => navigate('/')}>
+            <ListItemButton>
+              <ListItemIcon>
+                <img src={Home} alt="Home" />
+              </ListItemIcon>
+              <ListItemText primary="Home" />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem onClick={() => navigate('/instituicoes')}>
+            <ListItemButton>
+              <ListItemIcon>
+                <Icon>
+                  <AccountBalanceOutlined fontSize="small" sx={{ color: '#f4f4f49d' }} />
+                </Icon>
+              </ListItemIcon>
+              <ListItemText primary="Instituições" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem onClick={() => navigate('/cursos')}>
+            <ListItemButton>
+              <ListItemIcon>
+                <img src={Vector4} alt="Cursos" />
+              </ListItemIcon>
+              <ListItemText primary="Cursos" />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem onClick={() => navigate('/disciplinas')}>
+            <ListItemButton>
+              <ListItemIcon>
+                <img src={Vector} alt="Disciplinas" />
+              </ListItemIcon>
+              <ListItemText primary="Disciplinas" />
+            </ListItemButton>
+          </ListItem>
+        </List>
+      </Drawer>
+      <Main open={open} sx={{ background: '#E5E5E5' }}>
+        <DrawerHeader />
+
+        <Router />
+      </Main> */}
     </Box>
   );
 }
