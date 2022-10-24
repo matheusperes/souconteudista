@@ -8,7 +8,7 @@ export const itensNav: ItemProps[] = [
   {
     titulo: 'Cursos',
     descricao:
-      'Possibilita o cadastramento e acesso os cursos ativos e inativos da instituição de ensino, além da relação e comparação dos PPCs que as representam.',
+      'Possibilita o cadastramento e acesso os cursos ativos e inativos da instituição, além da relação e comparação dos PPCs .',
     link: '/cursos',
   },
   {
@@ -26,7 +26,7 @@ export const itensNav: ItemProps[] = [
   {
     titulo: 'Versão da Disciplina',
     descricao:
-      'Possibilita o cadastramento e acesso a todas as versões de todas as diciplinas da instituição de ensino, além de poder compara-las entre si.',
+      'Possibilita o cadastramento e acesso a todas as versões de suas respectivas diciplinas da instituição de ensino, além de poder compara-las entre si.',
     link: '/versoes',
   },
   {

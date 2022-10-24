@@ -87,6 +87,13 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'flex-end',
 }));
 
+const DrawerHeader2 = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  padding: theme.spacing(0, 1),
+  // necessary for content to be below app bar
+}));
+
 const SELECT_VALUE_KEY = '@MycomParator:instituicao';
 
 type Option = {
@@ -97,10 +104,12 @@ type Option = {
 export default function PersistentDrawerLeft() {
   const navigate = useNavigate();
   const { title } = useTitle();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const { message } = useToast();
   const { startLoading, stopLoading } = useLoading();
   const { instituicao, updateInstitution } = useInstitution();
+
+  const Matheus = true;
 
   const [selected, setSelected] = useState<Option | null>(null);
 
@@ -142,102 +151,206 @@ export default function PersistentDrawerLeft() {
   }, [getInstituicoes]);
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-      <CssBaseline />
-      <AppBar position="fixed" open={open} sx={{ background: 'white', color: '#000000' }}>
-        <Toolbar>
-          <IconButton color="inherit" onClick={handleDrawerChange} edge="start" sx={{ mr: 2 }}>
-            {open ? <MenuIcon /> : <MenuIcon />}
-          </IconButton>
+    <>
+      {location.pathname !== '/' && (
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <CssBaseline />
+          <AppBar position="fixed" open={open} sx={{ background: 'white', color: '#000000' }}>
+            <Toolbar>
+              <IconButton color="inherit" onClick={handleDrawerChange} edge="start" sx={{ mr: 2 }}>
+                {open ? <MenuIcon /> : <MenuIcon />}
+              </IconButton>
 
-          <Typography variant="h6" noWrap component="div">
-            {title}
-          </Typography>
-          <Box sx={{ marginLeft: 'auto', width: '170px' }}>
-            <Select
-              value={selected}
-              onChange={handleChange}
-              options={instuicoes}
-              getOptionLabel={(option) => option.name}
-              getOptionValue={(option) => option.id}
-              menuPlacement="auto"
-              menuPosition="fixed"
-            />
-          </Box>
-        </Toolbar>
-      </AppBar>
-      <Drawer
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-            background: '#020560',
-            color: 'white',
-          },
-        }}
-        variant="persistent"
-        anchor="left"
-        open={open}
-      >
-        <DrawerHeader
-          sx={{
-            background: '#020560',
-            height: '15rem',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Box onClick={() => navigate('/')} sx={{ cursor: 'pointer' }}>
-            <img width="218px" src={Logo2} alt="Sou Conteudista" />
-          </Box>
-        </DrawerHeader>
-        <Divider sx={{ background: '#9193b95d', height: '0.25rem' }} />
-        <List sx={{ background: '#020560', color: 'white', marginTop: '3.43rem' }}>
-          <ListItem onClick={() => navigate('/')}>
-            <ListItemButton>
-              <ListItemIcon>
-                <img src={Home} alt="Home" />
-              </ListItemIcon>
-              <ListItemText primary="Home" />
-            </ListItemButton>
-          </ListItem>
+              <Typography variant="h6" noWrap component="div">
+                {title}
+              </Typography>
+              <Box sx={{ marginLeft: 'auto', width: '170px' }}>
+                <Select
+                  value={selected}
+                  onChange={handleChange}
+                  options={instuicoes}
+                  getOptionLabel={(option) => option.name}
+                  getOptionValue={(option) => option.id}
+                  menuPlacement="auto"
+                  menuPosition="fixed"
+                />
+              </Box>
+            </Toolbar>
+          </AppBar>
+          <Drawer
+            sx={{
+              width: drawerWidth,
+              flexShrink: 0,
+              '& .MuiDrawer-paper': {
+                width: drawerWidth,
+                boxSizing: 'border-box',
+                background: '#020560',
+                color: 'white',
+              },
+            }}
+            variant="persistent"
+            anchor="left"
+            open={open}
+          >
+            <DrawerHeader
+              sx={{
+                background: '#020560',
+                height: '15rem',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Box onClick={() => navigate('/')} sx={{ cursor: 'pointer' }}>
+                <img width="218px" src={Logo2} alt="Sou Conteudista" />
+              </Box>
+            </DrawerHeader>
+            <Divider sx={{ background: '#9193b95d', height: '0.25rem' }} />
+            <List sx={{ background: '#020560', color: 'white', marginTop: '3.43rem' }}>
+              <ListItem onClick={() => navigate('/')}>
+                <ListItemButton>
+                  <ListItemIcon>
+                    <img src={Home} alt="Home" />
+                  </ListItemIcon>
+                  <ListItemText primary="Home" />
+                </ListItemButton>
+              </ListItem>
 
-          <ListItem onClick={() => navigate('/instituicoes')}>
-            <ListItemButton>
-              <ListItemIcon>
-                <Icon>
-                  <AccountBalanceOutlined fontSize="small" sx={{ color: '#f4f4f49d' }} />
-                </Icon>
-              </ListItemIcon>
-              <ListItemText primary="Instituições" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem onClick={() => navigate('/cursos')}>
-            <ListItemButton>
-              <ListItemIcon>
-                <img src={Vector4} alt="Cursos" />
-              </ListItemIcon>
-              <ListItemText primary="Cursos" />
-            </ListItemButton>
-          </ListItem>
+              <ListItem onClick={() => navigate('/instituicoes')}>
+                <ListItemButton>
+                  <ListItemIcon>
+                    <Icon>
+                      <AccountBalanceOutlined fontSize="small" sx={{ color: '#f4f4f49d' }} />
+                    </Icon>
+                  </ListItemIcon>
+                  <ListItemText primary="Instituições" />
+                </ListItemButton>
+              </ListItem>
+              <ListItem onClick={() => navigate('/cursos')}>
+                <ListItemButton>
+                  <ListItemIcon>
+                    <img src={Vector4} alt="Cursos" />
+                  </ListItemIcon>
+                  <ListItemText primary="Cursos" />
+                </ListItemButton>
+              </ListItem>
 
-          <ListItem onClick={() => navigate('/disciplinas')}>
-            <ListItemButton>
-              <ListItemIcon>
-                <img src={Vector} alt="Disciplinas" />
-              </ListItemIcon>
-              <ListItemText primary="Disciplinas" />
-            </ListItemButton>
-          </ListItem>
-        </List>
-      </Drawer>
-      <Main open={open} sx={{ background: '#E5E5E5' }}>
-        <DrawerHeader />
+              <ListItem onClick={() => navigate('/disciplinas')}>
+                <ListItemButton>
+                  <ListItemIcon>
+                    <img src={Vector} alt="Disciplinas" />
+                  </ListItemIcon>
+                  <ListItemText primary="Disciplinas" />
+                </ListItemButton>
+              </ListItem>
+            </List>
+          </Drawer>
+          <Main open={open} sx={{ background: '#E5E5E5' }}>
+            <DrawerHeader />
 
-        <Router />
-      </Main>
+            <Router />
+          </Main>
+        </Box>
+      )}
+
+      {location.pathname === '/' && (
+        <Box sx={{ display: 'flex', alignItems: 'center', minHeight: 'important -56px' }}>
+          <CssBaseline />
+          {/* <AppBar position="fixed" open={open} sx={{ background: 'white', color: '#000000' }}>
+            <Toolbar>
+              <IconButton color="inherit" onClick={handleDrawerChange} edge="start" sx={{ mr: 2 }}>
+                {open ? <MenuIcon /> : <MenuIcon />}
+              </IconButton>
+
+              <Typography variant="h6" noWrap component="div">
+                {title}
+              </Typography>
+              <Box sx={{ marginLeft: 'auto', width: '170px' }}>
+                <Select
+                  value={selected}
+                  onChange={handleChange}
+                  options={instuicoes}
+                  getOptionLabel={(option) => option.name}
+                  getOptionValue={(option) => option.id}
+                  menuPlacement="auto"
+                  menuPosition="fixed"
+                />
+              </Box>
+            </Toolbar>
+          </AppBar> */}
+          <Drawer
+            sx={{
+              width: drawerWidth,
+              flexShrink: 0,
+              '& .MuiDrawer-paper': {
+                width: drawerWidth,
+                boxSizing: 'border-box',
+                background: '#020560',
+                color: 'white',
+              },
+            }}
+            variant="persistent"
+            anchor="left"
+            open={Matheus}
+          >
+            <DrawerHeader2
+              sx={{
+                background: '#020560',
+                height: '15rem',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Box onClick={() => navigate('/')} sx={{ cursor: 'pointer' }}>
+                <img width="218px" src={Logo2} alt="Sou Conteudista" />
+              </Box>
+            </DrawerHeader2>
+            <Divider sx={{ background: '#9193b95d', height: '0.25rem' }} />
+            <List sx={{ background: '#020560', color: 'white', marginTop: '3.43rem' }}>
+              <ListItem onClick={() => navigate('/')}>
+                <ListItemButton>
+                  <ListItemIcon>
+                    <img src={Home} alt="Home" />
+                  </ListItemIcon>
+                  <ListItemText primary="Home" />
+                </ListItemButton>
+              </ListItem>
+
+              <ListItem onClick={() => navigate('/instituicoes')}>
+                <ListItemButton>
+                  <ListItemIcon>
+                    <Icon>
+                      <AccountBalanceOutlined fontSize="small" sx={{ color: '#f4f4f49d' }} />
+                    </Icon>
+                  </ListItemIcon>
+                  <ListItemText primary="Instituições" />
+                </ListItemButton>
+              </ListItem>
+              <ListItem onClick={() => navigate('/cursos')}>
+                <ListItemButton>
+                  <ListItemIcon>
+                    <img src={Vector4} alt="Cursos" />
+                  </ListItemIcon>
+                  <ListItemText primary="Cursos" />
+                </ListItemButton>
+              </ListItem>
+
+              <ListItem onClick={() => navigate('/disciplinas')}>
+                <ListItemButton>
+                  <ListItemIcon>
+                    <img src={Vector} alt="Disciplinas" />
+                  </ListItemIcon>
+                  <ListItemText primary="Disciplinas" />
+                </ListItemButton>
+              </ListItem>
+            </List>
+          </Drawer>
+          <Main open={Matheus} sx={{ background: '#E5E5E5' }}>
+            <DrawerHeader2 />
+
+            <Router />
+          </Main>
+        </Box>
+      )}
 
       {/* <Drawer
         sx={{
@@ -311,6 +424,6 @@ export default function PersistentDrawerLeft() {
 
         <Router />
       </Main> */}
-    </Box>
+    </>
   );
 }
